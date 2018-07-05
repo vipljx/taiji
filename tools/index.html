@@ -1,0 +1,406 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>后台管理系统</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link href="assets/css/dpl-min.css" rel="stylesheet" type="text/css" />
+    <link href="assets/css/bui-min.css" rel="stylesheet" type="text/css" />
+    <link href="assets/css/main-min.css" rel="stylesheet" type="text/css" />
+    <style>
+.dl-role{
+	width: 400px;
+	height: 30px;
+	background:#666666;
+	float: right;
+}
+.dl-role select{
+	width: 100%;
+	height: 30px;
+	float: left;
+	margin-left: 0px;
+	line-height: 30px;
+}
+
+
+.dl-role-jt{
+	width: 90px;
+	height: 30px;
+	float: left;
+	margin-left: 10px;
+	border: 1px solid #000000;
+	
+}
+
+.dl-role-sq{
+	width: 90px;
+	height: 30px;
+	float: left;
+	margin-left: 10px;
+	border: 1px solid #000000;
+	
+}
+.dl-role-yh{
+	width: 90px;
+	height: 30px;
+	float: left;
+	margin-left: 10px;
+	border: 1px solid #000000;
+	
+}
+.dl-role-qh{
+	width: 80px;
+	height: 30px;
+	float: left;
+	margin-left: 10px;
+	line-height: 30px;
+	text-align: center;
+	cursor: pointer;
+	
+}
+  
+    </style>
+</head>
+
+<body onload="windowloaderHandler()" >
+
+<div class="header" >
+    <div class="dl-log">欢迎：
+        <span class="dl-log-user" id="splab"></span>
+        <a  title="退出系统" class="dl-log-quit" id="tuichu" onclick="tuichu()">[退出]</a>
+    </div>
+    <div class="dl-main-nav">
+        <div class="dl-inform"><div class="dl-inform-title"><s class="dl-inform-icon dl-up"></s></div></div>
+        <ul id="J_Nav"  class="nav-list ks-clear">
+            <li class="nav-item dl-selected">
+                <div class="nav-item-inner nav-home">系 统 管 理</div>
+            </li>
+        </ul>
+    </div>
+
+</div>
+
+
+<div class="content">
+    <ul id="J_NavContent" class="dl-tab-conten" ></ul>
+</div>
+<script type="text/javascript" src="assets/js/jquery-1.8.1.min.js"></script>
+<!--[if lt IE 11]>
+<script type="text/javascript" src="assets/js/jquery-1.4.2.min.js"></script>
+<![endif]-->
+<script type="text/javascript" src="assets/js/bui-min.js"></script>
+<script type="text/javascript" src="assets/js/common/main-min.js"></script>
+<script type="text/javascript" src="assets/js/config-min.js"></script>
+<script type="text/javascript" src="Js/ursl.js"></script>
+<script>
+
+    var uname,res;
+    var sqlist1=[];
+    var sqlist=[];
+    var sqlist2=[];
+    var changelist=[]
+    var changelist1=[]
+	var url1 =urls;
+//	var url1="192.168.1.248";
+    function windowloaderHandler() {
+        localhost = window.sessionStorage ? sessionStorage.getItem("lh") : Cookie.read("lh");
+		var uname = window.sessionStorage ? sessionStorage.getItem("mgr") : Cookie.read("mgr");
+		console.log(uname);
+        res = jQuery.parseJSON(uname);
+        		mid = res .mid;
+				mgrid = res .id;
+        document.getElementById("splab").innerText = res.name;
+		var student = new Object();
+			student.rid=res.type;
+		var datajson=JSON.stringify(student);
+        $.ajax({
+            type: "post",
+			contentType:"application/x-www-form-urlencoded;charset=utf-8",
+			data:datajson,
+			dataType:"json",
+            url:"http://" + url1 + ":6078/backstagegetpermissiontable",
+            success: function (res) {
+//                console.log(res);
+//                var res = jQuery.parseJSON(data.permissiontablemap);
+                var item = [
+                     {id:'m1',homePage:'Node/index.html',menu:[{text:'系 统 管 理',items:[]}]},
+                    ];
+                res.permissiontablemap.sort(function(a,b){
+                    return a.ordsort-b.ordsort;
+                });
+                for (var i = 0; i < res.permissiontablemap.length; i++) {
+//                    alert(res.res[i].name+"------"+JSON.stringify(res.res[i]))
+                    if (window.sessionStorage) {
+                        sessionStorage.setItem(res.permissiontablemap[i].name, JSON.stringify(res.permissiontablemap[i]));
+                    } else {
+                        Cookie.write(res.permissiontablemap[i].name, JSON.stringify(res.permissiontablemap[i]));
+                    }
+//                    permission.push(res.res[i]);
+                    var tmp = {
+                               id:res.permissiontablemap[i].linkurl,
+                               text:res.permissiontablemap[i].name,
+                               href:res.permissiontablemap[i].linkurl
+                            };
+                    item[0].menu[0].items.push(tmp);
+                }
+
+                BUI.use('common/main',function(){
+                    new PageUtil.MainPage({
+                        modulesConfig : item
+                    });
+                });
+
+//                alert(permission[9].name)
+//                if (window.sessionStorage) {
+//                    sessionStorage.setItem("permission",permission);
+//                } else {
+//                    alert("该浏览器不支持sessionStorage存储");
+//                }
+
+            },
+            error: function (err) {
+                alert("err:" + err);
+            }
+         });
+         
+         //调用获取集团数据
+//        jituan() 
+      }
+         //获取集团数据
+        	
+
+          function jituan(){ 
+        	$.ajax({
+        		type:"get",
+        		url:"http://"+localhost+":8080/fkds1.5.tools/IdentitySwitch/groupList.action?mgrid="+mgrid,
+        		async:true,
+        		success:function(data){
+        		var res = jQuery.parseJSON(data);
+        		var jtdiv=document.getElementById("select-jt");
+        		var sqdiv=document.getElementById("select-sq");
+        		var shdiv=document.getElementById("select-yh");
+        		for(var i=0;i<res.res.length;i++){
+        			sqlist1.push(res.res[i].id);
+        			sqlist2.push(res.res[i].type);
+        				
+        		}
+        			if(sqlist2[0]==0){
+        				for(var i=0;i<sqlist2.length;i++){
+        					jtdiv.options.add(new Option(res.res[i].name+"、"+res.res[i].id));
+        				}
+        				
+        			}
+        			else if(sqlist2[0]==1){
+        				
+        				sqdiv.options.add(new Option(res.res[0].name+"、"+res.res[0].id));
+        			}
+        			else if(sqlist2[0]==2){
+        			
+        				shdiv.options.add(new Option(res.res[0].name+"、"+res.res[0].id));
+        			}
+        		squan();
+        			//console.log(sqlist1)	
+        		},
+        		error:function(){
+        			alert("失败");
+        		}
+        	});
+        }
+      
+       
+       //获取商圈数据
+       function squan(){
+       	$.ajax({
+        		type:"get",
+        		url:"http://"+localhost+":8080/fkds1.5.tools/IdentitySwitch/marketList.action",
+        		async:true,
+        		success:function(data){
+        		  
+    			var res = jQuery.parseJSON(data);
+//      		var nowdiv=document.getElementById("select-jt")
+        		for(var i=0;i<res.res.length;i++){
+        			//nowdiv.options.add(new Option(res.res[i].name+"丶"+res.res[i].id));
+        			
+        			sqlist.push(res.res[i]);
+        		}
+        			
+        		},
+        		error:function(){
+        			alert("失败");
+        		}
+        	});
+       	
+       }
+//     function disab(){
+//     	 	var nowdiv2=document.getElementById("select-jt");
+//     		var nowlenght2=nowdiv2.options.length;
+//     		if(nowlenght2>0){
+//    		alert("pppp")
+//    		document.getElementById("dl-role-qh").style.disabled="disabled"
+//			
+//		}
+//     }
+       
+  	function panduan(){
+  	
+  	}
+    
+    //点击集团获取对应商圈数据
+      function changesq(){
+      changelist=[];
+      	divcode = document.getElementById('select-jt').value.split('、')[1];
+      	
+      	var nowdiv=document.getElementById("select-sq");
+      	var nowdiv1=document.getElementById("select-yh");
+     
+      	var nowlength=nowdiv.options.length;
+      	var nowlenght1=nowdiv1.options.length;
+	
+      	if(nowlength>0){
+      	document.getElementById("select-sq").length=0;
+      	document.getElementById("select-sq").options.add(new Option("请选择商圈"+"、"+"-99",1));
+      	}
+      	if(nowlenght1>0){
+      		//document.getElementById("select-yh").length=0;
+      	}
+      
+      	for(var i=0;i<sqlist.length;i++){
+      		changelist.push(sqlist[i]);
+      	}
+      
+      	for(var i=0;i<changelist.length;i++){
+      		
+        if(divcode==changelist[i].parent && changelist[i].type==1){
+        	   // nowdiv.options(0).add(new Option("大声道"));
+      			nowdiv.options.add(new Option(changelist[i].name+"、"+changelist[i].id));
+      		}
+      		else{
+      		}
+      		
+      	
+      	}
+
+       }
+      
+      //点击商圈获取对应商户数据
+      function changeyh(){
+      	 var nowjt= document.getElementById('select-jt')
+     var nowjtlength=nowjt.options.length;
+     	if(nowjtlength>1){
+     		changelist1=[];
+     	divcode1=document.getElementById("select-sq").value.split('、')[1];
+      	var nowdiv1=document.getElementById("select-yh");
+      	var nowlenght1=nowdiv1.options.length;
+      	if(nowlenght1>=0){
+      		document.getElementById("select-yh").length=0;
+      	document.getElementById("select-yh").options.add(new Option("请选择用户"+"、"+"-99",1));
+
+      	}
+      	for(var i=0;i<sqlist.length;i++){
+      		changelist1.push(sqlist[i]);
+      	}
+      	for(var i=0;i<changelist.length;i++){
+        if(divcode1==changelist[i].parent && changelist[i].type==2){
+      			nowdiv1.options.add(new Option(changelist[i].name+"、"+changelist[i].id));
+      		}
+      	}    		
+     	}
+     	else{
+     		changelist1=[];
+     	divcode1=document.getElementById("select-sq").value.split('、')[1];
+      	var nowdiv1=document.getElementById("select-yh");
+      	var nowlenght1=nowdiv1.options.length;
+      	if(nowlenght1>=0){
+      		document.getElementById("select-yh").length=0;
+      		document.getElementById("select-yh").options.add(new Option("请选择商户",1));
+
+      	}
+      	for(var i=0;i<sqlist.length;i++){
+      		changelist1.push(sqlist[i]);
+      	}
+      		for(var i=0;i<sqlist.length;i++){
+      		changelist.push(sqlist[i]);
+      	}
+      	for(var i=0;i<changelist.length;i++){
+        if(divcode1==changelist[i].parent){
+      		nowdiv1.options.add(new Option(changelist[i].name+"、"+changelist[i].id));
+      		}     	
+      	}
+     }
+      }
+      //点击切换按钮获取值
+      function getval(){
+      	window.location.reload();
+      	var nowval;
+      	var nowval1;
+      	var nowval2;
+      	var backval
+      	  if (window.sessionStorage) {
+                sessionStorage.removeItem('nowvla');
+                sessionStorage.removeItem('nowvla1');
+                sessionStorage.removeItem('nowvla2');
+                sessionStorage.removeItem('backval');
+            } 
+            
+      	var getvaljt= document.getElementById("select-jt"); //定位id
+      	var nowlength3=getvaljt.options.length
+      	if(nowlength3>=0){	
+      	var index1 = getvaljt.selectedIndex; // 选中索引
+		var text1 = getvaljt.options[index1].text; // 选中文本
+		var value1 = getvaljt.options[index1].value.split('、')[1];
+		if(value1==-99){
+			value1="null1"
+		}
+      		
+      	}
+		var getvalsq= document.getElementById("select-sq"); //定位id
+		var nowlenght2=getvalsq.options.length;
+		if(nowlenght2>=0){
+			var index2 = getvalsq.selectedIndex; // 选中索引
+		var text2 = getvalsq.options[index2].text; // 选中文本
+		var value2 = getvalsq.options[index2].value.split('、')[1];
+		if(value2==-99||value2==undefined){
+			value2="null1"
+		}
+		}
+		var getvalyh= document.getElementById("select-yh") ;//定位id
+		var nowlenght1=getvalyh.options.length;
+		if(nowlenght1>=0){
+			var index3 = getvalyh.selectedIndex; // 选中索引
+			var text3 = getvalyh.options[index3].text; // 选中文本
+			var value3 = getvalyh.options[index3].value.split('、')[1];
+			if(value3==-99||value3==undefined){
+			value3="null1"
+		}
+		}	
+		if(window.sessionStorage){
+      		sessionStorage.setItem("nowval",value1)
+      		sessionStorage.setItem("nowval1",value2)
+      		sessionStorage.setItem("nowval2",value3)
+      		sessionStorage.setItem("backval",true)
+      	}
+      	else{
+      		Cookie.write("nowval",value1)
+      		Cookie.write("nowval1",value2)
+      		Cookie.write("nowval2",value3)
+      		Cookie.write("backval",true)
+      	}
+		
+      } 		
+      
+    
+    
+
+        function tuichu() {
+        
+            if (window.sessionStorage) {
+                sessionStorage.removeItem('mgr');
+                sessionStorage.clear();
+            } else {
+                alert("该浏览器不支持sessionStorage存储");
+            }
+                 window.location="Public/login.html"
+         }
+
+</script>
+</body>
+</html>

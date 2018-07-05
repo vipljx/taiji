@@ -1,0 +1,336 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta charset="UTF-8">
+    <!--<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />-->
+    <link rel="stylesheet" type="text/css" href="../Css/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="../Css/bootstrap-responsive.css" />
+    <link rel="stylesheet" type="text/css" href="../Css/style.css" />
+    <!--<link rel="stylesheet" type="text/css" href="../Css/prettify.css" />-->
+    <script type="text/javascript" src="../Js/jquery.js"></script>
+    <script type="text/javascript" src="../Js/bootstrap.js"></script>
+    <script type="text/javascript" src="../Js/ckform.js"></script>
+    <script type="text/javascript" src="../Js/common.js"></script>
+    <script type="text/javascript" src="../Js/js/laydate.js"></script>
+    <script type="text/javascript" src="../Js/js1/jquery-1.4.3.js"></script>
+    <!--<script type="text/javascript" src="../Js/js1/lab2.js"></script>-->
+
+    <style type="text/css">
+        .s1{
+            width:120px;
+        }
+        #d1{
+            width:620px;
+            height:420px;
+            background-color:#b1d6e8;
+            margin:0 auto;
+            margin-top: 60px;
+            margin-left: 6%;
+        }
+        #d3{
+            padding-left:30px;
+        }
+    </style>
+
+    <script>
+
+        var localhost = " ";
+        var mokuanName = [];
+        var mokuanId = [];
+        var res,res1;
+        var smarr = [];
+        var leftarr = [];
+        var recarr = [];
+        var addarr = [];
+        var delarr = [];
+        var updarr = [];
+        var selected;
+        var role,table,smid;
+//      var url1 = "120.77.34.195";
+        var url1="192.168.1.248";
+
+        function init() {
+            localhost = window.sessionStorage ? sessionStorage.getItem("lh") : Cookie.read("lh");
+            table = window.sessionStorage ? sessionStorage.getItem("val") : Cookie.read("val");
+            role = window.sessionStorage ? sessionStorage.getItem("roid") : Cookie.read("roid");
+            smid = window.sessionStorage ? sessionStorage.getItem("id") : Cookie.read("id");
+            document.getElementById('tableText').value = table ;
+            document.getElementById('roleText').value = role;
+			var student=new Object();
+			student.smid=smid;
+			var datajson=JSON.stringify(student);
+            $.ajax({
+                type: "post",
+                contentType:"application/x-www-form-urlencoded",
+                data:datajson,
+                dataType:"json",
+                url:"http://" + url1 + ":6078/backstagegetsystemmodeldetail",
+                success: function (data) {          
+                    smarr = [];
+                    for (var i = 0; i < data.SystemModelDetailMap.length; i++) {
+                        smarr.push(data.SystemModelDetailMap[i]);
+                    }
+                    roleSelectDom();
+                },
+                error: function (err) {
+                    alert("err:" + err);
+                }
+            });
+        }
+
+        function roleSelectDom() {
+			var student=new Object();
+			student.rid=role;
+			student.smid=smid;
+			var datajson=JSON.stringify(student);
+            $.ajax({
+                type: "post",
+                contentType:"application/x-www-form-urlencoded",
+                data:datajson,
+                dataType:"json",
+                url:"http://" + url1 + ":6078/backstagegetpermissionfieldbyridsmid",
+                success: function (data) {
+                    //console.log(data);
+                    data.permissionfieldmap.sort(function(a,b){return a.smdid -b.smdid});
+                    mokuanName = [];
+                    mokuanId = [];
+                    for (var i = 0; i < data.permissionfieldmap.length; i++) {
+                        mokuanName.push(data.permissionfieldmap[i].name);
+                        mokuanId.push(data.permissionfieldmap[i].smdid);
+                        if(data.permissionfieldmap[i].enable+"" == "" ){
+                           data.permissionfieldmap[i].enable = 1;
+                        }
+                        updarr.push(data.permissionfieldmap[i].enable);
+                    }
+                    var select = document.getElementById('s2');
+                    while (select.options.length>0){
+                        select.remove(0);
+                    }
+                    for (var i = 0; i < mokuanName.length; i++){
+                        var opt = new Option(mokuanId[i]);
+                        opt.value = mokuanId[i];
+                        select.options.add(new Option(mokuanName[i]));
+                    }
+                    initleft();
+                },
+                error: function (err) {
+                    alert("err:" + err);
+                }
+            });
+        }
+
+        function initleft() {
+            leftarr = [];
+            for(var i=0;i<smarr.length;i++){
+                if(mokuanName.indexOf(smarr[i].name) < 0){
+                    leftarr.push(smarr[i].name);
+                }
+            }
+
+            var select = document.getElementById('s1');
+            while (select.options.length>0){
+                select.remove(0);
+            }
+
+            for (var i = 0; i < leftarr.length; i++){
+                select.options.add(new Option(leftarr[i]));
+            }
+        }
+
+        //根据name取ID
+        function name2id(name) {
+            for(var i=0;i<smarr.length;i++){
+                if(name == smarr[i].name){
+                    return smarr[i].id;
+                }
+            }
+            return -1;
+        }
+        $(function(){
+
+            $('#b1').click(function(){
+                $obj = $('#s1 option:selected').clone(true);
+                if($obj.size() == 0){
+                    alert("请至少选择一条!");
+                    return;
+                }
+
+                var tmp = name2id($('#s1 option:selected').text());
+                mokuanId.push(tmp);
+                updarr.push(1);
+
+                $('#s2').append($obj);
+                $('#s1 option:selected').remove();
+//                alert(mokuanId);
+            });
+//
+//            $('#b2').click(function(){
+//                var tmp;
+//                while ($('#s1 option').length > 0){
+//                    tmp = name2id($('#s1 option:last').text());
+//
+//                    if (mokuanId.indexOf(tmp)<0){
+//                        mokuanId.push(tmp);
+//
+//                        addarr.push(1);
+//                        updarr.push(1);
+//                        delarr.push(1);
+//                        recarr.push(11);
+//
+//                        $obj = $("#s1 option:last").clone(true);
+//                        $('#s2').append($obj);
+//                        $("#s1 option:last").remove();
+//                    }
+//                }
+//            });
+
+
+
+            $('#b3').click(function(){
+                $obj = $('#s2 option:selected').clone(true);
+                if($obj.size() == 0){
+                    alert("请至少选择一条!");
+                    return;
+                }
+                var tmp = name2id($('#s2 option:selected').text());
+                mokuanId.splice(mokuanId.indexOf(tmp),1);
+                updarr.splice(mokuanId.indexOf(tmp),1);
+
+                $('#s1').append($obj);
+                $('#s2 option:selected').remove();
+//                alert(mokuanId);
+            });
+
+
+//
+//            $('#b4').click(function(){
+//                $('#s1').append($('#s2 option'));
+//
+//                var tmp;
+//                while ($('#s2 option').length > 0) {
+//                    tmp = name2id($('#s2 option:last').text());
+//
+//                    mokuanId = [];
+//                    addarr = [];
+//                    updarr = [];
+//                    delarr = [];
+//                    recarr = [];
+//                    if (mokuanId.indexOf(tmp) < 0) {
+//                        $obj = $("#s2 option:last").clone(true);
+//                        $('#s1').append($obj);
+//                        $("#s2 option:last").remove();
+//                    }
+//                }
+//            });
+
+        });
+
+
+        function change() {
+            var xiangqiang = document.getElementById("xiangqiang");
+            var objS = document.getElementById("s2");
+            selected = objS.selectedIndex;
+            xiangqiang.style.display = 'block';
+            $('#reccount').val(recarr[selected])  ;
+            document.getElementById('bianji').selectedIndex = updarr[selected];
+        }
+    </script>
+</head>
+<body onload="init()">
+
+<div style="margin-left: 6%;margin-top: 3%" data-genuitec-lp-enabled="false" data-genuitec-file-id="wc2-76" data-genuitec-path="/fkds1.5.tools/WebRoot/tools/authority/secondary.html">
+    role: <input type="text" id="roleText">   table: <input type="text" id="tableText">
+</div>
+
+<div id="d1" >
+    <div id="d3">
+        <table cellpadding="0" cellspacing="8">
+            <tr>
+                <td>可选权限</td>
+                <td>&nbsp;</td>
+                <td>已选权限</td>
+            </tr>
+            <tr>
+                <td>
+                    <select id="s1" name="s1" style="width:250px; height:320px;" multiple="multiple"></select>
+                </td>
+                <td>
+                    <p><input id="b1" type="button" class="s1" value="---&gt;" /></p>
+                    <!--<p><input type="button" id="b2" class="s1" value="&#45;&#45;&gt;&gt;" /></p>-->
+                    <p><input type="button" id="b3" class="s1" value="&lt;---" /></p>
+                    <!--<p><input type="button" id="b4" class="s1" value="&lt;&lt;&#45;&#45;" /></p>-->
+                </td>
+                <td><select id="s2"  style="width:250px;height:320px;" onchange="change()" multiple="multiple" ondblclick="secondaryHtml()" ></select></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div id="xiangqiang" style="position:absolute; right:10%; top:220px;width:290px;height:auto;border: 1px solid #CCCCCC;padding-bottom:10px;text-align:center;display:none;background-color:#FFFFFF;text-align:center;" class="definewidth m20" data-genuitec-lp-enabled="false" data-genuitec-file-id="wc1-34">
+
+    <lable> 更 改 </lable><select name="" id="bianji">
+    <option value="">否</option>
+    <option value="">是</option>
+</select><br>
+    <a class="save" id="queding1" onclick="queding1()">确定</a>
+</div>
+
+
+<div  style="height:50px;margin-left:6%;margin-top:2%" class="definewidth m20" data-genuitec-lp-enabled="false" data-genuitec-file-id="wc1-34">
+    <a class="save" id="queding" >确定</a>
+    <a class="save" id="back" onclick="back1()" >返 回</a>
+
+</div>
+</body>
+</html>
+<script>
+
+
+    function sortNumber(a,b)
+    {
+        return a - b;
+    }
+
+    $('#queding').click(function () {
+        if (mokuanId.length <= 0){
+            return;
+        }
+        mokuanId.sort(sortNumber);
+//      var url = "http://" + localhost + ":8080/fkds1.5.tools/permission/updatePmfByRid.action?rid=" + role +
+//          "&smdids=" +mokuanId.toString()+
+//          "&smid="+smid +
+//          "&enables="+updarr.toString();
+        var student=new Object();
+        	student.rid=role;
+			student.smdids=mokuanId.toString();
+			student.smid=smid;
+			student.enables=updarr.toString();
+			var datajson=JSON.stringify(student);
+            $.ajax({
+                type: "post",
+                contentType:"application/x-www-form-urlencoded",
+                data:datajson,
+                dataType:"json",
+                url:"http://" + url1 + ":6078/backstageupdatepermissionfield",
+           		success: function (data) {
+//            alert(data)
+            	},
+            	error: function (err) {
+                	alert("err:" + err);
+            	}
+        });
+    })
+
+
+    function queding1() {
+        recarr[selected] = $('#reccount').val();
+        updarr[selected] =  document.getElementById('bianji').selectedIndex;
+    }
+
+    function back1() {
+        window.location = "index.html";
+    }
+
+
+</script>

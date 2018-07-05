@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<link rel="stylesheet" type="text/css" href="../Css/bootstrap.css" />
+		<link rel="stylesheet" type="text/css" href="../Css/bootstrap4alpha.css" />
+		<link rel="stylesheet" type="text/css" href="../Css/bootstrap-responsive.css" />
+		<link rel="stylesheet" type="text/css" href="../Css/style.css" />
+		<script type="text/javascript" src="../Js/jquery.min.js"></script>
+		<script type="text/javascript" src="../Js/jquery.dataTables.js"></script>
+		<script type="text/javascript" src="../Js/dataTables.bootstrap4.js"></script>
+		<script type="text/javascript" src="../Js/dataTables.buttons.js"></script>
+		<script type="text/javascript" src="../Js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="../Js/js/laydate.js"></script>
+		<script type="text/javascript" src="../Js/ursl.js"></script>
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				list-style-type: none;
+			}
+			
+			#market li {
+				width: 200px;
+				height: 30px;
+				float: left;
+			}
+			
+			#market li input {
+				width: 30px;
+				height: 15px;
+				float: left;
+				margin-top: 7px;
+				margin-left: 20px;
+
+			#market li span {
+				width: auto;
+				height: 30px;
+				float: left;
+				padding: 0 5px;
+				line-height: 30px;
+			}
+			a{
+				font-family: "微软雅黑";
+				font-weight: bold;
+				text-align: center;
+			}
+		</style>
+		
+	</head>
+
+	<body class="dt-example dt-example-bootstrap4">
+		<ul id="myTab" class="nav nav-tabs" style="background:#CCCCCC;">
+			<li class="active" style="width:10%;margin-left:20%;">
+				<a href="#tb1" data-toggle="tab">
+					 私教卡次数提醒
+				</a>
+			</li>
+			<li style="width:10%;"><a href="#tb2" data-toggle="tab">储值卡余额提醒</a></li>
+			<li style="width:10%;"><a href="#tb3" data-toggle="tab">年卡到期时间提醒</a></li>
+			<li style="width:10%;"><a href="#tb4" data-toggle="tab">冻结到期</a></li>
+			<li style="width:10%;"><a href="#tb5" data-toggle="tab">有效期</a></li>
+	
+		</ul>
+		<div id="myTabContent" class="tab-content" >
+				<div id="tb1" class="container tab-pane fade in active" style="float:left;margin-left:20%;margin-top: 5%;">
+					<table id="example" class="table table-bordered table-striped table-hover" style="width:100%;margin:5% auto;">
+						<thead>
+							<tr id="table_tr">
+											<th>余额</th>
+											<th>教练电话</th>
+											<th>教练名称</th>
+											<th>卡号</th>
+											<th>用户电话</th>
+											<th>用户名称</th>
+											<th>所属拳馆</th>
+											
+											
+		
+							</tr>
+						</thead>
+					</table>
+				</div>
+				
+				<div id="tb2" class="container tab-pane fade" style="float: left;margin-left:20%;margin-top: 5%;">
+					<table id="example1" class="table table-bordered table-striped table-hover" style="width:100%;margin:5% auto;">
+						<thead>
+							<tr id="table_tr">
+											<th>姓名</th>
+											<th>学号</th>
+											<th>余额</th>
+											<th>卡号</th>
+											<th>所属拳馆</th>
+											
+											
+		
+							</tr>
+						</thead>
+					</table>
+				</div>
+				<div id="tb3" class="container tab-pane fade" style="float: left;margin-left:20%;margin-top: 5%;">
+		
+					<table id="example2" class="table table-bordered table-striped table-hover" style="width:100%;margin:5% auto;">
+						<thead>
+							<tr id="table_tr">
+											<th>学号</th>
+											<th>昵称</th>
+											<th>所属拳馆</th>
+											<th>余额</th>
+											<th>总次数</th>
+											<th>剩余次数</th>
+											<th>卡号</th>
+											
+											
+		
+							</tr>
+						</thead>
+					</table>
+				</div>
+				<div id="tb4" class="container tab-pane fade" style="float: left;margin-left:20%;margin-top:5%;">
+		
+					<table id="example3" class="table table-bordered table-striped table-hover" style="width:100%;margin:5% auto;">
+						<thead>
+							<tr id="table_tr">
+											<th>卡号</th>
+											<th>余额</th>
+											<th>总次数</th>
+											<th>剩余次数</th>
+											
+											
+		
+							</tr>
+						</thead>
+					</table>
+				</div>
+				<div id="tb5" class="container tab-pane fade" style="float: left;margin-left:20%;margin-top: 5%;">
+		
+					<table id="example4" class="table table-bordered table-striped table-hover" style="width:100%;margin:5% auto;">
+						<thead>
+							<tr id="table_tr">
+											<th>卡号</th>
+											<th>余额</th>
+											<th>所属拳馆</th>
+											<th>总次数</th>
+											<th>剩余次数</th>
+											
+											
+		
+							</tr>
+						</thead>
+					</table>
+				</div>
+		</div>
+		<script>
+			var page = 1;
+			var count = 999;
+			var localhost = " ";
+			var nowid = [];
+			var cbcomps1 = [];
+			var market = [];
+			var mytext;
+			var res1, res;
+			var dataarr = [];
+			var url1=urls;
+			$(document).ready(function() {
+				$.fn.dataTable.ext.errMode = 'none'; 
+				var student = new Object();
+				student.tcount="10";
+				student.count="3";
+				student.page="1";
+	            var datajson=JSON.stringify(student);
+				$.ajax({
+					type: "post",
+		            contentType:"application/x-www-form-urlencoded",
+		            data:datajson,
+		            dataType:"json",
+		            url:"http://" + url1 + ":6078/backstagegetcardstcountreport",
+		            success:function(data){
+		            	var dataTable=data.cardmap;
+		            			$('#example').DataTable({
+									ordering: false, //是否启用排序
+									searching: true, //搜索
+									language: {
+										lengthMenu: '显示 <select style="height: 30px;width: 100px">' +
+											'<option value="5">5条</option>' +
+											'<option value="10">10条</option>' +
+											'<option value="20">20条</option>' +
+											'<option value="30">30条</option>' +
+											'<option value="40">40条</option>' +
+											'<option value="50">50条</option>' +
+											'<option value="-1">不限</option>' +
+											'</select>',
+										search: '<span class="label label-success" >搜索：</span>', //右上角的搜索文本，可以写html标签
+				
+										paginate: { //分页的样式内容。
+											previous: "上一页",
+											next: "下一页",
+											first: "第一页",
+											last: "最后一页"
+										},
+				
+										zeroRecords: "没有搜索到数据",
+										//下面三者构成了总体的左下角的内容。
+//										info: "总共_PAGES_ 页，显示第_START_ 到第 _END_ ，筛选之后得到 _TOTAL_ 条，初始_MAX_ 条 ", //左下角的信息显示，大写的词为关键字。
+										info:"",
+										infoEmpty: "0条记录", //筛选为空时左下角的显示。
+										infoFiltered: "", //筛选之后的左下角筛选提示，
+										serverSide: true
+									},
+									paging: true,
+									pagingType: "full_numbers", //分页样式的类型
+									data: dataTable,
+									lengthChange: true,
+									columns: [
+										{ "data": "balance" },
+//										{ "data": "coach" },
+										{ "data": "coachname" },
+										{ "data": "coachnickname" },
+//										{ "data": "enable" },
+//										{ "data": "endtime" },
+										{ "data": "num" },
+										{ "data": "username" },
+										{ "data": "usernickname" },
+//										{ "data": "regtime" },
+//										{ "data": "starttime" },
+//										{ "data": "tcount" },
+//										{ "data": "timestamp" },
+//										{ "data": "type" },					
+//										{ "data": "id" },
+										{ "data": "vname" }
+//										{ "data": "vtotal"}
+				
+									],
+				
+									buttons: ['excel'],
+									createdRow: function(row, data, index) {
+										$('td', row).css('font-weight', "bold").css("text-align", "center");
+									},
+				
+								});
+								getcard();
+		            }
+		            
+				});
+				
+			
+			});
+			
+			function getcard(){
+					//储值卡余额
+				var student = new Object();
+				student.balance="1000";
+				student.count="3";
+				student.page="1";
+	            var datajson=JSON.stringify(student);
+				$.ajax({
+					type: "post",
+		            contentType:"application/x-www-form-urlencoded",
+		            data:datajson,
+		            dataType:"json",
+		            url:"http://" + url1 + ":6078/backstagegetcardsbalancereport",
+		            success:function(data){
+		            	var dataTable=data.cardmap;
+		            			$('#example1').DataTable({
+									ordering: false, //是否启用排序
+									searching: true, //搜索
+									language: {
+										lengthMenu: '显示 <select style="height: 30px;width: 100px">' +
+											'<option value="5">5条</option>' +
+											'<option value="10">10条</option>' +
+											'<option value="20">20条</option>' +
+											'<option value="30">30条</option>' +
+											'<option value="40">40条</option>' +
+											'<option value="50">50条</option>' +
+											'<option value="-1">不限</option>' +
+											'</select>',
+										search: '<span class="label label-success" >搜索：</span>', //右上角的搜索文本，可以写html标签
+				
+										paginate: { //分页的样式内容。
+											previous: "上一页",
+											next: "下一页",
+											first: "第一页",
+											last: "最后一页"
+										},
+				
+										zeroRecords: "没有搜索到数据",
+										//下面三者构成了总体的左下角的内容。
+//										info: "总共_PAGES_ 页，显示第_START_ 到第 _END_ ，筛选之后得到 _TOTAL_ 条，初始_MAX_ 条 ", //左下角的信息显示，大写的词为关键字。
+										info:"",
+										infoEmpty: "0条记录", //筛选为空时左下角的显示。
+										infoFiltered: "", //筛选之后的左下角筛选提示，
+										serverSide: true
+									},
+									paging: true,
+									pagingType: "full_numbers", //分页样式的类型
+									data:dataTable,
+									lengthChange: true,
+									columns: [
+										{ "data": "usernickname" },
+										{ "data": "username" },
+										{ "data": "balance" },
+										{ "data": "num" },
+										{ "data": "vname" },
+//										{ "data": "endtime" },
+//										{ "data": "usernickname" },
+//										{ "data": "num" },
+//										{ "data": "regtime" },
+//										{ "data": "starttime" },
+//										{ "data": "tcount" },
+//										{ "data": "timestamp" },
+//										{ "data": "type" },
+//										{ "data": "username" },
+//										{ "data": "id" },
+//										{ "data": "vid" },
+//										{ "data": "vtotal" }
+				
+									],
+				
+									buttons: ['excel'],
+									createdRow: function(row, data, index) {
+										$('td', row).css('font-weight', "bold").css("text-align", "center");
+									},
+				
+								});
+								getyearcard();
+		            }
+				});
+			}
+			
+			
+			//年卡到期提醒
+			function getyearcard(){
+				var student = new Object();
+				student.days="30";
+				student.count="3";
+				student.page="1";
+	            var datajson=JSON.stringify(student);
+				$.ajax({
+					type: "post",
+		            contentType:"application/x-www-form-urlencoded",
+		            data:datajson,
+		            dataType:"json",
+		            url:"http://" + url1 + ":6078/backstagegetcardsendtimereport",
+		            success:function(data){
+		            	var dataTable=data.cardmap;
+		            			$('#example2').DataTable({
+									ordering: false, //是否启用排序
+									searching: true, //搜索
+									language: {
+										lengthMenu: '显示 <select style="height: 30px;width: 100px">' +
+											'<option value="5">5条</option>' +
+											'<option value="10">10条</option>' +
+											'<option value="20">20条</option>' +
+											'<option value="30">30条</option>' +
+											'<option value="40">40条</option>' +
+											'<option value="50">50条</option>' +
+											'<option value="-1">不限</option>' +
+											'</select>',
+										search: '<span class="label label-success" >搜索：</span>', //右上角的搜索文本，可以写html标签
+				
+										paginate: { //分页的样式内容。
+											previous: "上一页",
+											next: "下一页",
+											first: "第一页",
+											last: "最后一页"
+										},
+				
+										zeroRecords: "没有搜索到数据",
+										//下面三者构成了总体的左下角的内容。
+//										info: "总共_PAGES_ 页，显示第_START_ 到第 _END_ ，筛选之后得到 _TOTAL_ 条，初始_MAX_ 条 ", //左下角的信息显示，大写的词为关键字。
+										info:"",
+										infoEmpty: "0条记录", //筛选为空时左下角的显示。
+										infoFiltered: "", //筛选之后的左下角筛选提示，
+										serverSide: true
+									},
+									paging: true,
+									pagingType: "full_numbers", //分页样式的类型
+									data:dataTable,
+									lengthChange: true,
+									columns: [
+										{ "data": "username" },
+										{ "data": "usernickname" },
+										{ "data": "vname" },
+										{ "data": "balance" },
+										{ "data": "vtotal" },
+										{ "data": "tcount" },
+										{ "data": "num"},
+//										{ "data": "num" },
+//										{ "data": "regtime" },
+//										{ "data": "starttime" },
+//										{ "data": "tcount" },
+//										{ "data": "timestamp" },
+//										{ "data": "type" },
+//										{ "data": "username" },
+//										{ "data": "id" },
+//										{ "data": "vid" },
+//										{ "data": "vtotal" }
+				
+									],
+				
+									buttons: ['excel'],
+									createdRow: function(row, data, index) {
+										$('td', row).css('font-weight', "bold").css("text-align", "center");
+									},
+				
+								});
+								gettimeout();
+		            }
+				});
+			}
+			
+			//解冻到期时间提醒
+			
+			function gettimeout(){
+				var student = new Object();
+				student.days="10";
+				student.count="3";
+				student.page="1";
+	            var datajson=JSON.stringify(student);
+				$.ajax({
+					type: "post",
+		            contentType:"application/x-www-form-urlencoded",
+		            data:datajson,
+		            dataType:"json",
+		            url:"http://" + url1 + ":6078/backstagegetcardsregtimereport",
+		            success:function(data){
+		            	var dataTable=data.cardmap;
+		            			$('#example3').DataTable({
+									ordering: false, //是否启用排序
+									searching: true, //搜索
+									language: {
+										lengthMenu: '显示 <select style="height: 30px;width: 100px">' +
+											'<option value="5">5条</option>' +
+											'<option value="10">10条</option>' +
+											'<option value="20">20条</option>' +
+											'<option value="30">30条</option>' +
+											'<option value="40">40条</option>' +
+											'<option value="50">50条</option>' +
+											'<option value="-1">不限</option>' +
+											'</select>',
+										search: '<span class="label label-success" >搜索：</span>', //右上角的搜索文本，可以写html标签
+				
+										paginate: { //分页的样式内容。
+											previous: "上一页",
+											next: "下一页",
+											first: "第一页",
+											last: "最后一页"
+										},
+				
+										zeroRecords: "没有搜索到数据",
+										//下面三者构成了总体的左下角的内容。
+//										info: "总共_PAGES_ 页，显示第_START_ 到第 _END_ ，筛选之后得到 _TOTAL_ 条，初始_MAX_ 条 ", //左下角的信息显示，大写的词为关键字。
+										info:"",
+										infoEmpty: "0条记录", //筛选为空时左下角的显示。
+										infoFiltered: "", //筛选之后的左下角筛选提示，
+										serverSide: true
+									},
+									paging: true,
+									pagingType: "full_numbers", //分页样式的类型
+									data:dataTable,
+									lengthChange: true,
+									columns: [
+										{ "data": "num"},
+//										{ "data": "usernickname" },
+//										{ "data": "vname" },
+										{ "data": "balance" },
+										{ "data": "vtotal" },
+										{ "data": "tcount" },
+										
+//										{ "data": "num" },
+//										{ "data": "regtime" },
+//										{ "data": "starttime" },
+//										{ "data": "tcount" },
+//										{ "data": "timestamp" },
+//										{ "data": "type" },
+//										{ "data": "username" },
+//										{ "data": "id" },
+//										{ "data": "vid" },
+//										{ "data": "vtotal" }
+				
+									],
+				
+									buttons: ['excel'],
+									createdRow: function(row, data, index) {
+										$('td', row).css('font-weight', "bold").css("text-align", "center");
+									},
+				
+								});
+								getExpire();
+		            }
+				});
+			}
+			
+			
+			//有效期
+			function getExpire(){
+						var student = new Object();
+				student.days="10";
+				student.count="3";
+				student.page="1";
+				student.type="1";
+	            var datajson=JSON.stringify(student);
+				$.ajax({
+					type: "post",
+		            contentType:"application/x-www-form-urlencoded",
+		            data:datajson,
+		            dataType:"json",
+		            url:"http://" + url1 + ":6078/backstagegetcardstimestampreport",
+		            success:function(data){
+		            	var dataTable=data.cardmap;
+		            			$('#example4').DataTable({
+									ordering: false, //是否启用排序
+									searching: true, //搜索
+									language: {
+										lengthMenu: '显示 <select style="height: 30px;width: 100px">' +
+											'<option value="5">5条</option>' +
+											'<option value="10">10条</option>' +
+											'<option value="20">20条</option>' +
+											'<option value="30">30条</option>' +
+											'<option value="40">40条</option>' +
+											'<option value="50">50条</option>' +
+											'<option value="-1">不限</option>' +
+											'</select>',
+										search: '<span class="label label-success" >搜索：</span>', //右上角的搜索文本，可以写html标签
+				
+										paginate: { //分页的样式内容。
+											previous: "上一页",
+											next: "下一页",
+											first: "第一页",
+											last: "最后一页"
+										},
+				
+										zeroRecords: "没有搜索到数据",
+										//下面三者构成了总体的左下角的内容。
+//										info: "总共_PAGES_ 页，显示第_START_ 到第 _END_ ，筛选之后得到 _TOTAL_ 条，初始_MAX_ 条 ", //左下角的信息显示，大写的词为关键字。
+										info:"",
+										infoEmpty: "0条记录", //筛选为空时左下角的显示。
+										infoFiltered: "", //筛选之后的左下角筛选提示，
+										serverSide: true
+									},
+									paging: true,
+									pagingType: "full_numbers", //分页样式的类型
+									data:dataTable,
+									lengthChange: true,
+									columns: [
+										{ "data": "num"},
+										{ "data": "balance" },
+										{ "data": "vname" },
+//										{ "data": "balance" },
+										{ "data": "vtotal" },
+										{ "data": "tcount" },
+										
+//										{ "data": "num" },
+//										{ "data": "regtime" },
+//										{ "data": "starttime" },
+//										{ "data": "tcount" },
+//										{ "data": "timestamp" },
+//										{ "data": "type" },
+//										{ "data": "username" },
+//										{ "data": "id" },
+//										{ "data": "vid" },
+//										{ "data": "vtotal" }
+				
+									],
+				
+									buttons: ['excel'],
+									createdRow: function(row, data, index) {
+										$('td', row).css('font-weight', "bold").css("text-align", "center");
+									},
+				
+								});
+								
+		            }
+				});
+			}
+		</script>
+
+	</body>
+
+</html>

@@ -1,0 +1,847 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no" />
+	<meta charset="utf-8">
+	<meta name="format-detection" content="telephone=no,email=no,adress=no">
+	<title>课表查询</title>
+	<link rel="stylesheet" type="text/css" href="../Css/bootstrap.css" />
+	<link rel="stylesheet" type="text/css" href="../Css/bootstrap-responsive.css" />
+	<link rel="stylesheet" type="text/css" href="../Css/style.css" />
+	<script type="text/javascript" src="../Js/jquery.js"></script>
+	<script type="text/javascript" src="../Js/jquery-ui.js"></script>
+	<script type="text/javascript" src="../Js/bootstrap.js"></script>
+	<script type="text/javascript" src="../Js/ckform.js"></script>
+	<script type="text/javascript" src="../Js/common.js"></script>
+	<script type="text/javascript" src="../Js/js/laydate.js"></script>
+	<script type="text/javascript" src="../Js/ui.js"></script>
+	<script type="text/javascript" src="../Js/ursl.js"></script>
+	<style type="text/css">
+		body {
+			padding-bottom: 40px;
+
+		}
+
+
+		@media (max-width: 980px) {
+			/* 启用浮动导航栏文字 */
+			.navbar-text.pull-right {
+				float: none;
+				padding-left: 5px;
+				padding-right: 5px;
+			}
+		}
+
+		.theadColor th {
+			background-color: #b1d6e8;
+			/*color: #1976b0;*/
+			font-weight: normal;
+			text-align: center;
+			height: 20px;
+			line-height: 22px;
+		}
+
+		.theadColor th span {
+			color: #1976b0;
+		}
+
+
+		.theadColor td{
+			background-color: #b1d6e8;
+			/*color: #1976b0;*/
+			/*font-weight:normal;*/
+		}
+
+		#class{ position: relative}
+
+		.table .td3{
+			padding: 0;
+			height: 60px;
+
+		}
+		.table .td31{
+
+			height: 61px;
+			line-height: 61px;
+		}
+		.table-border tr td{
+			padding: 0;
+			border: 0;
+			background:rgba(255, 85, 85, 0.75);
+			color: white;
+		}
+		#test {
+			width: 100%;
+			height: 100%;
+			background-color: #000;
+			position: absolute;
+			top: 0;
+			left: 0;
+			z-index: 2;
+			opacity: 0.3;
+			/*兼容IE8及以下版本浏览器*/
+			filter: alpha(opacity=30);
+			display: none;
+		}
+
+		#detail_div{
+			width: 800px;
+			height: 550px;
+			padding-bottom: 50px;
+			background-color: white;
+			margin: auto;
+			position: absolute;
+			z-index: 3;
+			top: 0;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			display: none;
+			overflow-y: scroll;
+			/*border: 2px solid #b1d6e8;*/
+		}
+		#test1 {
+			width: 100%;
+			height: 100%;
+			background-color: #000;
+			position: absolute;
+			top: 0;
+			left: 0;
+			z-index: 2;
+			opacity: 0.3;
+			/*兼容IE8及以下版本浏览器*/
+			filter: alpha(opacity=30);
+			display: none;
+		}
+		.theadColor td,
+		.tableleft {
+			/*background-color: #b1d6e8;*/
+			/*color: #1976b0;*/
+			/*font-weight:normal;*/
+		}
+		.theadColor td,.tableleft  span {
+			color:#000;
+			font-weight: bold;
+		}
+
+		#class{
+			position: absolute;
+			top:0;
+			left: 115px;
+			width:-webkit-calc(100% - 115px);
+			width:-moz-calc(100% - 115px);
+			width:calc(100% - 115px);
+
+		}
+	</style>
+
+	<script type="text/javascript">
+		var subpath="Course";
+        var url1=urls;
+        var n=0;
+		var olddate=window.sessionStorage? sessionStorage.getItem("date"): Cookie.read("date");
+        var course=JSON.parse(window.sessionStorage? sessionStorage.getItem("course"): Cookie.read("course"));
+        var dataarr=[];
+        var delCourseDetail=[];
+        var detailjson={};
+        var updateCourseDetail=[];
+        //			所有教练
+        var allcoach=[];
+        //          关联公开课教练
+        var coursecoach=[];
+        var localhost = " ";
+        localhost = window.sessionStorage ? sessionStorage.getItem("lh") : Cookie.read("lh");
+        //公开课详情
+        function initcoursedetail(){
+            var obj=new Object();
+            obj.cid=course.id;
+            obj.page=1;
+            obj.count=99999;
+            var datajson=JSON.stringify(obj);
+            //console.log(datajson);
+			$.ajax({
+                type: "post",
+                contentType:"application/x-www-form-urlencoded",
+                data:datajson,
+                dataType:"json",
+                url:"http://" + url1 + ":6078/backstagegetcoursedetail",
+                success: function(data) {
+                    //console.log(data.coursedetailmap);
+                    if(data.respVo.resultCode=="0"){
+                        detailjson={};
+                        for(var i=0;i<data.coursedetailmap.length;i++){
+                            var timer=new Date(data.coursedetailmap[i].starttime);
+                            timer=timer.getFullYear()+'-'+(timer.getMonth()+1)+'-'+timer.getDate() ;
+                            //var date=new Date(timer).getTime();
+                            n=0;
+                            for(var key in Object.keys(detailjson)) {
+                                if (Object.keys(detailjson)[key] == timer) {
+                                    detailjson[timer].push(data.coursedetailmap[i]);
+                                    n=1;
+                                }
+                            }
+                            if(n==0) {
+                                detailjson[timer] = [];
+                                detailjson[timer].push(data.coursedetailmap[i]);
+                            }
+
+                        }
+                        var clas = document.getElementById('class');
+                        while(clas.hasChildNodes()) //当div下还存在子节点时 循环继续
+                        {
+                            clas.removeChild(clas.firstChild);
+                        }
+                        dataarr=detailjson[olddate];
+                        //console.log(dataarr);
+                        if (window.sessionStorage ) {
+                            delCourseDetail = JSON.parse(sessionStorage.getItem("delCourseDetail")?sessionStorage.getItem("delCourseDetail"):"[]");
+                            updateCourseDetail = JSON.parse(sessionStorage.getItem("updateCourseDetail")?sessionStorage.getItem("updateCourseDetail"):"[]");
+                        } else {
+                            delCourseDetail = JSON.parse(Cookie.read("delCourseDetail")?sessionStorage.getItem("delCourseDetail"):"[]");
+                            updateCourseDetail = JSON.parse(Cookie.read("updateCourseDetail")?sessionStorage.getItem("updateCourseDetail"):"[]");
+                        }
+						if(dataarr!==undefined){
+                            for (var i = 0; i < dataarr.length; i++) {
+//                                if(updatearr.length>0 && dataarr[i].id==updatearr[0].id){
+//                                    dataarr[i]=updatearr[0];
+//                                }
+                                if(updateCourseDetail.length>0 ) {
+                                    for (var j = 0; j < updateCourseDetail.length; j++) {
+                                        if (dataarr[i].id== updateCourseDetail[j].id) {
+                                            dataarr[i] = updateCourseDetail[j];
+                                        }
+                                    }
+                                }
+                                if(delCourseDetail.indexOf(dataarr[i].id)==-1) {
+                                    var starttimer = dataarr[i].starttime;
+                                    var scrollTop = (parseInt(new Date(starttimer).getHours()) - 0.00) * 60 + new Date(starttimer).getMinutes() + 59;
+                                    var times = dataarr[i].endtime - dataarr[i].starttime;
+                                    var hour = Math.floor(times / 3600000);
+                                    var minutes = Math.floor((times % 3600000) / 60000);
+                                    var heights = hour * 60 + minutes * 1;
+                                    //console.log(heights);
+                                    var table1 = document.createElement("table");
+                                    table1.className = "table table-border";
+                                    var row = table1.insertRow(table1.rows.length);
+                                    $(table1).css({
+                                        position: "absolute",
+                                        top: scrollTop + "px"
+                                    });
+                                    //console.log(dataarr[i]);
+                                    var cell0 = row.insertCell(0);
+                                    cell0.width = "20%";
+                                    cell0.innerHTML = `<td><div>课程：${dataarr[i].cname}</div></td>`;
+                                    $(cell0).children(["div"]).css({
+                                        height: heights + "px",
+                                        lineHeight: heights + "px"
+                                    });
+                                    var cell1 = row.insertCell(1);
+                                    cell1.width = "20%";
+                                    cell1.innerHTML = `<td><div>课时名称：${dataarr[i].name}</div></td>`;
+                                    var cell2 = row.insertCell(2);
+                                    cell2.width = "20%";
+                                    cell2.innerHTML = `<td><div>上课时间：${timestampToAll(dataarr[i].starttime)}</div></td>`;
+                                    var cell3 = row.insertCell(3);
+                                    cell3.width = "20%";
+                                    cell3.innerHTML = `<td><div>下课时间：${timestampToAll(dataarr[i].endtime)}</div></td>`;
+                                    var optcell = row.insertCell(4);
+                                    optcell.width = "20%";
+                                    optcell.innerHTML = `<input type='image' src='../assets/img/bianji.png' onclick='edit(${dataarr[i].id},${i})'>&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/shanchu.png'  onclick='del(${dataarr[i].id} ,${table1.rows.length})' >`;
+                                    clas.appendChild(table1);
+                                }
+                            }
+						}
+
+                    }else{
+
+                        detailjson={}
+                    }
+
+
+                },
+                error: function(err) {
+//						alert("err:" + err);
+                }
+            });
+        }
+        //初始化调用
+        function init() {
+            initcoursedetail();
+            initallcoach();
+            initcoursecoach();
+        }
+        //公共列表
+        function initTables(idx){
+
+            var row0 = detail_table.insertRow(0);
+            row0.innerHTML=`<td class="tableleft"><span class="tanKuangSpan">课程</span></td><td style="padding-top: 18px">
+							<input type="text" id="cidtext" class="txt" name="moduletitle" style="border-radius: 0px;width: 95%" data="${idx>=0?dataarr[idx]["cid"]:''}" value="${idx>=0?dataarr[idx]["cname"]:''}" readonly="readonly" /><br />
+							<span id="cidtext_info"></span>
+							</td>`;
+            var row1 = detail_table.insertRow(1);
+            row1.innerHTML=`<td class="tableleft"><span class="tanKuangSpan">课时名称</span></td><td style="padding-top: 18px">
+							<input type="text" id="nametext" class="txt" name="moduletitle" style="border-radius: 0px;width: 95%" value="${idx>=0?dataarr[idx]["name"]:''}" /><br />
+							<span id="nametext_info"></span>
+							</td>`;
+            var row2 = detail_table.insertRow(2);
+            row2.innerHTML=`<td class="tableleft"><span class="tanKuangSpan">课时序号</span></td><td style="padding-top: 18px">
+							<input type="text" id="classhourtext" class="txt" name="moduletitle" style="border-radius: 0px;width: 95%" value="${idx>=0?dataarr[idx]["classhour"]:''}" /><br />
+							<span id="classhourtext_info"></span>
+							</td>`;
+
+            var row3 = detail_table.insertRow(3);
+            row3.innerHTML=`<td class="tableleft"><span class="tanKuangSpan">教学计划</span></td><td style="padding-top: 18px">
+							<input type="text" id="descriptiontext" class="txt" name="moduletitle" style="border-radius: 0px;width: 95%" value="${idx>=0?dataarr[idx]["description"]:''}" /><br />
+							<span id="descriptiontext_info"></span>
+							</td>`;
+            var row4 = detail_table.insertRow(4);
+            row4.innerHTML=`<td class="tableleft"><span class="tanKuangSpan">教练</span></td><td style="padding-top: 18px">
+							<select name="" id="coachtext" style="border-radius: 0px;width: 95%" onchange="checkcoachtext()"></select><br />
+							<span id="coachtext_info"></span>
+							</td>`;
+            var row5 = detail_table.insertRow(5);
+            row5.innerHTML=`<td class="tableleft"><span class="tanKuangSpan">状态</span></td><td style="padding-top: 18px">
+							<input type="text" id="statetext" class="txt" name="moduletitle" style="border-radius: 0px;width: 95%" value="${idx>=0?dataarr[idx]["state"]:''}" /><br />
+							<span id="statetext_info"></span>
+							</td>`;
+            row5.style.display="none";
+            var row6 = detail_table.insertRow(6);
+            row6.innerHTML=`<td class="tableleft"><span class="tanKuangSpan">上课日期</span></td><td style="padding-top: 18px">
+							<input type="text" id="onlydaytext" class="timer1" name="moduletitle" style="border-radius: 0px;width: 95%" value="${idx>=0?timestampToDate(dataarr[idx]["starttime"]):''}" /><br />
+							<span id="onlydaytext_info"></span>
+							</td>`;
+            laydate.render({
+                elem: '#onlydaytext',
+                trigger: 'click'
+            });
+
+            var row7 = detail_table.insertRow(7);
+            row7.innerHTML=`<td class="tableleft"><span class="tanKuangSpan">上课时间—下课时间</span></td><td style="padding-top: 18px">
+							<input type="text" id="starttimetext" class="timer3" name="moduletitle" style="border-radius: 0px;width: 45%" value="${idx>=0?timestampToTime(dataarr[idx]["starttime"]):''}"  />—
+							<input type="text" id="endtimetext" class="timer3" name="moduletitle" style="border-radius: 0px;width: 45%" value="${idx>=0?timestampToTime(dataarr[idx]["endtime"]):''}"/><br />
+							<span id="timetxt_info"></span>
+							</td>`;
+            lay('.timer3').each(function(){
+                laydate.render({
+                    elem: this,
+                    type: 'time',
+                    min: '00:00:00',
+                    max: '23:00:00',
+                    format: 'HH:mm',
+                    btns: ['clear', 'confirm'],
+                    trigger: 'click'
+                });
+            });
+
+            var row8 = detail_table.insertRow(8);
+            row8.innerHTML=`<td class="tableleft"><span class="tanKuangSpan">说明图片</span></td><td>
+								<div style="width: 95%; margin: 0 auto; display: none" id="imgurl1"><input type="file" id="imgurltext" class="txt" name="moduletitle" style="border-radius: 0px; float: left"  /><div style="clear: both; height: 0px;"></div></div>
+								<div style="width: 95%; margin: 0 auto; position: relative; top: 5px; " id="imgurl2"><input type="text" id="imgurltxt" class="txt" name="moduletitle" style="border-radius: 0px; float: left" value="${dataarr[idx]["imgurl"] ?dataarr[idx]["imgurl"]:''}" disabled="disabled" /><input type="button" value="重新上传" onclick="reload()" style="float: right"><div style="clear: both; height: 0px;"></div></div>
+								<span id="imgurltext_info"></span>
+							</td>`;
+            var row9= detail_table.insertRow(9);
+            row9.innerHTML=`<td class="tableleft"><span class="tanKuangSpan">说明视频</span></td><td style="padding-top: 18px">
+								<input type="text" id="weburltext" class="timer1" name="moduletitle" style="border-radius: 0px;width: 95%" value="${idx>=0?dataarr[idx]["weburl"]?dataarr[idx]["weburl"]:'':''}"  placeholder="请输入说明视频链接"/><br />
+								<span id="weburltext_info"></span>
+							</td>`;
+
+        }
+
+        //重新上传
+        function reload(){
+            document.getElementById("imgurltxt").value="";
+            document.getElementById("imgurl2").style.display="none";
+            document.getElementById("imgurl1").style.display="";
+        }
+
+        //编辑用户
+        function edit(id,idx) {
+            var s = document.getElementById("test");
+            s.style.display = "block";
+            var l = document.getElementById("detail_div");
+            l.style.display = "block";
+            var detail_table = document.getElementById('detail_table');
+            while (detail_table.rows.length > 0) {
+                detail_table.deleteRow(0);
+            }
+            currentIndex = idx;
+            initTables(idx);
+            var select = document.getElementById("coachtext");
+            while (select.options.length > 0) {
+                select.remove(0);
+            }
+            //console.log(dataarr[idx]);
+            if(parseInt(dataarr[idx].coach)!==0){
+                select.options.add(new Option(dataarr[idx].coachname+"-"+dataarr[idx].coachnickname,dataarr[idx].coach));
+            }else{
+                select.options.add(new Option("没指定教练",""));
+            }
+
+//            for (var i = 0; i < allcoach.length; i++) {
+//                if(allcoach[i]!==dataarr[idx].coach) {
+//                    select.options.add(new Option(allcoach[i], allcoach[i]));
+//                }
+//            }
+            var optrow = detail_table.insertRow(detail_table.rows.length);
+            optrow.innerHTML = `<tr>
+										<td class="tableleft"></td>
+										<td colspan="3">
+											<a  onclick="onSavebtnClickHandler(${id})" class="save">保 存</a>
+										</td>
+								</tr>`;
+        }
+        //删除公开课
+        function del(id) {
+            if (confirm("确定要删除吗？")) {
+                var obj=new Object();
+                obj.index=id;
+                var datajson=JSON.stringify(obj);
+                // console.log(datajson);
+                $.ajax({
+                    type: "post",
+                    contentType:"application/x-www-form-urlencoded",
+                    dataType:"json",
+                    data:datajson,
+                    url:"http://" + url1 + ":6078/backstagedelcoursedetail",
+                    success: function(data) {
+                        //console.log(data);
+                        delCourseDetail = JSON.parse(sessionStorage.getItem("delCourseDetail")?sessionStorage.getItem("delCourseDetail"):"[]");
+                        delCourseDetail.push(id);
+                        if (window.sessionStorage) {
+                            sessionStorage.setItem("delCourseDetail", JSON.stringify(delCourseDetail));
+                        } else {
+                            Cookie.write("delCourseDetail", JSON.stringify(delCourseDetail));
+                        }
+                        init();
+                    },
+                    error: function(err) {
+                        //mizhu.alert('','err:'+ err,'iconfont-close');
+                    }
+                });
+            }
+        }
+
+        //图片上传
+        function upload() {
+            var formData = new FormData();
+            var ifimgurl=document.getElementById("imgurltext");
+            if(ifimgurl){
+                formData.append("file", document.getElementById("imgurltext").files[0]);
+            }else{
+                formData.append("file", document.getElementById("imgurltxt").value);
+            }
+
+            $.ajax({
+                url: "http://" + localhost + ":8080/taiji.tools/FileServlet?dir="+subpath,
+                type: "POST",
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(data) {
+                },
+                error: function() {
+                    mizhu.alert('', '上传失败！','iconfont-close');
+                }
+            });
+        }
+        //保存添加与修改的用户
+        function onSavebtnClickHandler(id) {
+            if(checkclasshourtext()&&checknametext()&&checkdescriptiontext()&&checkcoachtext()&&checkstatetext()&&checkonlydaytext()&&checkstarttime()&&checkendtime()&&checkimgurltext()){
+                var datajson;
+				if (currentIndex >= 0) {
+					var url = "http://" + url1 + ":6078/backstageupdatecoursedetail";
+					var obj = new Object();
+					obj.id = parseInt(id);
+					obj.cid = document.getElementById('cidtext').getAttribute("data");
+					obj.classhour = document.getElementById('classhourtext').value;
+					obj.name = document.getElementById('nametext').value;
+					obj.description = document.getElementById('descriptiontext').value;
+					obj.coach = document.getElementById('coachtext').value;
+					obj.state = document.getElementById('statetext').value;
+                    var onlydaytext = document.getElementById("onlydaytext");
+					obj.starttime = new Date(onlydaytext.value+" "+document.getElementById('starttimetext').value).getTime();
+					obj.endtime = new Date(onlydaytext.value+" "+document.getElementById('endtimetext').value).getTime();
+                    var ifimgurl=document.getElementById('imgurltext').files[0];
+                    if(ifimgurl){
+                        obj.imgurl = "/" + subpath + "/" + document.getElementById("imgurltext").files[0].name;
+					}else{
+                        obj.imgurl = document.getElementById("imgurltxt").value;
+					}
+
+                    obj.weburl = document.getElementById('weburltext').value;
+					datajson = JSON.stringify(obj);
+					//console.log(datajson);
+					save();
+
+				}
+				function save(){
+					$.ajax({
+						type: "post",
+						contentType: "application/x-www-form-urlencoded",
+						data: datajson,
+						dataType: "json",
+						url: url,
+						success: function (data) {
+							//console.log(data);
+							//console.log(currentIndex);
+							if (currentIndex >= 0) {
+								if(data.respVo.resultCode<0){
+                                    mizhu.alert('',data.respVo.resultDesc,'iconfont-close');
+									return;
+								}else{
+                                    datajson=JSON.parse(datajson);
+                                    datajson.cname=document.getElementById('cidtext').value;
+                                    datajson.coachname=$("#coachtext option:selected").text().split("-")[0];
+                                    datajson.coachnickname=$("#coachtext option:selected").text().split("-")[1];
+                                    if (window.sessionStorage) {
+                                        updateCourseDetail = JSON.parse(sessionStorage.getItem("updateCourseDetail")?sessionStorage.getItem("updateCourseDetail"):"[]");
+                                        if(updateCourseDetail.length>0) {
+                                            var len=0;
+                                            for (var j = 0; j < updateCourseDetail.length; j++) {
+                                                //console.log(updateCourse[j].id+"b");
+                                                if (datajson.id == updateCourseDetail[j].id) {
+                                                    len++;
+                                                    updateCourseDetail[j]=datajson;
+                                                }
+                                            }
+                                            if(len==0){
+                                                updateCourseDetail.push(datajson);
+                                            }
+                                        }else{
+                                            updateCourseDetail.push(datajson);
+                                        }
+                                        sessionStorage.setItem("updateCourseDetail", JSON.stringify(updateCourseDetail));
+                                    }
+                                    else {
+                                        updateCourseDetail = JSON.parse(Cookie.read("updateCourseDetail")?Cookie.read("updateCourseDetail"):"[]");
+                                        if(updateCourseDetail.length>0) {
+                                            var len=0;
+                                            for (var j = 0; j < updateCourseDetail.length; j++) {
+                                                if (datajson.id == updateCourseDetail[j].id) {
+                                                    len++;
+                                                    updateCourseDetail[j]=datajson;
+                                                }
+                                            }
+                                            if(len==0){
+                                                updateCourseDetail.push(datajson);
+                                            }
+                                        }else{
+                                            updateCourseDetail.push(datajson);
+                                        }
+                                        Cookie.write("updateCourseDetail", JSON.stringify(updateCourseDetail));
+                                    }
+                                    upload();
+                                    mizhu.alert('', '修改成功','iconfont-gou');
+									init();
+									cancel_shield();
+								}
+							}
+
+						},
+						error: function (err) {
+                            //mizhu.alert('','保存失败','iconfont-close');
+							cancel_shield();
+						}
+					});
+				}
+
+            }else{
+                mizhu.alert('', '请正确完善信息','iconfont-close');
+            }
+
+        }
+        //验证
+        function checkclasshourtext(){
+            var classhourtext = document.getElementById("classhourtext");
+            var classhourtext_info = document.getElementById("classhourtext_info");
+            if (classhourtext.value == "" ) {
+                classhourtext_info.innerHTML = "该字段不能为空";
+                classhourtext.style.border = "1px solid red";
+                classhourtext_info.style.color = "red";
+                return false;
+            }
+            else {
+                var reg=new RegExp(/^\d{1,10}(\.\d{1,2})?$/,"gi");
+                if(!reg.test(classhourtext.value)){
+                    classhourtext_info.innerHTML = "该字段必须为00.00数字格式";
+                    classhourtext.style.border = "1px solid red";
+                    classhourtext_info.style.color = "red";
+                    return false;
+                }else{
+                    classhourtext_info.innerHTML = "";
+                    classhourtext.style.border = "";
+                    return true;
+                }
+            }
+
+        }
+        function checknametext(){
+            var nametext = document.getElementById("nametext");
+            var nametext_info = document.getElementById("nametext_info");
+            if (nametext.value == "" ) {
+                nametext_info.innerHTML = "该字段不能为空";
+                nametext.style.border = "1px solid red";
+                nametext_info.style.color = "red";
+                return false;
+            }
+            else {
+                nametext_info.innerHTML = "";
+                nametext.style.border = "";
+                return true;
+            }
+
+        }
+        function checkdescriptiontext(){
+            var descriptiontext = document.getElementById("descriptiontext");
+            var descriptiontext_info = document.getElementById("descriptiontext_info");
+            if (descriptiontext.value == "" ) {
+                descriptiontext_info.innerHTML = "该字段不能为空";
+                descriptiontext.style.border = "1px solid red";
+                descriptiontext_info.style.color = "red";
+                return false;
+            }
+            else {
+                descriptiontext_info.innerHTML = "";
+                descriptiontext.style.border = "";
+                return true;
+            }
+
+        }
+        function checkcoachtext(){
+            var coachtext = document.getElementById("coachtext");
+            var coachtext_info = document.getElementById("coachtext_info");
+            if (coachtext.value == "" ) {
+                coachtext_info.innerHTML = "该字段不能为空";
+                coachtext.style.border = "1px solid red";
+                coachtext_info.style.color = "red";
+                return false;
+            }
+            else {
+                coachtext_info.innerHTML = "";
+                coachtext.style.border = "";
+                return true;
+
+            }
+
+        }
+        function checkstatetext(){
+            var statetext = document.getElementById("statetext");
+            var statetext_info = document.getElementById("statetext_info");
+            if (statetext.value == "" ) {
+                statetext_info.innerHTML = "该字段不能为空";
+                statetext.style.border = "1px solid red";
+                statetext_info.style.color = "red";
+                return false;
+            }
+            else {
+                var reg=new RegExp("^(-)?[0-9]{1}$","g");
+                if(!reg.test(statetext.value)){
+                    statetext_info.innerHTML = "该字段必须为数字，只能1位";
+                    statetext.style.border = "1px solid red";
+                    statetext_info.style.color = "red";
+                    return false;
+                }else{
+                    statetext_info.innerHTML = "";
+                    statetext.style.border = "";
+                    return true;
+                }
+            }
+
+        }
+        function checkonlydaytext(){
+            var onlydaytext = document.getElementById("onlydaytext");
+            var onlydaytext_info = document.getElementById("onlydaytext_info");
+            if (onlydaytext.value == "" ) {
+                onlydaytext_info.innerHTML = "该字段不能为空";
+                onlydaytext.style.border = "1px solid red";
+                onlydaytext_info.style.color = "red";
+                return false;
+            }
+            else {
+                onlydaytext_info.innerHTML = "";
+                onlydaytext.style.border = "";
+                return true;
+            }
+        }
+        //开始时间
+        function checkstarttime() {
+            var starttimetext = document.getElementById("starttimetext");
+            var timetxt_info = document.getElementById("timetxt_info");
+            if (starttimetext.value == "" ) {
+                timetxt_info.innerHTML = "该字段不能为空";
+                starttimetext.style.border = "1px solid red";
+                timetxt_info.style.color = "red";
+                return false;
+            }
+            else {
+                timetxt_info.innerHTML = "";
+				starttimetext.style.border = "";
+				return true;
+
+            }
+
+        }
+        //结束时间
+        function checkendtime() {
+            var onlydaytext = document.getElementById("onlydaytext");
+            var starttimetext = document.getElementById("starttimetext");
+            var endtimetext = document.getElementById("endtimetext");
+            var timetxt_info = document.getElementById("timetxt_info");
+            var startime=new Date(onlydaytext.value+" "+starttimetext.value).getTime();
+            var endtime=new Date(onlydaytext.value+" "+endtimetext.value).getTime();
+            //console.log(onlydaytext.value+":"+starttimetext.value+":"+endtimetext.value);
+            if (endtimetext.value == "" ) {
+                timetxt_info.innerHTML = "该字段不能为空";
+                endtimetext.style.border = "1px solid red";
+                timetxt_info.style.color = "red";
+                return false;
+            }
+            else {
+//                var LocaleDate=new Date(endtimetext.value).toLocaleDateString();
+//                var end=new Date(LocaleDate).getTime()+20*3600*1000;
+//                console.log(endtime+":"+end);
+                if(endtime<=startime){
+                    timetxt_info.innerHTML = "请选择大于开始时间的结束时间";
+                    endtimetext.style.border = "1px solid red";
+                    timetxt_info.style.color = "red";
+                    return false;
+                }else{
+                    timetxt_info.innerHTML = "";
+                    endtimetext.style.border = "";
+                    return true;
+                }
+
+            }
+        }
+        function checkimgurltext(){
+            var imgurltxt = document.getElementById("imgurltxt");
+            var imgurltext = document.getElementById("imgurltext");
+            var imgurltext_info = document.getElementById("imgurltext_info");
+            if (!imgurltext.files[0]) {
+                if(imgurltxt.value==""){
+                    console.log(1);
+                    imgurltext_info.innerHTML = "该字段不能为空";
+                    imgurltext_info.style.color = "red";
+                    return false;
+                }else{
+                    console.log(2);
+                    imgurltext_info.innerHTML = "";
+                    imgurltext.style.border = "";
+                    return true;
+                }
+            }else{
+                console.log(3);
+                imgurltext_info.innerHTML = "";
+                imgurltext.style.border = "";
+                return true;
+            }
+        }
+        //关闭弹出的div
+        function cancel_shield() {
+            var s = document.getElementById("test");
+            s.style.display = "none";
+            var d = document.getElementById("detail_div");
+            d.style.display = "none";
+            var m = document.getElementById("mytooltip");
+            m.style.display = "none";
+        }
+        //获取所有教练
+        function initallcoach(){
+            allcoach.push(course.coach);
+            allcoach.push(course.subcoach);
+        }
+        //获取关联公开课教练
+        function initcoursecoach(){
+            var obj=new Object();
+            var datajson=JSON.stringify(obj);
+            $.ajax({
+                type: "post",
+                contentType:"application/x-www-form-urlencoded",
+                data:datajson,
+                dataType:"json",
+                url:"http://" + url1 + ":6078/backstagegetcoursecoach",
+                success: function(data) {
+                    //console.log(data);
+                    coursecoach=[];
+                    if(data.respVo.resultCode=="0"){
+                        //console.log(data);
+                        for(var i=0;i<data.usercoursecoachmap.length;i++){
+                            coursecoach.push(data.usercoursecoachmap[i]);
+                        }
+                    }else{
+                        coursecoach.length=0;
+                    }
+
+
+                },
+                error: function(err) {
+//						alert("err:" + err);
+                }
+            });
+        }
+        //转换时间戳
+        function timestampToAll(timestamp) {
+            var date = new Date(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+            Y = date.getFullYear() + '-';
+            M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+            D = date.getDate()<10 ? '0'+date.getDate()+ ' ':date.getDate() + ' ';
+            h = date.getHours()<10 ? '0'+date.getHours()+ ':':date.getHours() + ':';
+            m = date.getMinutes()<10 ? '0'+date.getMinutes():date.getMinutes();
+            s = date.getSeconds();
+            return Y+M+D+h+m;
+        }
+        function timestampToDate(timestamp) {
+            var date = new Date(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+            Y = date.getFullYear() + '-';
+            M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+            D = date.getDate() + ' ';
+            h = date.getHours() + ':';
+            m = date.getMinutes() + ':';
+            s = date.getSeconds();
+            return Y+M+D;
+        }
+        function timestampToTime(timestamp) {
+            var date = new Date(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+            Y = date.getFullYear() + '-';
+            M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+            D = date.getDate()<10 ? '0'+date.getDate()+ ' ':date.getDate() + ' ';
+            h = date.getHours()<10 ? '0'+date.getHours()+ ':':date.getHours() + ':';
+            m = date.getMinutes()<10 ? '0'+date.getMinutes():date.getMinutes();
+            s = date.getSeconds();
+            return h+m;
+        }
+        function back(){
+            window.location ="msg.html";
+        }
+	</script>
+</head>
+
+<body onload="init()">
+<a  onclick="back()"  class="back"  style="position: absolute; top: 0px;">返 回</a>
+<div style="width: 100%;"  id="canvasDiv">
+	<canvas id="dailyTimeline" height="1511px"  ></canvas>
+	<div id="class"></div>
+</div>
+<script>
+    var canvasDiv = document.getElementById("canvasDiv");
+    var myCanvas = document.getElementById("dailyTimeline");
+    myCanvas.setAttribute("width", canvasDiv.offsetWidth+"px");
+</script>
+<script type="text/javascript" src="../Js/daily-timeline.js"></script>
+<!--//弹出遮罩-->
+<div id="test"></div>
+
+<!--公开课详细编辑-->
+<div id="detail_div">
+	<input type="image" src='../assets/img/guanbi.png' onclick="cancel_shield()" style="position: absolute;left: 745px;top: 10px;width: 27px;height: 27px">
+	<table class="table table-bordered " style="width: 600px;margin:0 auto;margin-top: 60px" id="detail_table">
+	</table>
+</div>
+
+<div id="mytooltip"></div>
+
+<div id="test1"><span>数据同步中，请稍后......</span></div>
+</body>
+
+</html>

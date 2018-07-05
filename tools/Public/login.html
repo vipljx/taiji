@@ -1,0 +1,130 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>后台管理系统</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="../Css/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="../Css/bootstrap-responsive.css" />
+    <link rel="stylesheet" type="text/css" href="../Css/style.css" />
+    <script type="text/javascript" src="../Js/jquery.js"></script>
+    <!--     <script src="http://code.jquery.com/jquery-1.4.1.min.js"></script> -->
+    <script type="text/javascript" src="../Js/bootstrap.js"></script>
+    <script type="text/javascript" src="../Js/ckform.js"></script>
+    <script type="text/javascript" src="../Js/common.js"></script>
+    <style type="text/css">
+
+        body {
+            padding-top: 40px;
+            padding-bottom: 40px;
+            background-color: #f5f5f5;
+        }
+
+        .form-signin {
+            width: 50%;
+            height: 50%;
+            /*max-width: 500px;*/
+            /*height: 500px;*/
+            padding: 19px 29px 29px;
+            margin: 0 auto 20px;
+            /*background-color: red;*/
+        }
+
+        .form-signin .form-signin-heading,
+        .form-signin .checkbox {
+            margin-bottom: 40px;
+        }
+
+        .form-signin input[type="text"],
+        .form-signin input[type="password"] {
+            font-size: 15px;
+            margin-bottom: 15px;
+            padding: 7px 9px;
+            height: 60px;
+            border-radius: 0px;
+        }
+
+        .form-signin {
+            margin-top: 320px;
+        }
+
+        h3 {
+            text-align: center;
+        }
+
+        #btnInput {
+            width: 150px;
+            margin:0 auto;
+            display:block;
+            margin-top: 65px;
+        }
+
+        #password {
+            margin-top: 25px;
+        }
+
+    </style>
+    <script type="text/javascript">
+
+        //      var localhost = "www.bananahome.com.cn";
+        var localhost = "192.168.1.182";
+        //	var url1 = "120.77.34.195";
+        var url1="192.168.1.248";
+        function login() {
+            var login = new Object();
+            login.name=document.getElementById('username').value;
+            login.password=document.getElementById('password').value;
+            var loginjson=JSON.stringify(login);
+            $.ajax({
+                type: "post",
+                contentType:"application/x-www-form-urlencoded",
+                data:loginjson,
+                dataType:"json",
+                url:"http://" + url1 + ":6078/backstagemanagerlogin",
+                success: function (data) {
+                    if(data.respVo.resultCode==0){
+//                        console.log(data.respVo.managermap);
+                        console.log(data.managermap);
+                        console.log(data.managermap[0]);
+                        //判断浏览器是否支持sessionStorage存储
+                        if (window.sessionStorage) {
+                            // 保存数据到sessionStorage
+                            sessionStorage.setItem("mgr", JSON.stringify(data.managermap[0]));
+                            sessionStorage.setItem("lh",localhost);
+                        } else {
+                            Cookie.write("mgr", JSON.stringify(data.managermap[0]));
+                            Cookie.write("lh", JSON.localhost);
+                        }
+                        window.location="../index.html";
+                    }else{
+                        alert("用户名或密码错误");
+                    }
+                },
+                error: function (err) {
+                    alert("err:"+err);
+                }
+            });
+        }
+
+
+        document.onkeydown = function(e) {
+            switch (e.keyCode) {
+                case 13:
+                    document.getElementById("btnInput").click();
+                    break;
+            }
+        }
+    </script>
+<body>
+<div class="container" data-genuitec-lp-enabled="false" data-genuitec-file-id="wc1-27" data-genuitec-path="/fkds1.5.tools/WebRoot/tools/Public/login.html" data-genuitec-lp-enabled="false" data-genuitec-file-id="wc2-47" data-genuitec-path="/fkds1.5.tools/WebRoot/tools/Public/login.html">
+    <div class="form-signin">
+        <h3 class="form-signin-heading">登 录 系 统</h3>
+        <input type="text" id="username" class="input-block-level" placeholder="账号">
+        <input type="password" id="password" class="input-block-level" placeholder="密码">
+        <p><input type="image" src='../assets/img/denglu.png'  id="btnInput" onclick="login();" title=""></p>
+    </div>
+</div>
+</body>
+</html>
+<script>
+    $('#btnInput').tooltip();
+</script>

@@ -1,0 +1,17 @@
+[genuitec-file-id="wc2-73"],[genuitec-lp-path="/fkds1.5.tools/WebRoot/tools/assets/css/page.css"],[genuitec-lp-enabled=false]{
+  /* for codelive */
+}
+
+
+.container {
+  margin-left: 0px;
+  margin-top: 0px;
+  width: auto;
+  padding: 20px 20px 0px 20px;
+}
+
+.detail-page,.form-page,.search-page{
+	padding:0;
+}
+
+

@@ -1,0 +1,2175 @@
+﻿<!DOCTYPE html>
+<html>
+
+	<head>
+		<title></title>
+		<meta charset="UTF-8">
+		<!--<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />-->
+		<link rel="stylesheet" type="text/css" href="../Css/bootstrap.css" />
+		<link rel="stylesheet" type="text/css" href="../Css/bootstrap-responsive.css" />
+		<link rel="stylesheet" type="text/css" href="../Css/style.css" />
+		<script type="text/javascript" src="../Js/jquery.js"></script>
+		<script type="text/javascript" src="../Js/jquery-ui.js"></script>
+		<script type="text/javascript" src="../Js/bootstrap.js"></script>
+		<script type="text/javascript" src="../Js/ckform.js"></script>
+		<script type="text/javascript" src="../Js/common.js"></script>
+		<script type="text/javascript" src="../Js/js/laydate.js"></script>
+		<script type="text/javascript" src="../Js/ui.js"></script>
+		<script type="text/javascript" src="../Js/ursl.js"></script>
+		<style type="text/css">
+			body {
+				padding-bottom: 40px;
+			}
+			
+			.sidebar-nav {
+				padding: 9px 0;
+			}
+			
+			@media (max-width: 980px) {
+				/* Enable use of floated navbar text */
+				.navbar-text.pull-right {
+					float: none;
+					padding-left: 5px;
+					padding-right: 5px;
+				}
+			}
+			
+			.lbs {
+				margin-top: 20px;
+				margin-left: 20px;
+			}
+			
+			#test {
+				width: 100%;
+				height: 100%;
+				background-color: #000;
+				position: absolute;
+				top: 0;
+				left: 0;
+				z-index: 2;
+				opacity: 0.3;
+				/*兼容IE8及以下版本浏览器*/
+				filter: alpha(opacity=30);
+				display: none;
+			}
+			
+			#log_window {
+				width: 800px;
+				height: 580px;
+				/*overflow: scroll;*/
+				padding-bottom: 50px;
+				background-color: white;
+				margin: auto;
+				position: absolute;
+				z-index: 3;
+				top: 0;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				display: none;
+				overflow-y:scroll;
+			}
+			
+			.theadColor th {
+				background-color: #b1d6e8;
+				/*color: #1976b0;*/
+				font-weight: normal;
+			}
+			
+			.theadColor th span {
+				color: #1976b0;
+			}
+			
+			#chaxun {
+				margin-top: 10px;
+			}
+			
+			#addnew1 {
+				margin-top: 10px;
+			}
+			
+			#rolename {
+				margin-top: 19px;
+			}
+			
+			.theadColor td,
+			.tableleft {
+				/*background-color: #b1d6e8;*/
+				/*color: #1976b0;*/
+				font-weight: normal;
+			}
+
+			.theadColor td,.tableleft  span {
+				color:#000;
+				font-weight: bold;
+			}
+			
+			#rolename {
+				padding-right: 26px;
+				background: url("../assets/img/fangdajing.png") no-repeat scroll right center transparent;
+			}
+			
+			#log_window2 {
+				width: 300px;
+				height: 200px;
+				min-height: 100px;
+				background-color: white;
+				border: 1px solid gainsboro;
+				margin: auto;
+				position: absolute;
+				z-index: 4;
+				padding-bottom: 20px;
+				top: 57%;
+				right: 38%;
+				display: none;
+			}
+			
+			.error {
+				font-size: 12px;
+				color: red;
+				text-align: left;
+				padding-left: 30px;
+			}
+			
+			.ok {
+				font-size: 12px;
+				text-align: left;
+				padding-left: 30px;
+			}
+			#userlist,#userlist1{
+			position: absolute;
+			width:40%;
+			border: 1px solid #dedede;
+			background: #ffffff;
+			border-top: none;
+			margin: 0;
+			text-align:left;
+			display: none;
+
+		}
+			#userlist li{
+				list-style: none;
+				line-height: 25px;
+			}
+			#userlist li div{
+				color: black;
+			}
+			#userlist li:hover{
+				background: #F6F6F6;
+			}
+			.onclick{
+				margin-left: 35px;
+			}
+			.onclick a{
+				margin: 0;
+
+			}
+		</style>
+
+		<script>
+			var page = 1;
+			var count = 10;
+			var maxpage = 0;
+			var dataarr = [];
+			var currentIndex = -1;
+			var localhost = " ";
+			var arrMarkid = [];
+			var logoName;
+			var subpath = "shopDetail";
+			var pathName = "";
+			var logofield;
+			var manager, mgrid;
+			var idsarr = [];
+			var namesarr = [];
+			var cbcomps = [];
+			var fields = [];
+			var arrCheckbox = [];
+			var addable1, updateable1, delable1, authority, pms;
+			var checkbox, index, sendto, mid, table, role, res, isindex;
+			var picurl = [];
+			var temp = [];
+			var shoptemp;
+			var cardState;
+			var shopid;
+			var cid;
+			localhost = window.sessionStorage ? sessionStorage.getItem("lh") : Cookie.read("lh");
+//			var url1="192.168.1.248";
+			var url1 =urls;
+			sessionStorage.removeItem("cardState");
+			//加载列表
+			function init() {
+				localhost = window.sessionStorage ? sessionStorage.getItem("lh") : Cookie.read("lh");
+				table =14;
+				var uname = window.sessionStorage ? sessionStorage.getItem("mgr") : Cookie.read("mgr");
+				manager = jQuery.parseJSON(uname);
+				mid = manager.mid;
+				mgrid = manager.id;
+				role = manager.type;
+				pms = window.sessionStorage ? sessionStorage.getItem("管 理 员") : Cookie.read("管 理 员");
+//				authority = jQuery.parseJSON(pms);
+//				addable1 = authority.addable;
+//				updateable1 = authority.updateable;
+//				delable1 = authority.delable;
+				if (null == uname || undefined == uname) {
+					parent.window.location = '../Public/login.html';
+					return;
+				}
+				var currentPage = window.sessionStorage ? sessionStorage.getItem("currentPageshop") : Cookie.read("currentPageshop");
+				if (null != currentPage && undefined != currentPage && currentPage.length > 0) {
+					window.location = currentPage;
+				}
+				if (window.sessionStorage) {
+					page = sessionStorage.getItem("shop_page");
+				} else {
+					page = Cookie.read("shop_page");
+				}
+				if (null == page)
+					page = 1;
+				document.getElementById('pagelab').value = page;
+				var Sys = {};
+				var ua = navigator.userAgent.toLowerCase();
+				var s;
+				(s = ua.match(/msie ([\d.]+)/)) ? Sys.ie = s[1]:
+					(s = ua.match(/firefox\/([\d.]+)/)) ? Sys.firefox = s[1] :
+					(s = ua.match(/chrome\/([\d.]+)/)) ? Sys.chrome = s[1] :
+					(s = ua.match(/opera.([\d.]+)/)) ? Sys.opera = s[1] :
+					(s = ua.match(/version\/([\d.]+).*safari/)) ? Sys.safari = s[1] : 0;
+				if (Sys.ie) { //Js判断为IE浏览器
+					alert('http://www.wangjinhai119.com' + Sys.ie);
+					if (Sys.ie == '9.0') { //Js判断为IE 9
+					} else if (Sys.ie == '8.0') { //Js判断为IE 8
+					} else {}
+				}
+				if (Sys.firefox) { //Js判断为火狐(firefox)浏览器
+					document.getElementById('pagelab').style.marginTop = '19px';
+				}
+				if (Sys.chrome) { //Js判断为谷歌chrome浏览器
+					document.getElementById('pagelab').style.marginTop = '18px';
+				}
+				if (Sys.opera) { //Js判断为opera浏览器
+					alert('http://www.wangjinhai119.com' + Sys.opera);
+				}
+				if (Sys.safari) { //Js判断为苹果safari浏览器
+					document.getElementById('pagelab').style.marginTop = '9px';
+				}
+				initFields();
+			}
+			
+			
+//		取数据
+			function initTableData(){
+				if(sessionStorage.getItem("cardState")!=null){
+					cardState=sessionStorage.getItem("cardState");
+					
+				}
+				
+//				console.log(sessionStorage.getItem("cardState"))
+				var obj=new Object();
+                obj.type=1;
+				obj.page=page;
+				obj.count=count;
+				obj.vid=manager.vid;
+				if(cardState==null){
+					obj.types=0;
+				}else{
+					obj.types=cardState;
+				}
+				
+                var datajson=JSON.stringify(obj);
+                //console.log(datajson);
+				$.ajax({
+                    type: "post",
+                    contentType:"application/x-www-form-urlencoded",
+                    data:datajson,
+                    dataType:"json",
+                    url:"http://" + url1 + ":6078/getallshopinfobyvid",
+					success: function(data) {
+                        //console.log(data);
+                        //console.log("此处是接口");
+						if(data.respVo.resultCode==0){
+							//设置排序
+							data.shopinfoMap.sort(function sortId(a,b){
+                                return b.shopid-a.shopid
+							});
+							//var res = jQuery.parseJSON(data);
+							var table1 = document.getElementById('tbl');
+							dataarr = [];
+							while (table1.rows.length > 1) {
+								table1.deleteRow(1);
+							}
+							if (window.sessionStorage ) {
+								delUser = JSON.parse(sessionStorage.getItem("delUser")?sessionStorage.getItem("delUser"):"[]");
+								updateStudent1 = JSON.parse(sessionStorage.getItem("updateStudent1")?sessionStorage.getItem("updateStudent1"):"[]");
+							} else {
+								delUser = JSON.parse(Cookie.read("delUser")?sessionStorage.getItem("delUser"):"[]");
+								updateStudent1 = JSON.parse(Cookie.read("updateStudent1")?sessionStorage.getItem("updateStudent1"):"[]");
+							}
+							//console.log(data.shopinfoMap);
+							for (var i = 0; i < data.shopinfoMap.length; i++) {
+								if(updateStudent1.length>0) {
+									for (var j = 0; j < updateStudent1.length; j++) {
+										if (data.shopinfoMap[i].id == updateStudent1[j].id) {
+											data.shopinfoMap[i] = updateStudent1[j];
+										}
+									}
+								}
+                                dataarr.push(data.shopinfoMap[i]);
+								if(delUser.indexOf(data.shopinfoMap[i].id)==-1){
+									var row = table1.insertRow(table1.rows.length);
+									for (var k = 0; k < nowfields.length; k++) {
+										
+											var cell = row.insertCell(k);
+											cell.innerHTML = nowfields[k].fieldname=="role"?data.shopinfoMap[i]["rolename"]: nowfields[k].fieldname=="vid"?data.shopinfoMap[i]["venuename"]?data.shopinfoMap[i]["venuename"]:"暂无所属拳馆":dataarr[i][nowfields[k].fieldname];
+										
+										
+
+									}
+									var optcell = row.insertCell(nowfields.length);
+									
+									if(manager.type==1||manager.type==2){
+										optcell.innerHTML = "<input type='image' src='../assets/img/bianji.png' id='bianji"+i+"'  value='' onclick='edit("+ i + ","  + data.shopinfoMap[i].shopid + ")'>" +
+//										"&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/xiangqing.png' id='xiangqing"+i+"' onclick='detail(" + data.shopinfoMap[i].id + ")'>" +
+										"&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/shanchu.png' id='shanchu"+i+"' value='' onclick='del(" + data.shopinfoMap[i].shopid + "," + table1.rows.length + ")'>"+
+										"&nbsp;&nbsp;&nbsp;<button style='border-radius:20px;width:70px;heigth:50px;' class='btn btn-primary' onclick='buy(" + data.shopinfoMap[i].shopid + ")'>购买</button>";
+									}else{
+										
+										optcell.innerHTML = "<input type='image' src='../assets/img/bianji.png' id='bianji"+i+"'  value='' onclick='edit("+ i + ","  + data.shopinfoMap[i].shopid + ")'>" +
+//										"&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/xiangqing.png' id='xiangqing"+i+"' onclick='detail(" + data.shopinfoMap[i].id + ")'>" +
+										"&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/shanchu.png' id='shanchu"+i+"' value='' onclick='del(" + data.shopinfoMap[i].shopid + "," + table1.rows.length + ")'>";
+									}
+							   }
+							}
+							maxpage = Math.ceil(data.respVo.resultDesc / count);
+							document.getElementById('pagelab').value = page;
+							//设置分页
+							var first=$(".page>div>div:nth-child(1)");
+							var prev=$(".page>div>div:nth-child(2)");
+							var next=$(".page>div>div:nth-child(3)");
+							var last=$(".page>div>div:nth-child(4)");
+							if(page>1){
+								first.attr("class","blue")
+							}else{
+								first.attr("class","gray")
+							}
+							if(page>1){
+								prev.attr("class","blue")
+							}else{
+								prev.attr("class","gray")
+							}
+							if(page<maxpage){
+								next.attr("class","blue")
+							}else{
+								next.attr("class","gray")
+							}
+							if(page<maxpage){
+								last.attr("class","blue")
+							}else{
+								last.attr("class","gray")
+							}
+                        }else{
+//						    alert(data.respVo.resultDesc);
+						}
+                        initMakeidSelect();
+					},
+					error: function(err) {
+//						alert("err:" + err);
+					}
+				});
+				
+
+			}
+			function changeState(){
+				cardState=document.getElementById("selectState").value;
+				sessionStorage.setItem("cardState",cardState);
+				init();
+				
+			}
+			//动态表头
+			function initFields() {
+				var users=new Object();
+                users.rid=role;
+                users.smid=14;
+                var datajson=JSON.stringify(users);
+				$.ajax({
+					type: "post",
+					contentType:"application/x-www-form-urlencoded",
+					data:datajson,
+                    dataType:"json",
+					url:"http://" + url1 + ":6078/backstagegetpermissionfieldbyridsmid",
+					success: function(data) {
+						   data.permissionfieldmap.sort(function(a,b){
+                            return a.smdid-b.smdid;
+                        });
+                        fields = [];
+                        nowfields = [];
+                        for (var i = 0; i < data.permissionfieldmap.length; i++) {
+                            var fieldname=data.permissionfieldmap[i].fieldname;
+                            if(fieldname=="name"){
+                                data.permissionfieldmap[i].name="学号";
+                            }
+                            if(fieldname!=="enable" && fieldname!=="password" && fieldname!=="level"){
+                                fields.push(data.permissionfieldmap[i]);
+                            }
+                            //console.log(data.permissionfieldmap[i]);
+                            if(fieldname!=="password" && fieldname!=="enable" && fieldname!=="level" ){
+                                nowfields.push(data.permissionfieldmap[i]);
+							}
+                        }
+                        var th = document.getElementById("tabhead");
+                        while (th.cells.length > 0) {
+                            th.deleteCell(0);
+                        }
+                        for (var i = 0; i < nowfields.length; i++) {
+                            var headcell = th.insertCell(i);
+                            headcell.innerHTML = "<th><span>" + nowfields[i].name + "</span></th>";
+                        }
+                        var headoptcell = th.insertCell(nowfields.length);
+                        headoptcell.innerHTML = "<th><span>" + "操 作" + "</span></th>";
+                       
+						initTableData();
+
+					},
+					error: function(err) {
+						//						alert("err:" + err);
+					}
+				});
+			}
+				//获取拳馆信息
+			function initMakeidSelect() {
+				var obj=new Object();
+				obj.vid=manager.vid;
+				obj.page=page;
+				obj.count="100";
+                var datajson=JSON.stringify(obj);
+				$.ajax({
+                    type: "post",
+                    contentType:"application/x-www-form-urlencoded",
+                    data:datajson,
+                    dataType:"json",
+                    url:"http://" + url1 + ":6078/backstagegetvenue",
+                    success: function(data) {
+//						var res = jQuery.parseJSON(data.VenueMap);
+						arrMarkid = [];
+						for (var i = 0; i < data.VenueMap.length; i++) {
+							arrMarkid.push(data.VenueMap[i]);
+						}
+					// console.log(arrMarkid)
+					},
+					error: function(err) {
+						alert("失败")
+						//						alert("err:" + err);
+					}
+                 })
+			}
+			
+			
+			
+	function first(){
+            if(document.getElementById("pagelab").value==1){
+                mizhu.alert('','当前已经为第一页!','iconfont-close');
+            }
+            else{
+                initTable(1,true);
+            }
+
+        }
+        function last(){
+
+            if(document.getElementById("pagelab").value==maxpage){
+                mizhu.alert('','当前已经为最后页!','iconfont-close');
+            }
+            else{
+                initTable(parseInt(maxpage),true);
+            }
+
+        }
+			
+			
+			//分页
+			function initTable(step, flag = false) {
+//				initFields();
+				console.log(maxpage);
+				step = parseInt(step);
+				var p = parseInt(page) + parseInt(step);
+				if (flag) {
+					if (step < 1 || step > maxpage) {
+						mizhu.alert('','页码超标','iconfont-close');
+						return;
+					}
+					page = step;
+				} else {
+					page = p;
+					if (page < 1 || page > maxpage) {
+						page -= step;
+						return;
+					}
+				}
+				
+				var obj=new Object();
+                obj.type=1;
+				obj.page=page;
+				obj.count=count;
+				obj.vid=manager.vid;
+				if(cardState==null){
+					obj.types=0;
+				}else{
+					obj.types=cardState;
+				}
+                var datajson=JSON.stringify(obj);
+                //console.log(datajson);
+				$.ajax({
+                    type: "post",
+                    contentType:"application/x-www-form-urlencoded",
+                    data:datajson,
+                    dataType:"json",
+                    url:"http://" + url1 + ":6078/getallshopinfobyvid",
+					success: function(data) {
+                        //console.log(data);
+                        //console.log("此处是接口");
+						if(data.respVo.resultCode==0){
+							//设置排序
+							data.shopinfoMap.sort(function sortId(a,b){
+                                return b.shopid-a.shopid
+							});
+							//var res = jQuery.parseJSON(data);
+							var table1 = document.getElementById('tbl');
+							dataarr = [];
+							while (table1.rows.length > 1) {
+								table1.deleteRow(1);
+							}
+							if (window.sessionStorage ) {
+								delUser = JSON.parse(sessionStorage.getItem("delUser")?sessionStorage.getItem("delUser"):"[]");
+								updateStudent1 = JSON.parse(sessionStorage.getItem("updateStudent1")?sessionStorage.getItem("updateStudent1"):"[]");
+							} else {
+								delUser = JSON.parse(Cookie.read("delUser")?sessionStorage.getItem("delUser"):"[]");
+								updateStudent1 = JSON.parse(Cookie.read("updateStudent1")?sessionStorage.getItem("updateStudent1"):"[]");
+							}
+							//console.log(data.shopinfoMap);
+							for (var i = 0; i < data.shopinfoMap.length; i++) {
+								if(updateStudent1.length>0) {
+									for (var j = 0; j < updateStudent1.length; j++) {
+										if (data.shopinfoMap[i].id == updateStudent1[j].id) {
+											data.shopinfoMap[i] = updateStudent1[j];
+										}
+									}
+								}
+                                dataarr.push(data.shopinfoMap[i]);
+								if(delUser.indexOf(data.shopinfoMap[i].id)==-1){
+									var row = table1.insertRow(table1.rows.length);
+									for (var k = 0; k < nowfields.length; k++) {
+										var cell = row.insertCell(k);
+										cell.innerHTML = nowfields[k].fieldname=="role"?data.shopinfoMap[i]["rolename"]: nowfields[k].fieldname=="vid"?data.shopinfoMap[i]["venuename"]?data.shopinfoMap[i]["venuename"]:"暂无所属拳馆":dataarr[i][nowfields[k].fieldname];
+
+									}
+									var optcell = row.insertCell(nowfields.length);
+									
+									
+									
+									if(manager.type==1||manager.type==2){
+										optcell.innerHTML = "<input type='image' src='../assets/img/bianji.png' id='bianji"+i+"'  value='' onclick='edit("+ i + ","  + data.shopinfoMap[i].shopid + ")'>" +
+//										"&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/xiangqing.png' id='xiangqing"+i+"' onclick='detail(" + data.shopinfoMap[i].id + ")'>" +
+										"&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/shanchu.png' id='shanchu"+i+"' value='' onclick='del(" + data.shopinfoMap[i].shopid + "," + table1.rows.length + ")'>"+
+										"&nbsp;&nbsp;&nbsp;<button style='border-radius:20px;width:70px;heigth:50px;' class='btn btn-primary' onclick='buy(" + data.shopinfoMap[i].shopid + ")'>购买</button>";
+									}else{
+										
+										optcell.innerHTML = "<input type='image' src='../assets/img/bianji.png' id='bianji"+i+"'  value='' onclick='edit("+ i + ","  + data.shopinfoMap[i].shopid + ")'>" +
+//										"&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/xiangqing.png' id='xiangqing"+i+"' onclick='detail(" + data.shopinfoMap[i].id + ")'>" +
+										"&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/shanchu.png' id='shanchu"+i+"' value='' onclick='del(" + data.shopinfoMap[i].shopid + "," + table1.rows.length + ")'>";
+									}
+							   }
+							}
+							maxpage = Math.ceil(data.respVo.resultDesc / count);
+							document.getElementById('pagelab').value = page;
+							//设置分页
+							var first=$(".page>div>div:nth-child(1)");
+							var prev=$(".page>div>div:nth-child(2)");
+							var next=$(".page>div>div:nth-child(3)");
+							var last=$(".page>div>div:nth-child(4)");
+							if(page>1){
+								first.attr("class","blue")
+							}else{
+								first.attr("class","gray")
+							}
+							if(page>1){
+								prev.attr("class","blue")
+							}else{
+								prev.attr("class","gray")
+							}
+							if(page<maxpage){
+								next.attr("class","blue")
+							}else{
+								next.attr("class","gray")
+							}
+							if(page<maxpage){
+								last.attr("class","blue")
+							}else{
+								last.attr("class","gray")
+							}
+                        }else{
+						    alert(data.respVo.resultDesc);
+						}
+					},
+					error: function(err) {
+//						alert("err:" + err);
+					}
+				});
+				
+
+			}
+
+			function pageKeyUpHandler(evt) {
+				if (evt.keyCode == 13) {
+					initTable(parseInt(document.getElementById("pagelab").value), true);
+				}
+			}
+			//删除
+			function del(idx, tabidx, delurl = "") {
+					if (delable1 == 0) {
+						return;
+					}
+//					alert(idx);
+//					var url = "http://" + localhost + ":8080/fkds1.5.tools/shopinfo/delShopInfo.action?shopid="+idx;
+//					if (delurl != undefined && delurl.length > 0) {
+//						url = delurl;
+//					}
+					 var users=new Object();
+               		 users.index=idx;
+               		 var datajson=JSON.stringify(users);
+					$.ajax({
+						 type: "post",
+	                    contentType: "application/x-www-form-urlencoded",
+	                    url: "http://" + url1 + ":6078/delshopdata",
+	                    data:datajson,
+	                    dataType:"json",
+						success: function(data) {
+							if(data.resultCode==0){
+								if (window.sessionStorage) {
+								sessionStorage.setItem("deleteId", idx);
+//								sessionStorage.setItem("delurl", url);
+								} else {
+									Cookie.write("deleteId", idx);
+	//								Cookie.write("delurl", url);
+								}
+								mizhu.alert('', '删除成功','iconfont-gou');    
+	                            cancel_shield();
+								init();
+							}
+							
+							
+//							init();
+						},
+						error: function(err) {
+								alert("err:" + err);
+						}
+					});
+				
+			}
+			//查询
+			function inquiry() {
+				//				initFields();
+				page = 1;
+				document.getElementById('pagelab').value = page;
+				if (window.sessionStorage) {
+					sessionStorage.setItem("shop_page", page);
+				} else {
+					Cookie.write("shop_page", page);
+				}
+				$.ajax({
+					type: "get",
+					contentType: "application/xml",
+					url: "http://" + localhost + ":8080/fkds1.5.tools/shopinfo/getShopInfoByName.action?shop_name=" + document.getElementById('rolename').value + "&page=1&count=10",
+					success: function(data) {
+						res = jQuery.parseJSON(data);
+						var table1 = document.getElementById('tbl');
+						dataarr = [];
+						while (table1.rows.length > 1) {
+							table1.deleteRow(1);
+						}
+						var delid = -1;
+						var delurl = "";
+						if (window.sessionStorage) {
+							delid = sessionStorage.getItem("deleteId");
+							delurl = sessionStorage.getItem("delurl");
+						} else {
+							delid = Cookie.read("deleteId");
+							delurl = Cookie.read("delurl");
+						}
+						for (var i = 0; i < res.res.length; i++) {
+							dataarr.push(res.res[i]);
+							var row = table1.insertRow(table1.rows.length);
+							for (var k = 0; k < fields.length; k++) {
+								var cell = row.insertCell(k);
+								cell.innerHTML = res.res[i][fields[k].fieldname];
+								if(fields[k].fieldname=="image_name"){
+									
+										cell.innerHTML='<img src="'+"http://120.77.34.195:8080/fkds1.5.tools/upload"+res.res[i].image_name+'">'
+									}
+							}
+							//操作
+							var optcell = row.insertCell(fields.length);
+							if (res.res[i].state == 0) {
+								optcell.innerHTML = '审核中......';
+							} else if (res.res[i].state == 1) {
+								optcell.innerHTML = "<input type='image' src='../assets/img/bianji.png' id='bianji" + i + "' onmousemove='isdisadd(this)' onmouseout='isdisout(this)' onclick='edit(" + res.res[i].shopid + ")'>" +
+//									"&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/mubiao.png' onclick='shuxing(" + res.res[i].shopid + ")'>" +
+									"&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/shanchu.png' id='shanchu" + i + "' onmousemove='isdisadd(this)' onmouseout='isdisout(this)' onclick='del(" + res.res[i].shopid + "," + table1.rows.length + ")'>";
+							} else if (res.res[i].state == -1) {
+								optcell.innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;审核未通过......&nbsp;&nbsp;<input type='image' id='shanchu" + i + "' src='../assets/img/shanchu.png' onmousemove='isdisadd(this)' onmouseout='isdisout(this)' onclick='del(" + res.res[i].id + "," + table1.rows.length + ")'>";
+							}
+							if (res.res[i].id + "" == delid + "") {
+								optcell.innerHTML = '已删除同步中...';
+							}
+						}
+					},
+					error: function(err) {
+						//						alert("err:" + err);
+					}
+				});
+			}
+			//编辑
+			function edit(idx,id) {
+				//console.log(dataarr[idx]);
+//				document.getElementById("tupian").style.display="block";
+//	        	document.getElementById("tupian1").style.display="none";
+				if(dataarr[idx].itemtype=="2"){
+					document.getElementById('sijiao').style.display="";
+					document.getElementById('exnum').style.display="";
+					document.getElementById('time').style.display="none";
+					
+				}
+				else if(dataarr[idx].itemtype=="3"){
+					document.getElementById('time').style.display="";
+					document.getElementById('exnum').style.display="none";
+					document.getElementById('sijiao').style.display="none";
+					document.getElementById('exnum').style.display="none";
+				}
+				else{
+					document.getElementById('time').style.display="none";
+					document.getElementById('sijiao').style.display="none";
+				}
+				if (updateable1 == 0) {
+					return;
+				}
+				var s = document.getElementById("test");
+				s.style.display = "block";
+				var l = document.getElementById("log_window");
+				l.style.display = "block";
+				var select2 = document.getElementById("markidSelect");
+				var cbidx = dataarr[idx].marketid;
+				while (select2.options.length > 0) {
+					select2.remove(0);
+				}
+				for (var i = 0; i < arrMarkid.length; i++) {
+					select2.options.add(new Option(arrMarkid[i].id + "、" + arrMarkid[i].name));
+					if (cbidx == arrMarkid[i].id) {
+						select2.selectedIndex = i;
+					}
+				}
+				var item = dataarr[idx].itemtype;
+				var temptypes = item.split(",");
+				
+//				var goods = document.getElementsByName("goods");
+//				goods[0].checked = false;
+//				goods[1].checked = false;
+//				goods[2].checked = false;
+//				if(temptypes.indexOf("1") == -1){
+//					goods[0].checked = true;
+//					document.getElementById("koubei").disabled="disabled";
+//				}
+//				if(temptypes.indexOf("2") == -1){
+//					goods[1].checked = true;
+//					document.getElementById("koubei").disabled="";
+//				}
+//				if(temptypes.indexOf("3") == -1){
+//					goods[2].checked = true;
+//					document.getElementById("koubei").disabled="disabled";
+//				}
+//				$('input[type=radio][name=goods]').change(function() {
+//			        if (this.value == '2') {
+//			           document.getElementById("koubei").disabled="";
+//			        }
+//			        else{
+//			            document.getElementById("koubei").disabled="disabled";
+//			        }
+//			    });
+//				isenable();
+                iteminfo(dataarr[idx].iteminfo);
+				currentIndex = id;
+				getObj('shopidtxt').value = dataarr[idx].shopid;
+				getObj('mainInfo_texttxt').value = dataarr[idx].mainInfo_text;
+				getObj('shop_nametxt').value = dataarr[idx].itemtype;
+				getObj('shop_texttxt').value = dataarr[idx].shop_text;
+				getObj('exchange_numtxt').value = dataarr[idx].exchange_num;
+				getObj('pricetxt').value = dataarr[idx].price;
+				getObj('exnuminfo').value = dataarr[idx].gamepoint;
+//				getObj('start_timetxt').value = dataarr[idx].start_time;
+//				getObj('end_timetxt').value = dataarr[idx].end_time;
+//				getObj('note1_texttxt').value = dataarr[idx].note1_text;
+//				getObj('diamondtxt').value = dataarr[idx].diamond;
+//				getObj('timestamptxt').value = dataarr[idx].timestamp;
+//				getObj('image_urltxt').value = dataarr[idx].image_url;
+//				getObj('tupiantxt').value = dataarr[idx].image_name;
+				//            getObj('image_nametxt').value = dataarr[idx].image_name;
+//				pathName = dataarr[idx].image_name;
+			}
+			//判断是否可以修改			
+			function isenable() {
+				$.ajax({
+					type: "get",
+					url: "http://" + localhost + ":8080/fkds1.5.tools/permission/getPermissionFieldByRid.action?rid=1",
+					contentType: "application/xml",
+					success: function(data) {
+						res = jQuery.parseJSON(data);
+						temp = [];
+						for (var i = 0; i < res.res.length; i++) {
+							temp.push(res.res[i]);
+						}
+						for (var i = 0; i < temp.length; i++) {
+							if ("图 片 路 径" == temp[i].name && 23 == temp[i].smdid) {
+								isindex = i;
+							}
+						}
+						if (1 == temp[isindex].enable) {
+							return getObj('image_urltxt').disabled = 'disabled';
+						} else if (0 == temp[isindex].enable) {
+							return getObj('image_urltxt').disabled = '';
+						}
+					}
+				});
+			}
+
+			function getObj(objid) {
+				return document.getElementById(objid);
+			}
+			//关闭弹出的div
+			function cancel_shield() {
+				var s = document.getElementById("test");
+				s.style.display = "none";
+				var l = document.getElementById("log_window");
+				l.style.display = "none";
+				var l2 = document.getElementById("log_window2");
+				l2.style.display = "none";
+				var objToolTip = document.getElementById("mytooltip");
+				objToolTip.innerText = "";
+			}
+			//新增
+			//取不到数据时弹出加载图标
+			function add1() {
+//			document.getElementById("tupian").style.display="none";
+//      	document.getElementById("tupian1").style.display="";
+				
+				if (addable1 == 0) {
+					return;
+				}
+				currentIndex = -1;
+				var s = document.getElementById("test");
+				s.style.display = "block";
+				var l = document.getElementById("log_window");
+				l.style.display = "block";
+				var select2 = document.getElementById("markidSelect");
+				while (select2.options.length > 0) {
+					select2.remove(0);
+				}
+				for (var i = 0; i < arrMarkid.length; i++) {
+					select2.options.add(new Option(arrMarkid[i].id + "、" + arrMarkid[i].name));
+				}
+				if(document.getElementById('shop_nametxt').value=="2"){
+					document.getElementById('sijiao').style.display="";
+					document.getElementById('time').style.display="none";
+				}
+				else if(document.getElementById('shop_nametxt').value=="3"){
+					document.getElementById('time').style.display="";
+					document.getElementById('sijiao').style.display="none";
+				}
+				else{
+					document.getElementById('sijiao').style.display="none";
+					document.getElementById('time').style.display="none";
+				}
+//				$('input[type=radio][name=goods]').change(function() {
+//			        if (this.value == '2') {
+//			           document.getElementById("koubei").disabled="";
+//			        }
+//			        else{
+//			            document.getElementById("koubei").disabled="disabled";
+//			        }
+//			    });
+//				
+//				if(role>2){
+//	        		document.getElementById('auditortxt').disabled="disabled";
+//	        		document.getElementById('auditortxt').placeholder="默认审核人审核";
+//	        		}
+//					else{
+//					 document.getElementById('auditortxt').disabled="";
+//					 document.getElementById('auditortxt').placeholder="请勾选审核人";
+//				}
+				
+				document.getElementById('shopidtxt').value = '';
+				//            document.getElementById('markidSelect').value = '';
+				document.getElementById('mainInfo_texttxt').value = '';
+				document.getElementById('shop_nametxt').value = '';
+				document.getElementById('shop_texttxt').value = '';
+				document.getElementById('exchange_numtxt').value = '';
+				document.getElementById('pricetxt').value = '';
+				document.getElementById('itemin').value = '12';
+//				document.getElementById('start_timetxt').value = '';
+//				document.getElementById('end_timetxt').value = '';
+//				document.getElementById('image_nametxt').value = '';
+//				document.getElementById('image_nametxt').disabled = '';
+//				document.getElementById('image_urltxt').value = '';
+//				document.getElementById('note1_texttxt').value = '';
+//				document.getElementById('auditortxt').value = '';
+				pathName = "";
+			}
+
+			//获取私教
+			function iteminfo(id){
+                var obj=new Object();
+                obj.vid=document.getElementById('markidSelect').value.split("、")[0];
+                var datajson=JSON.stringify(obj);
+                $.ajax({
+                    type: "post",
+                    contentType:"application/x-www-form-urlencoded",
+                    data:datajson,
+                    dataType:"json",
+                    url:"http://" + url1 + ":6078/backstagegetusercoachbyvid",
+                    success: function(data) {
+                        var select3 = getObj("iteminfo");
+                        while (select3.options.length > 0) {
+                            select3.remove(0);
+                        }
+                        for (var i = 0; i < data.UserMap.length; i++) {
+                           // console.log(data.UserMap[i].id+":"+id);
+                            if(parseInt(data.UserMap[i].id)==parseInt(id)){
+                                select3.options.add(new Option(data.UserMap[i].id + "、" + data.UserMap[i].name+ "-" + data.UserMap[i].nickname,data.UserMap[i].id + "、" + data.UserMap[i].name+ "-" + data.UserMap[i].nickname,true,true));
+							}else{
+                                select3.options.add(new Option(data.UserMap[i].id + "、" + data.UserMap[i].name+ "-" + data.UserMap[i].nickname));
+							}
+
+                        }
+
+
+                    },
+                    error: function(err) {
+                       // alert("失败")
+                        //						alert("err:" + err);
+                    }
+                })
+			}
+
+
+			function selectcard(){
+				
+				if(document.getElementById('shop_nametxt').value=="2"){
+					var obj=new Object();
+					obj.vid=document.getElementById('markidSelect').value.split("、")[0];
+	                var datajson=JSON.stringify(obj);
+					$.ajax({
+	                    type: "post",
+	                    contentType:"application/x-www-form-urlencoded",
+	                    data:datajson,
+	                    dataType:"json",
+	                    url:"http://" + url1 + ":6078/backstagegetusercoachbyvid",
+	                    success: function(data) {
+//								console.log(data.UserMap)
+								console.log(data.UserMap[0].userpropertymap)
+							var select3 = document.getElementById("iteminfo");
+							while (select3.options.length > 0) {
+								select3.remove(0);
+							}
+							for (var i = 0; i < data.UserMap.length; i++) {
+								select3.options.add(new Option(data.UserMap[i].id + "、" + data.UserMap[i].name+ "-" + data.UserMap[i].nickname));
+							}
+						 
+						},
+						error: function(err) {
+							//alert("失败")
+							//						alert("err:" + err);
+						}
+	                 })
+					
+					document.getElementById('sijiao').style.display="";
+					document.getElementById('exnum').style.display="";
+					document.getElementById('time').style.display="none"
+				}
+				else if(document.getElementById('shop_nametxt').value=="3"){
+					document.getElementById('time').style.display="";
+					document.getElementById('exnum').style.display="none";
+					document.getElementById('sijiao').style.display="none"
+					
+				}
+				else{
+					document.getElementById('sijiao').style.display="none"
+					document.getElementById('exnum').style.display="none";
+					document.getElementById('time').style.display="none"
+				}
+			}
+
+			function onSavebtnClickHandler() {
+//				var tmppath = pathName;
+//				if (tmppath.length == 0) {
+//					if (document.getElementById("image_nametxt").name.indexOf("/") < 0) {
+//						tmppath = "/" + subpath + "/" + document.getElementById("image_nametxt").name;
+//					} else {
+//						tmppath = document.getElementById("image_nametxt").name;
+//					}
+//				}
+				var markid = document.getElementById('markidSelect').value.split("、")[0];
+				var markid1 = document.getElementById('markidSelect').value.split("、")[1];
+//				var goods = document.getElementsByName("goods");
+//				var cbv = [];
+//				for(var i = 0;i<goods.length;i++){
+//					if(goods[i].checked == true){
+//						cbv[i] = i+1;
+//					}
+//				}
+//				var itemtype = cbv.join(",");
+//				console.log(itemtype)
+				if(checkgoodname()  && checkdescription() && checknum() && checkprice()){
+					
+				
+				var urls;
+				if (currentIndex >= 0) {
+						
+						var obj=new Object();
+						if(document.getElementById('shop_nametxt').value=="2"){
+							obj.iteminfo=document.getElementById('iteminfo').value.split("、")[0];
+							obj.gamepoint=document.getElementById('exnuminfo').value;
+						}
+						else if(document.getElementById('shop_nametxt').value=="3"){
+							obj.iteminfo=document.getElementById('itemin').value;
+						}
+						obj.shopid=currentIndex,
+						obj.marketid=markid,
+						obj.mainInfo_text=document.getElementById('mainInfo_texttxt').value,
+						obj.itemtype=document.getElementById('shop_nametxt').value,
+						obj.shop_text=document.getElementById('shop_texttxt').value,
+						obj.exchange_num=document.getElementById('exchange_numtxt').value,
+						obj.price=document.getElementById('pricetxt').value,
+//						obj.iteminfo=document.getElementById('iteminfo').value.split("、")[0];
+						obj.image_name="1",
+						obj.image_url="1",
+						obj.purpose="1",
+//						obj.iteminfo="1",
+//						obj.gamepoint=document.getElementById('exnuminfo').value,
+						datajson=JSON.stringify(obj);
+						urls="http://" + url1 + ":6078/modifyshopdata";
+                    console.log(datajson);
+//					url = "http://" + localhost + ":8080/fkds1.5.tools/shopinfo/updateShopInfo.action?shopid=" + dataarr[currentIndex].shopid +
+//						"&marketid=" + markid +
+//						"&mainInfo_text=" + document.getElementById('mainInfo_texttxt').value +
+//						"&shop_name=" + document.getElementById('shop_nametxt').value +
+//						"&shop_text=" + document.getElementById('shop_texttxt').value +
+//						"&exchange_num=" + document.getElementById('exchange_numtxt').value +
+//						"&price=" + document.getElementById('pricetxt').value +
+//						"&start_time=" + document.getElementById('start_timetxt').value +
+//						"&end_time=" + document.getElementById('end_timetxt').value +
+//						"&image_name=" + tmppath +
+//						"&image_url=" + document.getElementById('image_urltxt').value +
+//						"&note1_text=" + document.getElementById('note1_texttxt').value +
+//						"&itemtype=" + itemtype +
+//						"&mgrid=" + mgrid +
+//						"&sendto=" + sendto;
+				} else {
+						var obj=new Object();
+						//console.log(document.getElementById('iteminfo').value);
+						if(document.getElementById('shop_nametxt').value=="2"){
+							obj.iteminfo=document.getElementById('iteminfo').value.split("、")[0];
+							obj.gamepoint=document.getElementById('exnuminfo').value;
+						}
+						else if(document.getElementById('shop_nametxt').value=="3"){
+							obj.iteminfo=document.getElementById('itemin').value;
+						}
+						obj.marketid=markid,
+						obj.mainInfo_text=document.getElementById('mainInfo_texttxt').value,
+						obj.itemtype=document.getElementById('shop_nametxt').value,
+						obj.shop_text=document.getElementById('shop_texttxt').value,
+						obj.exchange_num=document.getElementById('exchange_numtxt').value,
+						obj.price=document.getElementById('pricetxt').value,
+						
+//						obj.iteminfo=document.getElementById('iteminfo').value.split("、")[0];
+					
+						
+						obj.image_name="1",
+						obj.image_url="1",
+						obj.purpose="1",
+//						obj.iteminfo="1",
+//						obj.gamepoint=document.getElementById('exnuminfo').value,
+						datajson=JSON.stringify(obj);
+						urls="http://" + url1 + ":6078/addshopdata";
+                    console.log(datajson);
+//					url = "http://" + localhost + ":8080/fkds1.5.tools/shopinfo/addShopInfo.action?" +
+//						"marketid=" + markid +
+//						"&mainInfo_text=" + document.getElementById('mainInfo_texttxt').value +
+//						"&shop_name=" + document.getElementById('shop_nametxt').value +
+//						"&shop_text=" + document.getElementById('shop_texttxt').value +
+//						"&exchange_num=" + document.getElementById('exchange_numtxt').value +
+//						"&price=" + document.getElementById('pricetxt').value +
+//						"&start_time=" + document.getElementById('start_timetxt').value +
+//						"&end_time=" + document.getElementById('end_timetxt').value +
+//						"&image_name=" + tmppath +
+//						"&image_url=" + document.getElementById('image_urltxt').value +
+//						"&note1_text=" + document.getElementById('note1_texttxt').value +
+//						"&itemtype=" + itemtype +
+//						"&mgrid=" + mgrid +
+//						"&sendto=" + sendto;
+				}
+
+				//alert(url);
+				$.ajax({
+					type: "post",
+                    contentType:"application/x-www-form-urlencoded",
+                    data:datajson,
+                    dataType:"json",
+                    url:urls,
+					success: function(data) {
+						if(data.resultCode==0){
+							mizhu.alert('', '保存成功','iconfont-gou');
+                            cancel_shield();
+							init();
+						}else{
+							mizhu.alert('', '保存失败:'+data.resultDesc,'iconfont-close');
+							init();
+						}
+					},
+					error: function(err) {
+						//alert("err:" + err);
+					}
+				});
+			}else{
+				mizhu.alert('', '请正确完善信息','iconfont-close');
+			}
+				}
+			
+			//购买
+			function buy(idx){
+//				alert(idx);
+				shopid=idx;
+				$("#myModal").modal("show");
+						            //绑定会员查询
+	            $("#username").bind('input porpertychange',function(){
+	            	
+	                var obj=new Object();
+	                obj.name=$(this).val();
+	                var datajson=JSON.stringify(obj);
+	                $.ajax({
+	                    type: "post",
+	                    contentType:"application/x-www-form-urlencoded",
+	                    data:datajson,
+	                    dataType:"json",
+	                    url:"http://" + url1 + ":6078/getuserbyname",
+	                    success: function (res) {
+	                        //console.log(res.UserMap);
+	                        
+	                        var html="";
+	                        for(var u of res.UserMap){
+	                            html+=`<li>
+											<div class="search-item" title="${u.id}">${u.nickname}_${u.name}</div>
+									   </li>`
+									   
+	                        }
+	                        if(obj.name==""){
+	                            $("#userlist").hide();
+	                            $("#userlist").css({
+	                                "height":""
+	                            });
+	                        }else{
+	                            $("#userlist").html(html).show();
+	                            var height=$("#userlist").height();
+	                            //console.log(height);
+	                            if(height>120){
+	                                $("#userlist").css({
+	                                    "height":"120px",
+	                                    "overflow-y":"scroll"
+	                                });
+	                            }else{
+	                                $("#userlist").css({
+	                                    "height":""
+	                                });
+	                            }
+	                            $("#userlist").on("click","li",function(){
+	                                //console.log($(this).children().html());
+	                                var text=$(this).children().html();
+	                                var title=$(this).children().attr("title");
+	                                $("#username").attr("data",title);
+	                                $("#username").val(text);
+	                                $("#userlist").hide();
+//	                                $("#username1").find("option[value='1']").attr("selected",true);
+	                                selectcards();
+	                            })
+	                        }
+	
+	                    },
+	                    error: function (err) {
+	                        alert("err:" + err);
+	                    }
+	                });
+	
+	            });
+			}
+			var arr=[];
+			function selectcards(){
+//				alert($('#username1 option:selected').index());
+				if($("#username1").val()==2){
+					var userid=document.getElementById("username").getAttribute("data");
+				  	if(userid==null){
+						alert("请选会员!");
+//						$('#username1 options')[0].selected="selected";
+						$("#username1").find("option[value='1']").attr("selected",true);
+//						alert();
+						return;
+					}
+				  	 var obj=new Object();
+					obj.uid=userid;
+					obj.page=1;
+					obj.count=count;
+	            	var datajson=JSON.stringify(obj);		      		    
+				    $.ajax({
+				      type: "post",
+				      url: "http://" + url1 + ":6078/backstagegetcardsbyuid",
+				      contentType: "application/x-www-form-urlencoded",
+				      data:datajson,
+				      dataType: "json",
+				      success: function (data) {
+				        if (data.respVo.resultCode==0) {
+				        	   $("#username2").empty();
+//					          $("#username2").append('<option selected="selected" disabled="disabled"  style="display: none" value="">请选择会员卡</option>');
+					
+					//           $("#username2").append('<option>请选择</option>');
+					          var i = 0;
+					          for (var v in data.cardmap) {
+//					             if (data.cardmap[v].type == 1) {
+//					               $("#username2").append('<option>年卡</option>');
+//					               arr["年卡"] = data.cardmap[v];
+//					             }
+//					            if (data.cardmap[v].type == 2) {
+//					              $("#username2").append('<option>次卡</option>');
+//					              arr["次卡"] = data.cardmap[v];
+//					            }
+					             if (data.cardmap[v].type == 3){
+					               $("#username2").append('<option>储值卡.余额:'+data.cardmap[v].balance+'</option>');
+					               arr["余额卡"] = data.cardmap[v];
+					               cid=data.cardmap[v].id;
+					               $("#username2").css("display","block");
+					             }else{
+//					             	alert("您当前没有储值卡!请用现金或者购买储值卡");
+					             	
+					             }
+					
+					            // console.log(data.cardmap[v].type)
+					          }
+				         	
+				        }
+				        else {
+//				          alert("当前没有绑定任何卡!");
+				          cid=null;
+				          $("#username2").css("display","none");
+				          return;
+//				          $("#username1").find("option[value='1']").attr("selected",true);
+				        }
+				        //  获取次卡
+//			        $("#username2").change(function () {
+//			          $("#xinxixianshi").empty();
+//			          if ($('#username2 option:selected').val() == '次卡') {
+//			            console.log("次卡")
+//			
+//			            $("#xinxixianshi").append("<div>剩余次数：" + arr[$(this).val()].tcount + "</div>");
+//			          }
+//			          var timeStamp = new Date(parseInt(arr[$(this).val()].endtime)).toLocaleString().replace(/:\d{1,2}$/, ' ')
+//			          $("#xinxixianshi").append("<div>到期时间：" + timeStamp + "</div>");
+//			          if ($('#username2 option:selected').val() == '余额卡') {
+//			            console.log("余额卡")
+//			
+//			            $("#xinxixianshi").append("<div>余额：" + arr[$(this).val()].balance + "</div>");
+//			          }
+//			
+//			          if ($('#username2 option:selected').val() == '年卡') {
+//			            var time = new Date(parseInt(arr[$(this).val()].endtime)).toLocaleString().replace(/:\d{1,2}$/, ' ')
+//			            $("#xinxixianshi").append("<div>到期时间：" + time + "</div>");
+//			            console.log("年卡")
+//			          }
+//			
+//			        });
+				      },
+				      error: function (err) {
+				        alert("err:" + err);
+				      }
+				    });
+					
+				}else{
+					$("#username2").css("display","none")
+				}
+				
+			}
+			//确认购买
+		function ceshi() {
+			var userid=document.getElementById("username").getAttribute("data");
+		  	if(userid==null){
+				alert("请选会员!");
+				$("#username1").find("option[value='1']").attr("selected",true);
+				return;
+			}
+//		  	console.log($('#username2 option:selected').index());
+		  	
+//		  	alert(userid);
+//		  	alert(arr[$('#username2 option:selected').val()].id);
+			console.log(arr);
+		  	if($("#username1").val()==2){
+		  		if(cid==null){
+					alert("当前没有储值卡!请用现金或者购买储值卡");
+//					window.location="index.html";
+					return;
+				}
+		  			var obj=new Object();
+					obj.uid=userid;
+					obj.shopid=shopid;
+					obj.cid=cid;
+					obj.mgrid=mgrid;
+            		var datajson=JSON.stringify(obj);		      		    
+				    $.ajax({
+				      type: "post",
+				      url: "http://" + url1 + ":6078/exchangeshop",
+				      contentType: "application/x-www-form-urlencoded",
+				      data:datajson,
+				      dataType: "json",
+				      success: function (data) {
+				        if (data.resultCode==0) {
+				        	alert("购买成功!");
+				         	window.location="index.html";
+				        }
+				        else {
+				          alert(data.resultDesc);
+				          window.location="index.html";
+				        }
+				      },
+				      error: function (err) {
+				        alert("err:" + err);
+				      }
+				    });
+		  	}else{
+		  		var obj=new Object();
+					obj.uid=userid;
+					obj.shopid=shopid;
+					obj.mgrid=mgrid;
+            		var datajson=JSON.stringify(obj);		      		    
+				    $.ajax({
+				      type: "post",
+				      url: "http://" + url1 + ":6078/cashexchangeshop",
+				      contentType: "application/x-www-form-urlencoded",
+				      data:datajson,
+				      dataType: "json",
+				      success: function (data) {
+				        if (data.resultCode==0) {
+				        	alert("购买成功!");
+				         	window.location="index.html";
+				        }
+				        else {
+				          alert(data.resultDesc);
+				          window.location="index.html";
+				        }
+				      },
+				      error: function (err) {
+				        alert("err:" + err);
+				      }
+				    });
+		  	}
+		 
+		  }
+			
+		
+
+			//图片上传
+			function upload() {
+				
+					var formData = new FormData();
+				formData.append("file", document.getElementById("image_nametxt").files[0]);
+				$.ajax({
+					url: "http://" + localhost + ":8080/fkds1.5.tools/FileServlet?dir=" + subpath,
+					type: "POST",
+					data: formData,
+					contentType: false,
+					processData: false,
+					success: function(data) {
+						pathName = "/" + subpath + "/" + document.getElementById("image_nametxt").files[0].name;
+						alert("上传成功！");
+						document.getElementById("image_nametxtinfo").style.display = "";
+                   		document.getElementById("image_nametxtinfo").className = "ok";
+                    	document.getElementById("image_nametxt").style.border = "";
+						
+					},
+					error: function() {
+						alert("上传失败！");
+					}
+				});
+				
+//				checkphoto();
+			}
+			//        function testTxt(idtxt) {
+			//            var objToolTip = document.getElementById("mytooltip") ;
+			//            var left=getAbsoluteLeft(idtxt);
+			//            var top=getAbsoluteTop(idtxt);
+			//            var str = document.getElementById(idtxt).value;
+			//            if (str.length == 0){
+			//                objToolTip.style = "display:block;color:red;position: absolute;left: "+left+"px;top: "+(top+10)+"px;z-index: 4";
+			//                objToolTip.innerText = "该字段不能为空";
+			//                return;
+			//            }
+			//
+			//        }
+			//
+			//        function testNum(idtxt){
+			//            var objToolTip = document.getElementById("mytooltip") ;
+			//            var left=getAbsoluteLeft(idtxt);
+			//            var top=getAbsoluteTop(idtxt);
+			//            var str = document.getElementById(idtxt).value;
+			//            var reg = /^[0-9]*$/;
+			//            if (str.length == 0){
+			//                objToolTip.style = "display:block;color:red;position: absolute;left: "+left+"px;top: "+(top+10)+"px;z-index: 4";
+			//                objToolTip.innerText = "该字段不能为空";
+			//                return;
+			//            }
+			//            if (!reg.test(str)) {
+			//                objToolTip.style = "display:block;color:red;position: absolute;left: " + left + "px;top: " + (top + 10) + "px;z-index: 4";
+			//                objToolTip.innerText = "该字段只能是数字";
+			//                return;
+			//            }
+			//
+			//        }
+			function shuxing(id) {
+				if (window.localStorage) {
+					localStorage.setItem("qid", id);
+				} else {
+					Cookie.write("qid", id);
+				}
+				window.location = "type.html";
+			}
+			//      function check() {
+			//
+			//          var l = document.getElementById("log_window2");
+			//          l.style.display = "block";
+			//
+			//          var url = "http://"+localhost+":8080/fkds1.5.tools/systemManager/getManagerByMid.action?page=1&count=9999&mid=" +mid;
+			////            alert(url)
+			//          $.ajax({
+			//              type: "get",
+			//              contextType: "application/xml",
+			//              url:url ,
+			//              success: function (data) {
+			////                    alert(data)
+			//                  var res = jQuery.parseJSON(data);
+			//                  var chb = document.getElementById('pp');
+			//
+			//
+			//                  arrCheckbox = [];
+			//                  for (var i=0;i<res.res.length;i++) {
+			//                      arrCheckbox.push(res.res[i]);
+			//                  }
+			//
+			//
+			//                  while(chb.hasChildNodes()) {
+			//                      chb.removeChild(chb.firstChild);
+			//                  }
+			//
+			//                  for (var i = 1;i <= arrCheckbox.length; i ++ ){
+			//
+			//                      checkbox = document.createElement('input');
+			//                      var br = document.createElement('br');
+			//                      checkbox.setAttribute("type","checkbox");
+			//                      checkbox.setAttribute("index",i);
+			//                      cbcomps.push(checkbox);
+			//                      var myText=document.createTextNode(arrCheckbox[i].id);
+			//
+			//                      chb.appendChild(checkbox);
+			//                      chb.appendChild(myText);
+			//                      if (i % 5 == 0){
+			//                          chb.appendChild(br);
+			//                      }
+			//                  }
+			//              },
+			//              error: function (err) {
+			//                  alert("err:"+err);
+			//              }
+			//          });
+			//      }
+			//关闭弹出的div
+			function cancel_shield2() {
+				var l = document.getElementById("log_window2");
+				l.style.display = "none";
+			}
+			$(function() {
+				console.log($("pp").scrollLeft());
+			});
+
+			function confimbtn() {
+				idsarr = [];
+				namesarr = [];
+				for (var i = 0; i < cbcomps.length; i++) {
+					var cb = cbcomps[i];
+					index = parseInt(cb.getAttribute("index"));
+					if (cb.checked) {
+						idsarr.push(arrCheckbox[index].id);
+						namesarr.push(arrCheckbox[index].name);
+					}
+				}
+				sendto = idsarr.toString();
+				document.getElementById('auditortxt').value = namesarr.toString();
+				var l = document.getElementById("log_window2");
+				l.style.display = "none";
+//				checkauditor();
+//				isdisabled();
+			}
+
+			function quxiaobtn() {
+				var l = document.getElementById("log_window2");
+				l.style.display = "none";
+			}
+			//审核人
+			function check() {
+				var l = document.getElementById("log_window2");
+				l.style.display = "block";
+				var url = "http://" + localhost + ":8080/fkds1.5.tools/systemManager/getManagerByMid.action?page=1&count=9999&mid=" + mid;
+				$.ajax({
+					type: "get",
+					contextType: "application/xml",
+					url: url,
+					success: function(data) {
+						var res = jQuery.parseJSON(data);
+						var chb = document.getElementById('pp');
+						//清空数组
+						arrCheckbox = [];
+						for (var i = 0; i < res.res.length; i++) {
+							arrCheckbox.push(res.res[i]);
+						}
+						//循环之前删除主键
+						while (chb.hasChildNodes()) {
+							chb.removeChild(chb.firstChild);
+						}
+						for (var i = 0; i <= arrCheckbox.length; i++) {
+							checkbox = document.createElement('input');
+							var br = document.createElement('br');
+							checkbox.setAttribute("type", "checkbox");
+							checkbox.setAttribute("index", i);
+							cbcomps.push(checkbox);
+							var myText = document.createTextNode(arrCheckbox[i].id);
+							chb.appendChild(checkbox);
+							chb.appendChild(myText);
+							if (i % 5 == 0) {
+								chb.appendChild(br);
+							}
+						}
+					},
+					error: function(err) {
+						//						alert("err:" + err);
+					}
+				});
+			}
+			//验证内容
+			function showmiss1() {
+				//				document.getElementById("mainInfo_texttxtinfo").style.display = "block";
+				document.getElementById("mainInfo_texttxtinfo").style.fontSize = "12px";
+			}
+
+			function checkgoodname() {
+				var reg = /^(([\u4e00-\u9fa5])|[a-zA-Z0-9-_]|[, . ▪ · ; : '' "" 、 ! () # $ % & *^@*|\\\\<>/?\ \s*]){1,100}$/;
+				if (!reg.test(document.getElementById("mainInfo_texttxt").value)) {
+					document.getElementById("mainInfo_texttxtinfo").style.display = "block";
+					document.getElementById("mainInfo_texttxt").style.border = "1px solid red";
+					document.getElementById("mainInfo_texttxtinfo").className = "error";
+					return false;
+				} else {
+					document.getElementById("mainInfo_texttxt").style.border = "";
+					document.getElementById("mainInfo_texttxtinfo").className = "ok";
+					document.getElementById("mainInfo_texttxtinfo").style.display = "none";
+					return true;
+				}
+			}
+
+			function showmiss2() {
+				//				document.getElementById("shop_nametxtinfo").style.display = "block";
+				document.getElementById("shop_nametxtinfo").style.fontSize = "12px";
+			}
+
+			function checktitle() {
+				var reg = /^(([\u4e00-\u9fa5])|[a-zA-Z0-9-_]|[, . ; : '' "" 、 ! () # $ % & *^@*|\\\\<>/?\ \s*]){1,12}$/;
+				if (!reg.test(document.getElementById("shop_nametxt").value)) {
+					document.getElementById("shop_nametxtinfo").style.display = "block";
+					document.getElementById("shop_nametxt").style.border = "1px solid red";
+					document.getElementById("shop_nametxtinfo").className = "error";
+					return false;
+				} else {
+					document.getElementById("shop_nametxt").style.border = "";
+					document.getElementById("shop_nametxtinfo").className = "ok";
+					document.getElementById("shop_nametxtinfo").style.display = "none";
+					return true;
+				}
+			}
+
+			function showmiss3() {
+				//				document.getElementById("shop_texttxtinfo").style.display = "block";
+				document.getElementById("shop_texttxtinfo").style.fontSize = "12px";
+			}
+
+			function checkdescription() {
+				var reg = /^(([\u4e00-\u9fa5])|[a-zA-Z0-9-_]|[, . ; · : '' "" 、 ! () # $ % & *^@*|\\\\<>/?\ \s*]){1,}$/;
+				if (!reg.test(document.getElementById("shop_texttxt").value)) {
+					document.getElementById("shop_texttxtinfo").style.display = "block";
+					document.getElementById("shop_texttxt").style.border = "1px solid red";
+					document.getElementById("shop_texttxtinfo").className = "error";
+					return false;
+				} else {
+					document.getElementById("shop_texttxt").style.border = "";
+					document.getElementById("shop_texttxtinfo").className = "ok";
+					document.getElementById("shop_texttxtinfo").style.display = "none";
+					return true;
+				}
+			}
+
+			function showmiss4() {
+				//				document.getElementById("exchange_numtxtinfo").style.display = "block";
+				document.getElementById("exchange_numtxtinfo").style.fontSize = "12px";
+			}
+
+			function checknum() {
+				var reg = /^\d+$/;
+				if (!reg.test(document.getElementById("exchange_numtxt").value)) {
+					document.getElementById("exchange_numtxtinfo").style.display = "block";
+					document.getElementById("exchange_numtxt").style.border = "1px solid red";
+					document.getElementById("exchange_numtxtinfo").className = "error";
+					return false;
+				} else {
+					document.getElementById("exchange_numtxt").style.border = "";
+					document.getElementById("exchange_numtxtinfo").className = "ok";
+					document.getElementById("exchange_numtxtinfo").style.display = "none";
+					return true;
+				}
+			}
+
+			function showmiss5() {
+				//				document.getElementById("pricetxtinfo").style.display = "block";
+				document.getElementById("pricetxtinfo").style.fontSize = "12px";
+			}
+
+			function checkprice() {
+				var reg = /^\d+$/;
+				if (!reg.test(document.getElementById("pricetxt").value)) {
+					document.getElementById("pricetxtinfo").style.display = "block";
+					document.getElementById("pricetxt").style.border = "1px solid red";
+					document.getElementById("pricetxtinfo").className = "error";
+					return false;
+				} else {
+					document.getElementById("pricetxt").style.border = "";
+					document.getElementById("pricetxtinfo").className = "ok";
+					document.getElementById("pricetxtinfo").style.display = "none";
+					return true;
+				}
+			}
+			//			function checkstarttime() {
+			//				if (document.getElementById("start_timetxt").value.length == 0) {
+			//					document.getElementById("start_timetxtinfo").className = "error";
+			//					document.getElementById("start_timetxtinfo").innerHTML = "该字段不能为空";
+			//					return false;
+			//				} else {
+			//					document.getElementById("start_timetxtinfo").innerHTML = "";
+			//					return true;
+			//				}
+			//                return true;
+			//			}
+			//
+			//
+			//			function checkendtime() {
+			//				if (document.getElementById("end_timetxt").value.length == 0) {
+			//					document.getElementById("end_timetxtinfo").className = "error";
+			//					document.getElementById("end_timetxtinfo").innerHTML = "该字段不能为空";
+			//					return false;
+			//				} else {
+			//					document.getElementById("end_timetxtinfo").innerHTML = "";
+			//					return true;
+			//				}
+			//              return true;
+			//			}
+			function showmiss6() {
+								document.getElementById("image_nametxtinfo").style.display = "block";
+				document.getElementById("image_nametxtinfo").style.fontSize = "12px";
+			}
+
+			function checkphoto(obj) {
+				var width = 256;
+				var height = 256;
+				
+				
+				 checkImgPX(obj, width, height);
+              if (checkImgType(obj) && checkImgPX(obj, width, height)) {
+                  return true;
+             	 } else {
+                  return false;
+              }
+              return true;
+//				if (checkImgType(obj) && checkImgPX(obj, width, height)) {
+//					document.getElementById("image_nametxtinfo").style.display = "block";
+//					document.getElementById("image_nametxt").style.border = "1px solid green";
+//					document.getElementById("image_nametxtinfo").className = "ok";
+//					return true;
+//				} else {
+//					document.getElementById("image_nametxt").style.border = "";
+//					document.getElementById("image_nametxtinfo").className = "error";
+//					document.getElementById("image_nametxtinfo").style.display = "none";
+//					return false;
+//				}
+			}
+
+			function checkImgType(ths) {
+				
+				 if (ths.value == "") {
+//                alert("请上传图片");
+                  return false;
+              } else {
+                  if (!/\.(png|PNG)$/.test(ths.value)) {
+//                    alert("图片类型必须是.png格式");
+                      ths.value = "";
+                      return false;
+                  } else {
+                      var img = new Image();
+//                    img.src = filepath;
+                      img.src = filepath;
+                      while (true) {
+                          if (img.fileSize > 0) {
+                              if (img.fileSize > 5 * 1024) {
+                                ths.value = "";
+//                                alert("图片不大于5M");
+                                  return false;
+                              }
+                              break;
+                          }
+                      }
+                  }
+              }
+              return true;
+				
+//				if (!/\.(png|PNG)$/.test(ths.value)) {
+//					alert("图片类型必须是.png格式");
+//					ths.value = "";
+//					return false;
+//				} else {
+//					var img = new Image();
+//					img.src = filepath;
+//					while (true) {
+//						if (img.fileSize > 0) {
+//							if (img.fileSize > 5 * 1024) {
+//								alert("图片不大于5M");
+//								return false;
+//							}
+//							break;
+//						}
+//					}
+//				}
+//				return true;
+			}
+
+			function checkImgPX(ths, width, height) {
+				 var input = document.getElementById("image_nametxt");  
+//           console.log(input.files);
+             if(input.files){  
+                //读取图片数据  
+                  var f = input.files[0];  
+                  var reader = new FileReader();  
+                  reader.onload = function (e) {  
+                      var data = e.target.result;  
+                      //加载图片获取图片真实宽度和高度  
+                      var image = new Image();  
+                      image.onload=function(){  
+                          var imgwidth = image.width;  
+                          var imgheight = image.height;  
+                          
+//                        console.log(width+'======'+height+"====="+f.size+'yi');  
+                    if (imgwidth != width || imgheight != height) {
+//              
+//                alert("图的尺寸应该是" + width + "x" + height);
+                              ths.value = "";
+//                            console.log("kongkongkong");
+                    document.getElementById("image_nametxtinfo").style.display = "block";
+                    document.getElementById("image_nametxtinfo").className = "error";
+                    document.getElementById("image_nametxt").style.border = "1px solid red";
+                              return false;
+                          }
+                          return true;
+
+                      };  
+                      image.src= data;  
+                  };  
+                      reader.readAsDataURL(f);  
+                  }
+             else{
+                      var image = new Image();   
+                      image.onload =function(){  
+                          var imgwidth = image.width;  
+                          var imgheight = image.height;  
+                          var fileSize = image.fileSize;  
+//                        console.log(width+'======'+height+"====="+fileSize+'er');
+                    if (imgwidth != width || imgheight != height) {
+//              
+//                alert("图的尺寸应该是" + width + "x" + height);
+                              ths.value = "";
+                              return false;
+                          }
+                           return true;
+                      }  
+                      image.src = input.value;  
+                  }  
+             
+				
+				
+				
+
+			}
+
+
+
+			function showmiss8() {
+				//				document.getElementById("note1_texttxtinfo").style.display = "block";
+				document.getElementById("note1_texttxtinfo").style.fontSize = "12px";
+			}
+
+
+
+			function showmiss9() {
+				//				document.getElementById("diamondtxtinfo").style.display = "block";
+				document.getElementById("diamondtxtinfo").style.fontSize = "12px";
+			}
+
+			function checkdiamond() {
+				var reg = /^\d+$/;
+				if (!reg.test(document.getElementById("diamondtxt").value)) {
+					document.getElementById("diamondtxtinfo").style.display = "block";
+					document.getElementById("diamondtxt").style.border = "1px solid red";
+					document.getElementById("diamondtxtinfo").className = "error";
+					return false;
+				} else {
+					//					alert(document.getElementById("auditortxt").value.length)
+					document.getElementById("diamondtxt").style.border = "";
+					document.getElementById("diamondtxtinfo").className = "ok";
+					document.getElementById("diamondtxtinfo").style.display = "none";
+					return true;
+				}
+			}
+			
+			function showmiss10() {
+				//				document.getElementById("auditortxtinfo").style.display = "block";
+				document.getElementById("auditortxtinfo").style.fontSize = "12px";
+			}
+
+			function checkauditor() {
+				if ("none" == document.getElementById("log_window2").style.display) {
+					if (document.getElementById("auditortxt").value.length == 0) {
+						document.getElementById("auditortxtinfo").style.display = "block";
+						document.getElementById("auditortxt").style.border = "1px solid red";
+						document.getElementById("auditortxtinfo").className = "error";
+						return false;
+					} else {
+						document.getElementById("auditortxt").style.border = "";
+						document.getElementById("auditortxtinfo").className = "ok";
+						document.getElementById("auditortxtinfo").style.display = "none";
+						return true;
+					}
+				}
+				return false;
+			}
+
+			function isdisabled() {
+				if (checkgoodname()  && checkdescription() && checknum() && checkprice()) {
+					document.getElementById("saveallinfo").disabled = false;
+					document.getElementById("saveallinfo").style.cursor = "pointer";
+				} else {
+					document.getElementById("saveallinfo").disabled = true;
+					document.getElementById("saveallinfo").style.cursor = "not-allowed";
+				}
+			}
+			//查询按钮添加回车事件			
+			document.onkeydown = function(e) {
+					switch (e.keyCode) {
+						case 13:
+							if (document.getElementById("rolename") == document.activeElement) {
+								document.getElementById("chaxun").click();
+							} else {
+								initTable(parseInt(document.getElementById("pagelab").value), true);
+							}
+							break;
+					}
+				}
+				//显示提示span
+			function showmiss(th) {
+				var missspan = document.getElementsByClassName("missspan");
+				missspan[th].style.display = "block";
+			}
+			//权限增删改
+			function isdisadd(obj) {
+				var idstr = obj.id;
+				if (addable1 == 0 && idstr.indexOf("add") >= 0) {
+					document.getElementById(idstr).disabled = 'disabled';
+					document.getElementById(idstr).style.cursor = "not-allowed";
+				}
+				if (updateable1 == 0 && idstr.indexOf("bian") >= 0) {
+					document.getElementById(idstr).disabled = 'disabled';
+					document.getElementById(idstr).style.cursor = "not-allowed";
+				}
+				if (delable1 == 0 && idstr.indexOf("shan") >= 0) {
+					document.getElementById(idstr).disabled = 'disabled';
+					document.getElementById(idstr).style.cursor = "not-allowed";
+				}
+			}
+
+			function isdisout(obj) {
+				var idstr = obj.id;
+				document.getElementById(idstr).disabled = false;
+				document.getElementById(idstr).style.cursor = "pointer";
+			}
+			
+			
+		function reload1(){
+			document.getElementById("tupian").style.display="none";
+			document.getElementById("tupian1").style.display="";
+		}
+		</script>
+		<!--<script>
+			! function(e) {
+				var c = {
+						nonSecure: "8123",
+						secure: "8124"
+					},
+					t = {
+						nonSecure: "http://",
+						secure: "https://"
+					},
+					r = {
+						nonSecure: "127.0.0.1",
+						secure: "gapdebug.local.genuitec.com"
+					},
+					n = "https:" === window.location.protocol ? "secure" : "nonSecure";
+				script = e.createElement("script"), script.type = "text/javascript", script.async = !0, script.src = t[n] + r[n] + ":" + c[n] + "/codelive-assets/bundle.js", e.getElementsByTagName("head")[0].appendChild(script)
+			}(document);
+		</script>-->
+	</head>
+
+	<body onload="init()">
+		<!--&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" style="width: 200px;height:25px;border-radius: 0px" name="rolename" id="rolename" class="abc input-default" placeholder="&nbsp;按标题查询" value="" data-genuitec-lp-enabled="false"
+			data-genuitec-file-id="wc1-67" data-genuitec-path="/fkds1.5.tools/WebRoot/tools/shop/index.html">&nbsp;&nbsp;&nbsp;
+		<a href='#' onclick="inquiry()" id="chaxun" onkeyup="searchinfo(event)">
+			<image style="margin-top: 10px" src="../assets/img/chaxun.png"></image>
+		</a>&nbsp;&nbsp;&nbsp;-->
+		 <!--模态框start--> 
+		<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+		  <div class="modal-dialog" role="document">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+		          aria-hidden="true">&times;</span></button>
+		        <h4 class="modal-title" id="myModalLabel">请选择会员以及购买方式</h4>
+		      </div>
+		      <div class="modal-body" id="myModalContext" style="height:200px;">
+		      		<div style="width:40%;float:left;">
+		      			<label for="username">请选择会员</label>
+						<input type="text" id="username" class="txt" name="moduletitle" style="border-radius: 0px;width:100%"  placeholder="请输入要搜索的会员" />
+						<ul id="userlist"></ul>
+					</div>
+					<div style="width:40%;float:left;margin-left:5%;">
+						<label for="username1">请选择支付方式</label>
+						<select name="" id="username1" onchange="selectcards()">
+							<option value="1">现金</option>
+							<option value="2">储值卡</option>
+						</select><br/>
+						<select name="" id="username2" style="display:none;">
+							<!--<option value="1">现金</option>
+							<option value="2">会员卡</option>-->
+						</select>
+						<div id="xinxixianshi">
+
+       					 </div>
+					</div>
+				
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+		        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="ceshi()">确定</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+		 <!--模态框end--> 
+		 <div class="onclick m10">
+			 <a id="addnew1"  onclick="add1()" class="add2">新  增</a>
+			<select name="" id="selectState" style="height:35px; margin-bottom: 5px" onchange="changeState()">
+				<option value="0">全部</option>
+				<option value="2">私教卡</option>
+				<option value="3">时间卡</option>
+				<option value="1">商品</option>
+			</select>
+		</div>
+		<table class="table table-hover definewidth m10" id="tbl">
+			<thead id="thead">
+				<tr id="tabhead" class="theadColor">
+				</tr>
+			</thead>
+		</table>
+
+		<div class="inline pull-right page">
+			<div class="first" onclick="first()">第一页</div>
+			<div class="prev" onclick="initTable(-1)">上一页</div>
+			<div class="next" onclick="initTable(1)">下一页</div>
+			<div class="last" onclick="last()">最后一页</div>
+			<div class="clearfix"></div>
+			<input type="hidden" id="pagelab" style="width: 50px;height:22px;overflow:hidden;margin-right: 5px;text-align: center;border-radius: 0px" onkeyup="pageKeyUpHandler(event)">
+		</div>
+
+		<!--//弹出遮罩-->
+		<div id="test"></div>
+		<div id="log_window">
+			<input type="image" src='../assets/img/guanbi.png' onclick="cancel_shield()" style="position: fixed;margin-left: 745px;margin-top: 10px;">
+			<table class="table table-bordered " style="width:600px;margin:0 auto;margin-top: 50px">
+				<tr>
+					<td class="tableleft"><span class="tanKuang">拳馆</span></td>
+					<td style="padding-top:15px"><select id="markidSelect" style="border-radius: 0px;width: 95%"></select></td>
+				</tr>
+				<!--<tr>
+					<td class="tableleft"><span class="tanKuang">商 品 类 型</span></td>
+					<td style="padding-top: 18px;text-align:left;padding-left: 20px;" id="shop_type">
+						<input type="radio" name="goods" value="1" />商店商品（商品只会出现在商店中）<br/>
+						<input type="radio" name="goods" value="2" />口碑商品（商品只会出现在活动奖励中）<input id="koubei" type="text" placeholder="请输入口碑卷" style="border-radius: 0px;" disabled/><br/>
+						<input type="radio" name="goods" value="3" />宝箱商品（商品只会出现在宝箱中）
+					</td>
+				</tr>-->
+				<tr>
+					<td class="tableleft"><span class="tanKuang">物 品 名 称</span></td>
+					<td style="padding-top:15px"><input type="text" id="mainInfo_texttxt" name="moduletitle" style="border-radius: 0px;width: 95%" oninput="checkgoodname()" onblur="checkgoodname()" onfocus="showmiss1()" placeholder="(名称最多100个字符，包含字母、数字、中文和英文符号)" />
+						<br /><span id="mainInfo_texttxtinfo" class="missspan" style="display: none;">名称最多100个字符，包含字母、数字、中文和英文符号</span></td>
+				</tr>
+				<tr>
+					<td class="tableleft"><span class="tanKuang">物 品 类 型</span></td>
+						<td style="padding-top:15px">
+							<select name="" id="shop_nametxt"  style="border-radius:0px;width:95%;" onchange="selectcard()">
+								<option value="1" selected="selected">商品</option>
+								<option value="2">私教卡</option>
+								<option value="3">时间卡</option>
+								<!--<option value="折扣卷">折扣卷</option>
+								<option value="实物劵">实物劵</option>-->
+							</select>
+						</td>	
+				</tr>
+				<tr style="display:none;" id="sijiao">
+					<td class="tableleft"><span class="tanKuang">私教</span></td>
+						<td style="padding-top:15px">
+							<select name="" id="iteminfo"  style="border-radius:0px;width:95%;">
+								<!--<option value="1" selected="selected">普通商品</option>
+								<option value="2">私教卡</option>
+								<option value="3">时间卡</option>
+								<!--<option value="折扣卷">折扣卷</option>-->
+								<!--<option value="实物劵">实物劵</option>-->-->
+							</select>
+						</td>	
+				</tr>
+				
+				<tr style="display:none;" id="exnum">
+					<td class="tableleft"><span class="tanKuang">次数</span></td>
+						<td style="padding-top:15px">
+							<input type="text"  id="exnuminfo" name="moduletitle" style="border-radius: 0px;width: 95%"/>
+						</td>	
+				</tr>
+				<tr style="display:none;" id="time">
+					<td class="tableleft"><span class="tanKuang">时间</span></td>
+						<td style="padding-top:15px">
+							<input type="text"  id="itemin" name="moduletitle" style="border-radius: 0px;width: 95%"/>
+						</td>	
+				</tr>
+				
+				<tr>
+					<td class="tableleft"><span class="tanKuang">描 述</span></td>
+					<td style="padding-top:15px"><input type="text" id="shop_texttxt" name="moduletitle" style="border-radius: 0px;width: 95%" oninput="checkdescription()" onblur="checkdescription()" onfocus="showmiss3()" placeholder="(描述包含字母、数字、中文和英文符号,字数不限)" />
+						<br /><span id="shop_texttxtinfo" class="missspan" style="display: none;">描述包含字母、数字、中文和英文符号,字数不限</span></td>
+				</tr>
+				<tr>
+					<td class="tableleft"><span class="tanKuang">物 品 数 量</span></td>
+					<td style="padding-top:15px"><input type="text" id="exchange_numtxt" name="grouptitle" style="border-radius: 0px;width: 95%" oninput="checknum()" onblur="checknum()" onfocus="showmiss4()" placeholder="(物品数量只能为数字)" />
+						<br /><span id="exchange_numtxtinfo" class="missspan" style="display: none;">物品数量只能为数字</span></td>
+				</tr>
+				<tr>
+					<td class="tableleft"><span class="tanKuang">物 品 价 格</span></td>
+					<td style="padding-top:15px"><input type="text" id="pricetxt" name="moduletitle" style="border-radius: 0px;width: 95%" oninput="checkprice()" onblur="checkprice()" onfocus="showmiss5()" placeholder="(价格只能为数字)" />
+						<br /><span id="pricetxtinfo" class="missspan" style="display: none;">价格只能为数字</span></td>
+				</tr>
+				<!--<tr>
+					<td class="tableleft"><span class="tanKuang">开 始 时 间</span></td>
+					<td style="padding-top: 18px">
+						<input type="text" id="start_timetxt" name="moduletitle" style="border-radius: 0px;width: 95%" placeholder="请选择开始时间" oninput="checkstarttime()" onpropertychange="checkstarttime()" onClick="laydate({elem: '#start_timetxt',istime: true, format: 'YYYY-MM-DD hh:mm:ss'})"
+						/><br /><span id="start_timetxtinfo"></span>
+						
+					</td>
+				</tr>
+				<tr>
+					<td class="tableleft"><span class="tanKuang">结 束 时 间</span></td>
+					<td style="padding-top: 18px">
+						<input type="text" id="end_timetxt" name="moduletitle" style="border-radius: 0px;width: 95%" placeholder="请选择结束时间" oninput="checkendtime()" onClick="laydate({elem: '#end_timetxt',istime: true, format: 'YYYY-MM-DD hh:mm:ss'})" /><br /><span id="end_timetxtinfo"></span>
+						
+					</td>
+				</tr>-->
+				<!--<tr>
+					<td class="tableleft"><span class="tanKuang">商 品 图</span></td>
+					
+					<td id="tupian" style="padding-top: 18px;display: none;">
+            			<input type="text" id="tupiantxt" style="width: 70%;border-radius: 0px;" disabled="disabled"/><button style="width: 25%;height: 25px;margin-top: -10px;" onclick="reload1()">重新上传</button>
+            		</td>
+					
+					
+					<td style="padding-top: 18px" id="tupian1"><input type="file" id="image_nametxt" accept="image/png,image/gif,application/msword"   name="moduletitle" style="border-radius: 0px" style="width:20px;height:30px;" />
+						<input type="button" value="上传" onclick="upload()">
+						
+					</td>
+				</tr>-->
+				<!--<tr style="display: none;">
+					<td class="tableleft"><span class="tanKuang">图 片 路 径</span></td>
+					<td style="padding-top: 18px"><input type="text" id="image_urltxt" name="moduletitle" style="border-radius: 0px;width: 95%" oninput="checkimgurl()" onblur="checkimgurl()" onfocus="showmiss7()" placeholder="(图片路径不能为空)" />
+						<br /><span id="image_urltxtinfo" class="missspan" style="display: none;">图片路径不能为空</span></td>
+				</tr>-->
+				<!--<tr>
+					<td class="tableleft"><span class="tanKuang">物 品 等 级</span></td>
+					<td style="padding-top: 18px"><select name="" id="note1_texttxt"  style="border-radius: 0px;width: 95%">
+						<option value="1" selected="selected">1 初级物品</option>
+						<option value="2">2 中级物品</option>
+						<option value="3">3 高级物品</option>
+					</select>
+						<br /><span id="note1_texttxtinfo" class="missspan" style="display:none;">预留只能为数字</span></td>
+				</tr>-->
+				
+
+				<!--<tr>
+					<td class="tableleft"><span class="tanKuang">审 核 人</span></td>
+					<td style="padding-top: 18px">
+						<input type="text" placeholder="请勾选审核人" id="auditortxt" style="border-radius: 0px;width: 95%" oninput="checkauditor()"  onclick="check()" onfocus="showmiss10()">
+						<br /><span id="auditortxtinfo" class="missspan" style="display: none;">你必须选择一个审核人</span>
+						
+					</td>
+				</tr>-->
+				<tr>
+					<td class="tableleft"></td>
+					<td>
+						<a  id="saveallinfo" onclick="onSavebtnClickHandler()" class="save">保 存</a>
+					</td>
+				</tr>
+			</table>
+			 <!--<div id="showdiv" style="width: 100%; height: 100%; position: absolute; top:0;left:0; background: none; ">
+            	<div style="width: 64px; position: fixed; height:64px; left:50%; top:50%;margin-top:-32px;margin-left: -32px;"><image src="../Images/5.gif" style="width: 64px;height: 64px"/></div>
+            </div>-->
+			<input type="hidden" id="shopidtxt" name="grouptitle" style="border-radius: 0px;width: 95%" />
+		</div>
+		<div id="mytooltip"></div>
+
+		<!--审核人-->
+		<div id="log_window2" style="display: none;">
+			<a href="javascript:cancel_shield2()" style="position: absolute;left: 260px;margin-top: -5px;">关闭</a>
+			<div style="width: 200px;margin:0 auto;height: 150px;overflow: scroll;" id="divv">
+				<p id="pp" style="height: 100%;width: 100%;"></p>
+			</div>
+			<div style="margin-top: 20px">
+				<button style="margin-left: 70px" onclick="confimbtn()">确定</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<button onclick="quxiaobtn()">取消</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			</div>
+		</div>
+	</body>
+
+</html>

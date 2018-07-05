@@ -1,0 +1,2069 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+	<title></title>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" type="text/css" href="../Css/bootstrap.css" />
+	<link rel="stylesheet" type="text/css" href="../Css/bootstrap-responsive.css" />
+	<link rel="stylesheet" type="text/css" href="../Css/style.css" />
+	<script type="text/javascript" src="../Js/jquery.js"></script>
+	<script type="text/javascript" src="../Js/jquery-ui.js"></script>
+	<script type="text/javascript" src="../Js/bootstrap.js"></script>
+	<script type="text/javascript" src="../Js/ckform.js"></script>
+	<script type="text/javascript" src="../Js/common.js"></script>
+	<script type="text/javascript" src="../Js/js/laydate.js"></script>
+	<script type="text/javascript" src="../Js/ui.js"></script>
+	<script type="text/javascript" src="../Js/ursl.js"></script>
+	<style type="text/css">
+		body {
+			padding-bottom: 40px;
+		}
+
+		@media (max-width: 980px) {
+			/* 启用浮动导航栏文字 */
+			.navbar-text.pull-right {
+				float: none;
+				padding-left: 5px;
+				padding-right: 5px;
+			}
+		}
+
+
+		#test {
+			width: 100%;
+			height: 100%;
+			background-color: #000;
+			position: absolute;
+			top: 0;
+			left: 0;
+			z-index: 2;
+			opacity: 0.3;
+			/*兼容IE8及以下版本浏览器*/
+			filter: alpha(opacity=30);
+			display: none;
+		}
+
+		#user_div{
+			width: 800px;
+			height: 500px;
+			padding-bottom: 50px;
+			background-color: white;
+			margin: auto;
+			position: absolute;
+			z-index: 3;
+			top: 0;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			display: none;
+			overflow-y: scroll;
+			/*border: 2px solid #b1d6e8;*/
+		}
+
+		#card_div{
+			width: 800px;
+			height: 300px;
+			padding-bottom: 50px;
+			background-color: white;
+			margin: auto;
+			position: absolute;
+			z-index: 3;
+			top: 0;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			display: none;
+			overflow-y: scroll;
+			/*border: 2px solid #b1d6e8;*/
+		}
+		.theadColor th {
+			background-color: #b1d6e8;
+			/*color: #1976b0;*/
+			font-weight: normal;
+			text-align: center;
+			height: 20px;
+			line-height: 22px;
+
+		}
+
+		.theadColor th span {
+			color: #1976b0;
+		}
+
+		#chaxun {
+			margin-top: 10px;
+		}
+
+		#addnew1 {
+			margin-top: 10px;
+		}
+
+
+		.theadColor td,
+		.tableleft {
+			/*background-color: #b1d6e8;*/
+			/*color: #1976b0;*/
+			/*font-weight:normal;*/
+		}
+
+		.theadColor td,.tableleft  span {
+			color:#000;
+			font-weight: bold;
+		}
+
+
+		#test1 {
+			width: 100%;
+			height: 100%;
+			background-color: #000;
+			position: absolute;
+			top: 0;
+			left: 0;
+			z-index: 2;
+			opacity: 0.3;
+			/*兼容IE8及以下版本浏览器*/
+			filter: alpha(opacity=30);
+			display: none;
+		}
+		.table>thead>tr>td:last-child{
+			width: 25%;
+		}
+		#userlist{
+			position: absolute;
+			width: 100%;
+			border: 1px solid #dedede;
+			background: #ffffff;
+			border-top: none;
+			margin: 0;
+			text-align: left;
+			display: none;
+
+		}
+		#userlist li{
+			list-style: none;
+			line-height: 25px;
+		}
+		#userlist li div{
+			color: black;
+		}
+		#userlist li:hover{
+			background: #F6F6F6;
+		}
+		.onclick{
+			margin-left: 35px;
+		}
+		.onclick a{
+			margin: 0;
+
+		}
+	</style>
+	<script type="text/javascript">
+
+        var page = 1;
+        var count = 10;
+        var maxpage = 0;
+        var dataarr = [];
+        var updateCard=[];
+        var currentIndex = -1;
+        var localhost = " ";
+        var table, role, res;
+        var fields = [];
+        var allfield = [];
+        //			所有教练
+        var allcoach=[];
+        //          关联公开课教练
+        var coursecoach=[];
+        //			所有拳馆
+        var freevenue=[];
+        //  所有会员卡
+		var cardState=1;
+        var cardSort="id";
+        var cardtype=[{"1":"时间卡"},{"2":"私教卡"},{"3":"储值卡"}];
+        var cardenable=[{"0":"启用"},{"-1":"未启用"},{"-2":"到期"},{"1":"冻结"},{"2":"冻结"},{"3":"启用"}];
+        var ifsuccess=0;
+        var addable1,updateable1,delable1,authority,pms,enables;
+        localhost = window.sessionStorage ? sessionStorage.getItem("lh") : Cookie.read("lh");
+
+        var url1=urls;
+        $(function() {
+            $(document).tooltip();
+        });
+
+        //加载列表
+        function init() {
+
+            //localhost = window.sessionStorage ? sessionStorage.getItem("lh") : Cookie.read("lh");
+            table = 1;
+            var uname = window.sessionStorage ? sessionStorage.getItem("mgr") : Cookie.read("mgr");
+            manager = jQuery.parseJSON(uname);
+            mid = manager.mid;
+            mgrid = manager.id;
+            role = manager.type;
+
+            pms = window.sessionStorage? sessionStorage.getItem("管 理 员"): Cookie.read("管 理 员");
+
+            authority = jQuery.parseJSON(pms);
+            addable1 = authority.addable;
+            updateable1 = authority.updateable;
+            delable1 = authority.delable;
+            enables = authority.enable;
+//                alert(authority)
+
+
+            if (null == uname || undefined == uname) {
+                parent.window.location = '../Public/login.html';
+                return;
+            }
+            if (window.sessionStorage) {
+                page = sessionStorage.getItem("Node_page");
+            } else {
+                page = Cookie.read("Node_page");
+            }
+            if (null == page)
+                page = 1;
+            document.getElementById('pagelab').value = page;
+
+            //判断各浏览器的兼容性
+            var Sys = {};
+            var ua = navigator.userAgent.toLowerCase();
+            var s;
+            (s = ua.match(/msie ([\d.]+)/)) ? Sys.ie = s[1]:
+                (s = ua.match(/firefox\/([\d.]+)/)) ? Sys.firefox = s[1] :
+                    (s = ua.match(/chrome\/([\d.]+)/)) ? Sys.chrome = s[1] :
+                        (s = ua.match(/opera.([\d.]+)/)) ? Sys.opera = s[1] :
+                            (s = ua.match(/version\/([\d.]+).*safari/)) ? Sys.safari = s[1] : 0;
+            if (Sys.ie) { //Js判断为IE浏览器
+                alert('http://www.wangjinhai119.com' + Sys.ie);
+                if (Sys.ie == '9.0') { //Js判断为IE 9
+                } else if (Sys.ie == '8.0') { //Js判断为IE 8
+                } else {}
+            }
+            if (Sys.firefox) { //Js判断为火狐(firefox)浏览器
+                document.getElementById('pagelab').style.marginTop = '19px';
+            }
+            if (Sys.chrome) { //Js判断为谷歌chrome浏览器
+                document.getElementById('pagelab').style.marginTop = '18px';
+            }
+            if (Sys.opera) { //Js判断为opera浏览器
+                alert('http://www.wangjinhai119.com' + Sys.opera);
+            }
+            if (Sys.safari) { //Js判断为苹果safari浏览器
+                document.getElementById('pagelab').style.marginTop = '9px';
+            }
+			//卡类型
+            if (window.sessionStorage ) {
+                updateCard = JSON.parse(sessionStorage.getItem("updateCard")?sessionStorage.getItem("updateCard"):"[]");
+                cardState = sessionStorage.getItem("cardState")?sessionStorage.getItem("cardState"):1;
+            } else {
+                updateCard = JSON.parse(Cookie.read("updateCard")?sessionStorage.getItem("updateCard"):"[]");
+                cardState = Cookie.read("cardState")?sessionStorage.getItem("cardState"):1;
+            }
+            //console.log(cardState);
+            if(cardState==1 || cardState==2){
+                $("#addnew1").hide()
+			}else{
+                $("#addnew1").show()
+			}
+            var selectState = document.getElementById("selectState");
+            for (var l = 0; l < selectState.options.length; l++) {
+                var tmp = selectState.options[l].value;
+                if (tmp == cardState) {
+                    selectState.options[l].selected = 'selected';
+                }
+            }
+            initFields();
+        }
+        //动态表头
+        function initFields() {
+            //alert(3333)
+            //alert(url1)
+            if (window.sessionStorage ) {
+                cardState = sessionStorage.getItem("cardState")?sessionStorage.getItem("cardState"):1;
+                cardSort = sessionStorage.getItem("cardSort")?sessionStorage.getItem("cardSort"):"id";
+
+            } else {
+                cardState = Cookie.read("cardState")?sessionStorage.getItem("cardState"):1;
+                cardSort = Cookie.read("cardSort")?sessionStorage.getItem("cardSort"):"id";
+
+            }
+            $("#num").val(window.sessionStorage ? sessionStorage.getItem("num") : Cookie.read("num"));
+            $("#start").val(window.sessionStorage ? sessionStorage.getItem("starttime") : Cookie.read("starttime"));
+            $("#end").val(window.sessionStorage ? sessionStorage.getItem("endtime") : Cookie.read("endtime"));
+            var selectState = document.getElementById("selectState");
+            for (var l = 0; l < selectState.options.length; l++) {
+                var tmp = selectState.options[l].value;
+                if (tmp == cardState) {
+                    selectState.options[l].selected = 'selected';
+                }
+            }
+
+            var selectSort = document.getElementById("selectSort");
+            for (var l = 0; l < selectSort.options.length; l++) {
+                var tmp = selectSort.options[l].value;
+                if (tmp == cardSort) {
+                    selectSort.options[l].selected = 'selected';
+                }
+            }
+
+            var users=new Object();
+            users.rid=role;
+            users.smid=12;
+            var datajson=JSON.stringify(users);
+            $.ajax({
+                type: "post",
+                contentType: "application/x-www-form-urlencoded",
+                url: "http://" + url1 + ":6078/backstagegetpermissionfieldbyridsmid",
+                data:datajson,
+                dataType:"json",
+                success: function(data) {
+                    data.permissionfieldmap.sort(function(a,b){
+                        return a.smdid-b.smdid;
+                    });
+                    fields = [];
+                    allfield=[];
+                    //console.log(data.permissionfieldmap);
+                    for (var i = 0; i < data.permissionfieldmap.length; i++) {
+                        if(cardState==1){
+                            if(data.permissionfieldmap[i].fieldname!=="regtime" && data.permissionfieldmap[i].fieldname!=="vtotal"  && data.permissionfieldmap[i].fieldname!=="tcount" && data.permissionfieldmap[i].fieldname!=="balance" && data.permissionfieldmap[i].fieldname!=="coach" && data.permissionfieldmap[i].fieldname!=="username" && data.permissionfieldmap[i].fieldname!=="enable"){
+                                fields.push(data.permissionfieldmap[i]);
+							}
+                            if(data.permissionfieldmap[i].fieldname!=="regtime" && data.permissionfieldmap[i].fieldname!=="vtotal"  && data.permissionfieldmap[i].fieldname!=="tcount" && data.permissionfieldmap[i].fieldname!=="balance" && data.permissionfieldmap[i].fieldname!=="coach") {
+                                allfield.push(data.permissionfieldmap[i]);
+                            }
+						}else if(cardState==2){
+                            if(data.permissionfieldmap[i].fieldname!=="regtime" && data.permissionfieldmap[i].fieldname!=="vtotal" && data.permissionfieldmap[i].fieldname!=="balance" && data.permissionfieldmap[i].fieldname!=="starttime" && data.permissionfieldmap[i].fieldname!=="endtime" && data.permissionfieldmap[i].fieldname!=="username"&& data.permissionfieldmap[i].fieldname!=="enable"){
+                                fields.push(data.permissionfieldmap[i]);
+                            }
+                            if(data.permissionfieldmap[i].fieldname!=="regtime" && data.permissionfieldmap[i].fieldname!=="balance" && data.permissionfieldmap[i].fieldname!=="starttime" && data.permissionfieldmap[i].fieldname!=="endtime") {
+                                allfield.push(data.permissionfieldmap[i]);
+                            }
+						}else{
+                            if(data.permissionfieldmap[i].fieldname!=="regtime" && data.permissionfieldmap[i].fieldname!=="vtotal" && data.permissionfieldmap[i].fieldname!=="tcount" && data.permissionfieldmap[i].fieldname!=="starttime" && data.permissionfieldmap[i].fieldname!=="endtime" && data.permissionfieldmap[i].fieldname!=="coach" && data.permissionfieldmap[i].fieldname!=="username"&& data.permissionfieldmap[i].fieldname!=="enable"){
+                                fields.push(data.permissionfieldmap[i]);
+                            }
+                            if(data.permissionfieldmap[i].fieldname!=="regtime" && data.permissionfieldmap[i].fieldname!=="vtotal" && data.permissionfieldmap[i].fieldname!=="tcount" && data.permissionfieldmap[i].fieldname!=="starttime" && data.permissionfieldmap[i].fieldname!=="endtime" && data.permissionfieldmap[i].fieldname!=="coach") {
+                                allfield.push(data.permissionfieldmap[i]);
+                            }
+						}
+
+                        //console.log(data.permissionfieldmap[i]);
+                    }
+                    var th = document.getElementById("tabhead");
+                    while (th.cells.length > 0) {
+                        th.deleteCell(0);
+                    }
+					//console.log(fields);
+                    for (var i = 0; i < allfield.length; i++) {
+                        //console.log(allfield);
+						var headcell = th.insertCell(i);
+
+						headcell.innerHTML = "<th><span>" + allfield[i].name + "</span></th>";
+
+
+                    }
+                    var headoptcell = th.insertCell(allfield.length);
+                    headoptcell.innerHTML = "<th><span>" + "操 作" + "</span></th>";
+                    initTableData();
+                    initallvenue();
+                    initallcoach();
+                    initcoursecoach();
+                },
+                error: function(err) {
+//						alert("err:" + err);
+                }
+            });
+        }
+        //获取所有拳馆
+        function initallvenue(){
+            var obj=new Object();
+            obj.vid=manager.vid;
+            obj.page=1;
+            obj.count=999999;
+            var datajson=JSON.stringify(obj);
+            $.ajax({
+                type: "post",
+                contentType:"application/x-www-form-urlencoded",
+                data:datajson,
+                dataType:"json",
+                url:"http://" + url1 + ":6078/backstagegetvenue",
+                success: function(data) {
+                    //console.log(data);
+                    data.VenueMap.sort(function(a,b){
+                        return a.id-b.id;
+                    });
+                    freevenue=[];
+                    if(data.respVo.resultCode=="0"){
+                        for(var i=0;i<data.VenueMap.length;i++){
+                                freevenue.push(data.VenueMap[i]);
+                        }
+                    }else{
+                        freevenue.length=0;
+                    }
+
+                },
+                error: function(err) {
+//						alert("err:" + err);
+                }
+            });
+        }
+        //获取所有教练
+        function initallcoach(){
+            var obj=new Object();
+            obj.vid=manager.vid;
+            var datajson=JSON.stringify(obj);
+            $.ajax({
+                type: "post",
+                contentType:"application/x-www-form-urlencoded",
+                data:datajson,
+                dataType:"json",
+                url:"http://" + url1 + ":6078/backstagegetallcoach",
+                success: function(data) {
+                    allcoach=[];
+                    if(data.respVo.resultCode=="0"){
+                        //console.log(data);
+                        for(var i=0;i<data.UserMap.length;i++){
+                            allcoach.push(data.UserMap[i]);
+                        }
+                    }else{
+                        allcoach.length=0;
+                    }
+
+
+                },
+                error: function(err) {
+//						alert("err:" + err);
+                }
+            });
+        }
+        //获取关联公开课教练
+        function initcoursecoach(){
+            var obj=new Object();
+            var datajson=JSON.stringify(obj);
+            $.ajax({
+                type: "post",
+                contentType:"application/x-www-form-urlencoded",
+                data:datajson,
+                dataType:"json",
+                url:"http://" + url1 + ":6078/backstagegetcoursecoach",
+                success: function(data) {
+                    //	console.log(data);
+                    coursecoach=[];
+                    if(data.respVo.resultCode=="0"){
+                        //console.log(data);
+                        for(var i=0;i<data.usercoursecoachmap.length;i++){
+                            coursecoach.push(data.usercoursecoachmap[i]);
+                        }
+                    }else{
+                        coursecoach.length=0;
+                    }
+
+
+                },
+                error: function(err) {
+//						alert("err:" + err);
+                }
+            });
+        }
+
+        //查询
+        function inquiry() {
+            var num=document.getElementById("num").value;
+            var starttime=document.getElementById("start").value;
+            var endtime=document.getElementById("end").value;
+            if (window.sessionStorage) {
+                sessionStorage.setItem("num", num);
+                sessionStorage.setItem("starttime", starttime);
+                sessionStorage.setItem("endtime", endtime);
+            } else {
+                Cookie.write("num", num);
+                Cookie.write("starttime", starttime);
+                Cookie.write("endtime", endtime);
+            }
+            initTableData()
+        }
+
+
+        //公开课列表初始化
+        function initTableData() {
+            var num=window.sessionStorage ? sessionStorage.getItem("num") : Cookie.read("num");
+            if(num==null){
+                num="";
+			}
+            var starttime=window.sessionStorage ? sessionStorage.getItem("starttime") : Cookie.read("starttime");
+            if(starttime==null){
+                starttime="";
+            }
+            var endtime=window.sessionStorage ? sessionStorage.getItem("endtime") : Cookie.read("endtime");
+            if(endtime==null){
+                endtime="";
+            }
+            var obj=new Object();
+            obj.vid=manager.vid;
+            obj.type=cardState;
+            obj.num=num;
+            obj.starttime=starttime;
+            obj.endtime=endtime;
+            obj.page=page;
+            obj.count=count;
+            var datajson=JSON.stringify(obj);
+            //console.log(datajson);
+            $.ajax({
+                type: "post",
+                contentType:"application/x-www-form-urlencoded",
+                data:datajson,
+                dataType:"json",
+                url:"http://" + url1 + ":6078/backstagegetcardsbynum",
+                success: function(data) {
+                    console.log(data);
+                    var table1 = document.getElementById('tbl');
+                    dataarr = [];
+                    while (table1.rows.length > 1) {
+                        table1.deleteRow(1);
+                    }
+                    if(data.respVo.resultCode==0) {
+						//设置排序
+						data.cardmap.sort(function sortId(a,b){
+							return b[cardSort]-a[cardSort]
+						});
+
+						//console.log(data.cardmap);
+                        //console.log(allfield);
+						for (var i = 0; i < data.cardmap.length; i++) {
+							if(updateCard.length>0) {
+								for (var j = 0; j < updateCard.length; j++) {
+									if (data.cardmap[i].id == updateCard[j].id) {
+										data.cardmap[i] = updateCard[j];
+									}
+								}
+							}
+							dataarr.push(data.cardmap[i]);
+
+                            //console.log(data.cardmap[i]);
+
+                            if(data.cardmap[i].enable!==-1) {
+                                var row = table1.insertRow(table1.rows.length);
+                                for (var k = 0; k < allfield.length; k++) {
+                                    var cell = row.insertCell(k);
+                                    if (allfield[k].fieldname == "starttime" || allfield[k].fieldname == "endtime") {
+                                        cell.innerHTML = timestampToTime(dataarr[i][allfield[k].fieldname]);
+                                    } else if (allfield[k].fieldname == "type") {
+                                        var isType = 0;
+                                        for (var l = 0; l < cardtype.length; l++) {
+                                            $.each(cardtype[l], function (index, value) {
+                                                if (parseInt(index) == parseInt(dataarr[i]["type"])) {
+                                                    isType++;
+                                                    cell.innerHTML = value
+                                                }
+                                            });
+                                        }
+                                        if (isType == 0) {
+                                            cell.innerHTML = "暂无";
+                                        }
+
+                                    } else if (allfield[k].fieldname == "vid") {
+                                        cell.innerHTML = dataarr[i]["vname"] ? dataarr[i]["vname"] : "暂无"
+                                    } else if (allfield[k].fieldname == "enable") {
+                                        var isenable = 0;
+                                        for (var m = 0; m < cardenable.length; m++) {
+                                            $.each(cardenable[m], function (index, value) {
+                                                if (parseInt(index) == parseInt(dataarr[i]["enable"])) {
+                                                    isenable++;
+                                                    cell.innerHTML = value
+                                                }
+                                            });
+                                        }
+                                        if (isenable == 0) {
+                                            cell.innerHTML = "暂无";
+                                        }
+
+                                    }else if(allfield[k].fieldname=="coach"){
+                                        cell.innerHTML =dataarr[i]["coachname"]?dataarr[i]["coachname"]+"-"+dataarr[i]["coachnickname"]:"暂无"
+                                    }else if(allfield[k].fieldname=="tcount"){
+                                        cell.innerHTML = dataarr[i][allfield[k].fieldname];
+									} else if(allfield[k].fieldname=="username"){
+                                        //console.log(dataarr[i][allfield[k].fieldname]);
+                                        cell.innerHTML = dataarr[i][allfield[k].fieldname]?dataarr[i][allfield[k].fieldname]+"-"+dataarr[i].usernickname:"暂无";
+                                    }else {
+                                        cell.innerHTML = dataarr[i][allfield[k].fieldname]?dataarr[i][allfield[k].fieldname]:"暂无";
+                                    }
+                                }
+                                var optcell = row.insertCell(allfield.length);
+                                //console.log(cardState);
+                                if (dataarr[i].enable == 1 || dataarr[i].enable == 2) {
+                                    optcell.innerHTML = "<input type='image' src='../assets/img/jiedong.png' id='jiedong" + i + "' value='' onclick='unfreeze(" + i + ")'>" +
+                                        "&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/chakan.png' id='bianji" + i + "' value='' onclick='edit(" + data.cardmap[i].id + "," + i + ")'>" +
+                                        "&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/czrz.png' id='xiangqing" + i + "' onclick='msg(" + i + ")'>" +
+                                        "&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/shanchu.png' id='shanchu" + i + "' value='' onclick='del(" + data.cardmap[i].id + "," + i + ")'>";
+                                } else {
+                                    if(cardState==3){
+                                        optcell.innerHTML = "<input type='image' src='../assets/img/dongjie.png' id='dongjie" + i + "' value='' onclick='frozen(" + i + ")'>" +
+                                            "&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/bianji.png' id='bianji" + i + "' value='' onclick='bianji(" + data.cardmap[i].id + "," + i + ")'>" +
+                                            "&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/czrz.png' id='xiangqing" + i + "' onclick='msg(" + i + ")'>" +
+                                            "&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/shanchu.png' id='shanchu" + i + "' value='' onclick='del(" + data.cardmap[i].id + "," + i + ")'>";
+
+									}else{
+                                        optcell.innerHTML = "<input type='image' src='../assets/img/dongjie.png' id='dongjie" + i + "' value='' onclick='frozen(" + i + ")'>" +
+                                            "&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/chakan.png' id='bianji" + i + "' value='' onclick='edit(" + data.cardmap[i].id + "," + i + ")'>" +
+                                            "&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/czrz.png' id='xiangqing" + i + "' onclick='msg(" + i + ")'>" +
+                                            "&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/shanchu.png' id='shanchu" + i + "' value='' onclick='del(" + data.cardmap[i].id + "," + i + ")'>";
+									}
+
+                                }
+
+                            }
+						}
+						//console.log(dataarr);
+						maxpage = Math.ceil(data.respVo.resultDesc / count);
+						//设置分页
+						var first=$(".page>div>div:nth-child(1)");
+						var prev=$(".page>div>div:nth-child(2)");
+						var next=$(".page>div>div:nth-child(3)");
+						var last=$(".page>div>div:nth-child(4)");
+						if(page>1){
+							first.attr("class","blue")
+						}else{
+							first.attr("class","gray")
+						}
+						if(page>1){
+							prev.attr("class","blue")
+						}else{
+							prev.attr("class","gray")
+						}
+						if(page<maxpage){
+							next.attr("class","blue")
+						}else{
+							next.attr("class","gray")
+						}
+						if(page<maxpage){
+							last.attr("class","blue")
+						}else{
+							last.attr("class","gray")
+						}
+                    }else{
+                        //alert(data.respVo.resultDesc);
+                    }
+                },
+                error: function(err) {
+//						alert("err:" + err);
+                }
+            });
+
+        }
+
+        //会员卡操作记录
+		function msg(idx){
+            window.location ="msg.html";
+            if (window.sessionStorage) {
+                sessionStorage.setItem("card", JSON.stringify(dataarr[idx]));
+
+            } else {
+                Cookie.write("card", dataarr[idx]);
+            }
+		}
+
+        //获取会员卡的用户
+        function initallcard(id){
+            var obj=new Object();
+            obj.cid=id;
+            var datajson=JSON.stringify(obj);
+            $.ajax({
+                type: "post",
+                contentType:"application/x-www-form-urlencoded",
+                data:datajson,
+                dataType:"json",
+                url:"http://" + url1 + ":6078/getusercardbycid",
+                success: function (res) {
+                    console.log(res);
+                    if(res.usercardmap.length>0){
+                        var row=document.getElementById("rowcard");
+                        row.innerHTML=`<td class="tableleft"><span class="tanKuangSpan">会员</span></td><td>
+							<div style="width: 95%; position: relative; margin: 0 auto">
+							<input type="text" id="username" class="txt" name="moduletitle" style="border-radius: 0px;width: 100%;display: none"  value="" />
+								该卡已绑定会员！
+							</div>
+							</td>`;
+                    }
+                },
+                error: function (err) {
+                    //mizhu.alert('','err:'+ err,'iconfont-close');
+                }
+            });
+        }
+
+        //公共列表
+        function initTables(idx){
+            for (var i = 1; i < fields.length; i++) {
+                var row = user_table.insertRow(user_table.rows.length);
+                if(fields[i].fieldname=="vid" || fields[i].fieldname=="type" || fields[i].fieldname=="enable"|| fields[i].fieldname=="coach"){
+
+                        row.innerHTML=`<td class="tableleft"><span class="tanKuangSpan">${fields[i].name}</span></td><td style="padding-top: 18px">
+							<select name="" id="${fields[i].fieldname}text" style="border-radius: 0px;width: 95%" onchange="check${fields[i].fieldname}text()"  disabled="disabled"></select><br/>
+							<span id="${fields[i].fieldname}text_info"></span>
+							</td>`;
+
+
+                }else if(fields[i].fieldname=="tcount"){
+
+                        row.innerHTML = `<td class="tableleft"><span class="tanKuangSpan">${fields[i].name}</span></td><td style="padding-top: 18px">
+							<input type="text" id="${fields[i].fieldname}text" class="txt" name="moduletitle" style="border-radius: 0px;width: 95%"  disabled="disabled" value="${idx >= 0 ? dataarr[idx][fields[i].fieldname] : ''}" /><br />
+							<span id="${fields[i].fieldname}text_info"></span>
+							</td>`;
+
+				}else if(fields[i].fieldname=="starttime" || fields[i].fieldname=="endtime"){
+
+                        row.innerHTML = `<td class="tableleft"><span class="tanKuangSpan">${fields[i].name}</span></td><td style="padding-top: 18px">
+							<input type="text" id="${fields[i].fieldname}text" class="timer" name="moduletitle" style="border-radius: 0px;width: 95%" disabled="disabled" value="${idx >= 0 ? timestampToTime(dataarr[idx][fields[i].fieldname]) : ''}"
+							  /><br />
+							<span id="${fields[i].fieldname}text_info"></span>
+							</td>`;
+
+                    laydate.render({
+                        elem: "#starttimetext",
+                        type: 'datetime',
+                        format: 'yyyy-MM-dd HH:mm' ,
+                        btns: ['clear', 'confirm'],
+                        trigger: 'click',
+						done: function(value, date, endDate){
+                            //console.log(value); //得到日期生成的值，如：2017-08-18
+                            //console.log(date); //得到日期时间对象：{year: 2017, month: 8, date: 18, hours: 0, minutes: 0, seconds: 0}
+                            var myDate = new Date(value);
+                            myDate.setFullYear(myDate.getFullYear()+1);
+                            myDate.setDate(myDate.getDate()-1);
+                            myDate=timestampToTime(myDate);
+                            $("#endtimetext").val(myDate)
+
+                        }
+                    });
+                    laydate.render({
+                        elem: "#endtimetext",
+                        type: 'datetime',
+                        format: 'yyyy-MM-dd HH:mm' ,
+                        btns: ['clear', 'confirm'],
+                        trigger: 'click'
+                    });
+                }else{
+
+                        row.innerHTML = `<td class="tableleft"><span class="tanKuangSpan">${fields[i].name}</span></td><td style="padding-top: 18px">
+							<input type="text" id="${fields[i].fieldname}text" class="txt" name="moduletitle" disabled="disabled" style="border-radius: 0px;width: 95%" value="${idx >= 0 ? dataarr[idx][fields[i].fieldname] ? dataarr[idx][fields[i].fieldname] : '暂无' : ''}" /><br />
+							<span id="${fields[i].fieldname}text_info"></span>
+							</td>`;
+
+
+                }
+
+            }
+            var row = user_table.insertRow(user_table.rows.length);
+            row.setAttribute("id","rowcard");
+
+			row.innerHTML = `<td class="tableleft"><span class="tanKuangSpan">绑定会员</span></td><td style="padding-top: 18px;">
+							<div style="width: 95%; position: relative; margin: 0 auto">
+								<input type="text"  class="txt" name="moduletitle" style="border-radius: 0px;width: 100%"  placeholder="暂无绑定会员" disabled="disabled" />
+							</div>
+							</td>`;
+
+
+        }
+
+        function initTables2(idx){
+            for (var i = 1; i < fields.length; i++) {
+                var row = user_table.insertRow(user_table.rows.length);
+                if(fields[i].fieldname=="vid" || fields[i].fieldname=="type" || fields[i].fieldname=="enable"|| fields[i].fieldname=="coach"){
+                    if(idx>=0){
+                        row.innerHTML=`<td class="tableleft"><span class="tanKuangSpan">${fields[i].name}</span></td><td style="padding-top: 18px">
+							<select name="" id="${fields[i].fieldname}text" style="border-radius: 0px;width: 95%" onchange="check${fields[i].fieldname}text()" disabled="disabled"></select><br/>
+							<span id="${fields[i].fieldname}text_info"></span>
+							</td>`;
+					}else{
+                        row.innerHTML=`<td class="tableleft"><span class="tanKuangSpan">${fields[i].name}</span></td><td style="padding-top: 18px">
+							<select name="" id="${fields[i].fieldname}text" style="border-radius: 0px;width: 95%" onchange="check${fields[i].fieldname}text()" ></select><br/>
+							<span id="${fields[i].fieldname}text_info"></span>
+							</td>`;
+					}
+
+
+                }else if(fields[i].fieldname=="num" ){
+                    if(idx>=0){
+                        row.innerHTML = `<td class="tableleft"><span class="tanKuangSpan">${fields[i].name}</span></td><td style="padding-top: 18px">
+							<input type="text" id="${fields[i].fieldname}text" class="txt" name="moduletitle" style="border-radius: 0px;width: 95%" value="${idx >= 0 ? dataarr[idx][fields[i].fieldname] ? dataarr[idx][fields[i].fieldname] : '暂无' : ''}"  disabled="disabled"/><br />
+							<span id="${fields[i].fieldname}text_info"></span>
+							</td>`;
+					}else{
+                        row.innerHTML = `<td class="tableleft"><span class="tanKuangSpan">${fields[i].name}</span></td><td style="padding-top: 18px">
+							<input type="text" id="${fields[i].fieldname}text" class="txt" name="moduletitle" style="border-radius: 0px;width: 95%" value="${idx >= 0 ? dataarr[idx][fields[i].fieldname] ? dataarr[idx][fields[i].fieldname] : '暂无' : ''}"  /><br />
+							<span id="${fields[i].fieldname}text_info"></span>
+							</td>`;
+					}
+				}else{
+
+					row.innerHTML = `<td class="tableleft"><span class="tanKuangSpan">${fields[i].name}</span></td><td style="padding-top: 18px">
+						<input type="text" id="${fields[i].fieldname}text" class="txt" name="moduletitle" style="border-radius: 0px;width: 95%" value="${idx >= 0 ? dataarr[idx][fields[i].fieldname] ? dataarr[idx][fields[i].fieldname] : '暂无' : ''}"  /><br />
+						<span id="${fields[i].fieldname}text_info"></span>
+						</td>`;
+
+
+                }
+
+            }
+            var row = user_table.insertRow(user_table.rows.length);
+            row.setAttribute("id","rowcard");
+
+                row.innerHTML = `<td class="tableleft"><span class="tanKuangSpan">绑定会员</span></td><td style="padding-top: 18px;">
+							<div style="width: 95%; position: relative; margin: 0 auto">
+								<input type="text" id="username" class="txt" name="moduletitle" style="border-radius: 0px;width: 100%"  placeholder="请输入要搜索的会员"  />
+								<ul id="userlist"></ul>
+							</div>
+							<span id="username_info"></span>
+							</td>`;
+
+            //绑定会员查询
+            $("#username").bind('input porpertychange',function(){
+                var obj=new Object();
+                obj.name=$(this).val();
+                var datajson=JSON.stringify(obj);
+                $.ajax({
+                    type: "post",
+                    contentType:"application/x-www-form-urlencoded",
+                    data:datajson,
+                    dataType:"json",
+                    url:"http://" + url1 + ":6078/getuserbyname",
+                    success: function (res) {
+                        //console.log(res.UserMap);
+                        var html="";
+                        for(var u of res.UserMap){
+                            if(u.role==4){
+                                html+=`<li>
+										<div class="search-item" title="${u.id}">${u.name}-${u.nickname}</div>
+								   </li>`
+                            }
+
+                        }
+                        if(obj.name==""){
+                            $("#userlist").hide();
+                            $("#userlist").css({
+                                "height":""
+                            });
+                        }else{
+                            $("#userlist").html(html).show();
+                            var height=$("#userlist").height();
+                            //console.log(height);
+                            if(height>120){
+                                $("#userlist").css({
+                                    "height":"120px",
+                                    "overflow-y":"scroll"
+                                });
+                            }else{
+                                $("#userlist").css({
+                                    "height":""
+                                });
+                            }
+                            $("#userlist").on("click","li",function(){
+                                //console.log($(this).children().html());
+                                var text=$(this).children().html();
+                                var title=$(this).children().attr("title");
+                                $("#username").attr("data",title);
+                                $("#username").val(text);
+                                $("#userlist").hide();
+                            })
+                        }
+
+                    },
+                    error: function (err) {
+                        //mizhu.alert('','err:'+ err,'iconfont-close');
+                    }
+                });
+
+            });
+        }
+
+        //新增会员卡
+        function add1() {
+            if(addable1 == 0){
+                return;
+            }
+            var s = document.getElementById("test");
+            s.style.display = "block";
+            var l = document.getElementById("user_div");
+            l.style.display = "block";
+            var user_table = document.getElementById('user_table');
+            while (user_table.rows.length > 0) {
+                user_table.deleteRow(0);
+            }
+
+            currentIndex = -1;
+            initTables2(currentIndex);
+
+            var select1 = document.getElementById("vidtext");
+            while (select1.options.length > 0) {
+                select1.remove(0);
+            }
+            //console.log(freevenue);
+            if(freevenue.length>0){
+                select1.options.add(new Option("请选择拳馆",""));
+                for (var i = 0; i < freevenue.length; i++) {
+                    select1.options.add(new Option(freevenue[i].name,freevenue[i].id));
+                }
+            }else{
+                select1.options.add(new Option("暂时没有空闲拳馆",""));
+            }
+
+            var select2 = document.getElementById("typetext");
+            while (select2.options.length > 0) {
+                select2.remove(0);
+            }
+            for (var i = 0; i < cardtype.length; i++) {
+                $.each(cardtype[i],function(index,value){
+                    if(index==cardState){
+                        select2.options.add(new Option(value,index));
+					}
+                });
+            }
+
+			if(cardState==2){
+                var select4 = document.getElementById("coachtext");
+                while (select4.options.length > 0) {
+                    select4.remove(0);
+                }
+
+                if(allcoach.length>0){
+                    select4.options.add(new Option("请选择教练",""));
+                    for (var i = 0; i < allcoach.length; i++) {
+                        select4.options.add(new Option(allcoach[i].name+"-"+allcoach[i].nickname,allcoach[i].id));
+                    }
+                }else{
+                    select4.options.add(new Option("暂无教练",""));
+                }
+			}
+
+            var optrow = user_table.insertRow(user_table.rows.length);
+            optrow.innerHTML = `<tr>
+					<td class="tableleft"></td>
+					<td>
+						<a  onclick="onSavebtnClickHandler()" class="save">保 存</a>
+					</td>
+				</tr>`;
+        }
+
+        //冻结会员
+		function frozen(idx) {
+            if(dataarr[idx].enable==3 || dataarr[idx].enable==2){
+                var r=confirm("该卡已经冻结过，需要冻结请向总经理申请");
+			}else{
+                var r=confirm("请确定要冻结会员卡吗？");
+			}
+
+            if(r==true){
+                var obj=new Object();
+                obj.vid=manager.vid;
+                obj.cid=dataarr[idx].id;
+                obj.mgrid=manager.id;
+                var datajson=JSON.stringify(obj);
+                //console.log(datajson);
+                $.ajax({
+                    type: "post",
+                    contentType:"application/x-www-form-urlencoded",
+                    data:datajson,
+                    dataType:"json",
+                    url:"http://" + url1 + ":6078/frozencard",
+                    success: function (data) {
+                        //console.log(res);
+                        if(data.respVo.resultCode==0){
+//                            if(dataarr[idx].enable==2){
+//                                dataarr[idx].enable=3;
+//							}else{
+//                                dataarr[idx].enable=2;
+//							}
+//
+//                            if (window.sessionStorage) {
+//                                updateCard = JSON.parse(sessionStorage.getItem("updateCard")?sessionStorage.getItem("updateCard"):"[]");
+//                                if(updateCard.length>0) {
+//                                    var len=0;
+//                                    for (var j = 0; j < updateCard.length; j++) {
+//                                        //console.log(updateCard[j].id+"b");
+//                                        if (dataarr[idx].id == updateCard[j].id) {
+//                                            len++;
+//                                            updateCard[j]=dataarr[idx];
+//                                        }
+//                                    }
+//                                    if(len==0){
+//                                        updateCard.push(dataarr[idx]);
+//                                    }
+//                                    sessionStorage.setItem("updateCard", JSON.stringify(updateCard));
+//                                }else{
+//                                    updateCard.push(dataarr[idx]);
+//                                    sessionStorage.setItem("updateCard", JSON.stringify(updateCard));
+//                                }
+//                            } else {
+//                                updateCard = JSON.parse(Cookie.read("updateCard")?Cookie.read("updateCard"):"[]");
+//                                if(updateCard.length>0) {
+//                                    var len=0;
+//                                    for (var j = 0; j < updateCard.length; j++) {
+//                                        if (dataarr[idx].id == updateCard[j].id) {
+//                                            len++;
+//                                            updateCard[j]=dataarr[idx];
+//                                        }
+//                                    }
+//                                    if(len==0){
+//                                        updateCard.push(dataarr[idx]);
+//                                    }
+//                                    Cookie.write("updateCard", JSON.stringify(updateCard));
+//                                }else{
+//                                    updateCard.push(dataarr[idx]);
+//                                    Cookie.write("updateCard", JSON.stringify(updateCard));
+//                                }
+//                            }
+                            mizhu.alert('',data.respVo.resultDesc,'iconfont-gou');
+                            //init();
+                            window.location.reload();
+                            cancel_shield();
+                        }
+                    },
+                    error: function (err) {
+                        //mizhu.alert('','err:'+ err,'iconfont-close');
+                    }
+                });
+			}
+		}
+
+		//解冻
+		function unfreeze(idx){
+            //console.log(dataarr[idx]);
+            var r=confirm("请确定要解冻会员卡吗？");
+            if(r==true){
+                var obj=new Object();
+                obj.vid=manager.vid;
+                obj.cid=dataarr[idx].id;
+                obj.mgrid=manager.id;
+                var datajson=JSON.stringify(obj);
+                $.ajax({
+                    type: "post",
+                    contentType:"application/x-www-form-urlencoded",
+                    data:datajson,
+                    dataType:"json",
+                    url:"http://" + url1 + ":6078/unfreezecard",
+                    success: function (res) {
+                        //console.log(res);
+                        if(res.respVo.resultCode==0){
+//							dataarr[idx].enable=3;
+//                            dataarr[idx].endtime=dataarr[idx].endtime+(new Date().getTime()-dataarr[idx].regtime);
+//                            if (window.sessionStorage) {
+//                                updateCard = JSON.parse(sessionStorage.getItem("updateCard")?sessionStorage.getItem("updateCard"):"[]");
+//                                if(updateCard.length>0) {
+//                                    var len=0;
+//                                    for (var j = 0; j < updateCard.length; j++) {
+//                                        //console.log(updateCard[j].id+"b");
+//                                        if (dataarr[idx].id == updateCard[j].id) {
+//                                            len++;
+//                                            updateCard[j]=dataarr[idx];
+//                                        }
+//                                    }
+//                                    if(len==0){
+//                                        updateCard.push(dataarr[idx]);
+//                                    }
+//                                    sessionStorage.setItem("updateCard", JSON.stringify(updateCard));
+//                                }else{
+//                                    updateCard.push(dataarr[idx]);
+//                                    sessionStorage.setItem("updateCard", JSON.stringify(updateCard));
+//                                }
+//                            } else {
+//                                updateCard = JSON.parse(Cookie.read("updateCard")?Cookie.read("updateCard"):"[]");
+//                                if(updateCard.length>0) {
+//                                    var len=0;
+//                                    for (var j = 0; j < updateCard.length; j++) {
+//                                        if (dataarr[idx].id == updateCard[j].id) {
+//                                            len++;
+//                                            updateCard[j]=dataarr[idx];
+//                                        }
+//                                    }
+//                                    if(len==0){
+//                                        updateCard.push(dataarr[idx]);
+//                                    }
+//                                    Cookie.write("updateCard", JSON.stringify(updateCard));
+//                                }else{
+//                                    updateCard.push(dataarr[idx]);
+//                                    Cookie.write("updateCard", JSON.stringify(updateCard));
+//                                }
+//                            }
+                            mizhu.alert('',res.respVo.resultDesc,'iconfont-gou');
+                            //init();
+                            window.location.reload();
+                            cancel_shield();
+                        }
+                    },
+                    error: function (err) {
+                        //mizhu.alert('','err:'+ err,'iconfont-close');
+                    }
+                });
+			}
+		}
+
+        //编辑会员卡
+        function edit(id,idx) {
+
+            if(updateable1 == 0){
+                return;
+            }
+            var s = document.getElementById("test");
+            s.style.display = "block";
+            var l = document.getElementById("user_div");
+            l.style.display = "block";
+            var user_table = document.getElementById('user_table');
+            while (user_table.rows.length > 0) {
+                user_table.deleteRow(0);
+            }
+            currentIndex = idx;
+            initTables(idx);
+            initallcard(dataarr[idx].id);
+            var select1 = document.getElementById("vidtext");
+            while (select1.options.length > 0) {
+                select1.remove(0);
+            }
+            //console.log(dataarr[idx]);
+            select1.options.add(new Option(dataarr[idx].vname?dataarr[idx].vname:"暂无",dataarr[idx].vid));
+
+            for (var i = 0; i < freevenue.length; i++) {
+                if(freevenue[i].id!==dataarr[idx].vid){
+                    if(parseInt(freevenue[i].id)!==parseInt(dataarr[idx].vid)) {
+                        select1.options.add(new Option(freevenue[i].name, freevenue[i].id));
+                    }
+                }
+            }
+
+            var select2 = document.getElementById("typetext");
+            while (select2.options.length > 0) {
+                select2.remove(0);
+            }
+
+            for(var i=0; i<cardtype.length;i++ ){
+                $.each(cardtype[i],function(index,value){
+                    if(index==cardState){
+                        select2.options.add(new Option(value,index));
+                    }
+                });
+			}
+
+
+            if(cardState==2) {
+                var select4 = document.getElementById("coachtext");
+                while (select4.options.length > 0) {
+                    select4.remove(0);
+                }
+                //console.log(dataarr[idx]);
+                if(parseInt(dataarr[idx].coach)!==0){
+                    select4.options.add(new Option(dataarr[idx].coachname?dataarr[idx].coachname+"-"+dataarr[idx].coachnickname:"暂无",dataarr[idx].coach));
+                }else{
+                    select4.options.add(new Option("没指定教练",""));
+                }
+				//console.log(allcoach);
+                for (var i = 0; i < allcoach.length; i++) {
+                    if(parseInt(allcoach[i].id)!==parseInt(dataarr[idx].coach)){
+                        select4.options.add(new Option(allcoach[i].name+"-"+allcoach[i].nickname,allcoach[i].id));
+                    }
+                }
+            }
+
+        }
+
+        function bianji(id,idx) {
+
+            if(updateable1 == 0){
+                return;
+            }
+            var s = document.getElementById("test");
+            s.style.display = "block";
+            var l = document.getElementById("user_div");
+            l.style.display = "block";
+            var user_table = document.getElementById('user_table');
+            while (user_table.rows.length > 0) {
+                user_table.deleteRow(0);
+            }
+            currentIndex = idx;
+            initTables2(idx);
+            initallcard(dataarr[idx].id);
+            var select1 = document.getElementById("vidtext");
+            while (select1.options.length > 0) {
+                select1.remove(0);
+            }
+            //console.log(dataarr[idx]);
+            select1.options.add(new Option(dataarr[idx].vname?dataarr[idx].vname:"暂无",dataarr[idx].vid));
+
+            for (var i = 0; i < freevenue.length; i++) {
+                if(freevenue[i].id!==dataarr[idx].vid){
+                    if(parseInt(freevenue[i].id)!==parseInt(dataarr[idx].vid)) {
+                        select1.options.add(new Option(freevenue[i].name, freevenue[i].id));
+                    }
+                }
+            }
+
+            var select2 = document.getElementById("typetext");
+            while (select2.options.length > 0) {
+                select2.remove(0);
+            }
+
+            for(var i=0; i<cardtype.length;i++ ){
+                $.each(cardtype[i],function(index,value){
+                    if(index==cardState){
+                        select2.options.add(new Option(value,index));
+                    }
+                });
+            }
+
+
+            if(cardState==2) {
+                var select4 = document.getElementById("coachtext");
+                while (select4.options.length > 0) {
+                    select4.remove(0);
+                }
+                //console.log(dataarr[idx]);
+                if(parseInt(dataarr[idx].coach)!==0){
+                    select4.options.add(new Option(dataarr[idx].coachname?dataarr[idx].coachname+"-"+dataarr[idx].coachnickname:"暂无",dataarr[idx].coach));
+                }else{
+                    select4.options.add(new Option("没指定教练",""));
+                }
+                //console.log(allcoach);
+                for (var i = 0; i < allcoach.length; i++) {
+                    if(parseInt(allcoach[i].id)!==parseInt(dataarr[idx].coach)){
+                        select4.options.add(new Option(allcoach[i].name+"-"+allcoach[i].nickname,allcoach[i].id));
+                    }
+                }
+            }
+
+            var optrow = user_table.insertRow(user_table.rows.length);
+            optrow.innerHTML = `<tr>
+										<td class="tableleft"></td>
+										<td colspan="3">
+											<a  onclick="onSavebtnClickHandler(${idx})" class="save">保 存</a>
+										</td>
+									</tr>`;
+
+        }
+        //删除会员卡
+        function del(id,idx) {
+            if(delable1 == 0){
+                return;
+            }
+            if (confirm("确定要删除吗？")) {
+                var obj=new Object();
+                obj.index=id;
+                var datajson=JSON.stringify(obj);
+                // console.log(datajson);
+                $.ajax({
+                    type: "post",
+                    contentType:"application/x-www-form-urlencoded",
+                    dataType:"json",
+                    data:datajson,
+                    url:"http://" + url1 + ":6078/backstagedelcards",
+                    success: function(data) {
+                        dataarr[idx].state=-1;
+                        if (window.sessionStorage) {
+                            updateCard = JSON.parse(sessionStorage.getItem("updateCard")?sessionStorage.getItem("updateCard"):"[]");
+                            if(updateCard.length>0) {
+                                var len=0;
+                                for (var j = 0; j < updateCard.length; j++) {
+                                    if (dataarr[idx].id == updateCard[j].id) {
+                                        len++;
+                                        updateCard[j]=dataarr[idx];
+                                    }
+                                }
+                                if(len==0){
+                                    updateCard.push(dataarr[idx]);
+                                }
+                                sessionStorage.setItem("updateCard", JSON.stringify(updateCard));
+                            }else{
+                                updateCard.push(dataarr[idx]);
+                                sessionStorage.setItem("updateCard", JSON.stringify(updateCard));
+                            }
+                        } else {
+                            updateCard = JSON.parse(Cookie.read("updateCard")?Cookie.read("updateCard"):"[]");
+                            if(updateCard.length>0) {
+                                var len=0;
+                                for (var j = 0; j < updateCard.length; j++) {
+                                    if (dataarr[idx].id == updateCard[j].id) {
+                                        len++;
+                                        updateCard[j]=dataarr[idx];
+                                    }
+                                }
+                                if(len==0){
+                                    updateCard.push(dataarr[idx]);
+                                }
+                                Cookie.write("updateCard", JSON.stringify(updateCard));
+                            }else{
+                                updateCard.push(dataarr[idx]);
+                                Cookie.write("updateCard", JSON.stringify(updateCard));
+                            }
+                        }
+                        init();
+                    },
+                    error: function(err) {
+                        //mizhu.alert('','err:'+ err,'iconfont-close');
+                    }
+                });
+            }
+        }
+
+
+        //验证
+        function checknumtext(){
+
+            var numtext = document.getElementById("numtext");
+            var numtext_info = document.getElementById("numtext_info");
+            if (numtext.value == "" ) {
+                numtext_info.innerHTML = "该字段不能为空";
+                numtext.style.border = "1px solid red";
+                numtext_info.style.color = "red";
+                return false;
+            }
+            else {
+				numtext_info.innerHTML = "";
+				numtext.style.border = "";
+				return true;
+            }
+
+        }
+
+        function checkvidtext(){
+            var vidtext = document.getElementById("vidtext");
+            var vidtext_info = document.getElementById("vidtext_info");
+            if (vidtext.value == "" ) {
+                vidtext_info.innerHTML = "请选择所属拳馆";
+                vidtext.style.border = "1px solid red";
+                vidtext_info.style.color = "red";
+                return false;
+            }else {
+                vidtext_info.innerHTML = "";
+                vidtext.style.border = "";
+                return true;
+
+            }
+
+        }
+
+        function checktypetext(){
+            var typetext = document.getElementById("typetext");
+            var typetext_info = document.getElementById("typetext_info");
+            if (typetext.value == "" ) {
+                typetext_info.innerHTML = "该字段不能为空";
+                typetext.style.border = "1px solid red";
+                typetext_info.style.color = "red";
+                return false;
+            }else {
+				typetext_info.innerHTML = "";
+				typetext.style.border = "";
+				return true;
+            }
+
+        }
+
+        function checktcounttext(){
+            var tcounttext = document.getElementById("tcounttext");
+            var tcounttext_info = document.getElementById("tcounttext_info");
+            if (tcounttext.value == "" ) {
+                tcounttext_info.innerHTML = "该字段不能为空";
+                tcounttext.style.border = "1px solid red";
+                tcounttext_info.style.color = "red";
+                return false;
+            }
+            else {
+                var reg=new RegExp("^[0-9]{1,}$","g");
+                if(!reg.test(tcounttext.value)){
+                    tcounttext_info.innerHTML = "该字段必须为数字";
+                    tcounttext.style.border = "1px solid red";
+                    tcounttext_info.style.color = "red";
+                    return false;
+                }else{
+                    tcounttext_info.innerHTML = "";
+                    tcounttext.style.border = "";
+                    return true;
+                }
+
+            }
+
+        }
+
+        function checkbalancetext(idx){
+            var balancetext = document.getElementById("balancetext");
+            var balancetext_info = document.getElementById("balancetext_info");
+            if (balancetext.value == "" ) {
+                balancetext_info.innerHTML = "该字段不能为空";
+                balancetext.style.border = "1px solid red";
+                balancetext_info.style.color = "red";
+                return false;
+            }
+            else {
+                var reg=new RegExp(/^\d{1,10}(\.\d{1,2})?$/,"gi");
+                if(!reg.test(balancetext.value)){
+                    balancetext_info.innerHTML = "该字段必须为00.00数字格式";
+                    balancetext.style.border = "1px solid red";
+                    balancetext_info.style.color = "red";
+                    return false;
+                }else{
+
+					balancetext_info.innerHTML = "";
+					balancetext.style.border = "";
+					return true;
+
+                }
+
+            }
+
+        }
+
+        function checkregtime() {
+            var regtimetext = document.getElementById("regtimetext");
+            var regtimetext_info = document.getElementById("regtimetext_info");
+            if (regtimetext.value == "" ) {
+                regtimetext_info.innerHTML = "该字段不能为空";
+                regtimetext.style.border = "1px solid red";
+                regtimetext_info.style.color = "red";
+                return false;
+            }
+            else {
+                regtimetext_info.innerHTML = "";
+                regtimetext.style.border = "";
+                return true;
+
+            }
+
+        }
+
+        //开始时间
+        function checkstarttime() {
+            var starttimetext = document.getElementById("starttimetext");
+            var starttimetext_info = document.getElementById("starttimetext_info");
+            if (starttimetext.value == "" ) {
+                starttimetext_info.innerHTML = "该字段不能为空";
+                starttimetext.style.border = "1px solid red";
+                starttimetext_info.style.color = "red";
+                return false;
+            }
+            else {
+                    starttimetext_info.innerHTML = "";
+                    starttimetext.style.border = "";
+                    return true;
+
+            }
+
+        }
+        //结束时间
+        function checkendtime() {
+            var starttimetext = document.getElementById("starttimetext");
+            var endtimetext = document.getElementById("endtimetext");
+            var endtimetext_info = document.getElementById("endtimetext_info");
+            var startime=new Date(starttimetext.value).getTime();
+            var endtime=new Date(endtimetext.value).getTime();
+
+            if (endtimetext.value == "" ) {
+                endtimetext_info.innerHTML = "该字段不能为空";
+                endtimetext.style.border = "1px solid red";
+                endtimetext_info.style.color = "red";
+                return false;
+            }else {
+                if(endtime<startime){
+                    endtimetext_info.innerHTML = "请选择不小于开始日期的结束日期";
+                    endtimetext.style.border = "1px solid red";
+                    endtimetext_info.style.color = "red";
+                    return false;
+				}else{
+                    endtimetext_info.innerHTML = "";
+                    endtimetext.style.border = "";
+                    return true;
+				}
+
+            }
+        }
+
+
+
+        function checkcoachtext(){
+            var coachtext = document.getElementById("coachtext");
+            var coachtext_info = document.getElementById("coachtext_info");
+            if (coachtext.value == "") {
+                coachtext_info.innerHTML = "该字段不能为空";
+                coachtext.style.border = "1px solid red";
+                coachtext_info.style.color = "red";
+                return false;
+            }
+            else {
+                //console.log(coursecoach);
+                coachtext_info.innerHTML = "";
+                coachtext.style.border = "";
+                return true;
+
+            }
+
+        }
+
+        //转换时间戳
+        function timestampToTime(timestamp) {
+            var date = new Date(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+            Y = date.getFullYear() + '-';
+            M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+            D = date.getDate()<10 ? '0'+date.getDate()+ ' ':date.getDate() + ' ';
+            h = date.getHours()<10 ? '0'+date.getHours()+ ':':date.getHours() + ':';
+            m = date.getMinutes()<10 ? '0'+date.getMinutes():date.getMinutes();
+            s = date.getSeconds();
+            return Y+M+D+h+m;
+        }
+
+
+        //保存添加与修改的公开课
+        function onSavebtnClickHandler(idx) {
+            //console.log(cardState);
+            var iftrue=false;
+			if(cardState==1){
+			    if(checknumtext()&&checkvidtext()&&checktypetext()&&checkstarttime()&&checkendtime()){
+                    iftrue=true;
+				}
+			}else if(cardState==2){
+                if(checknumtext()&&checkvidtext()&&checktypetext()&&checktcounttext()&&checkcoachtext()){
+                    iftrue=true;
+                }
+			}else if(cardState==3){
+                if(checknumtext()&&checkvidtext()&&checktypetext()&&checkbalancetext()){
+                    iftrue=true;
+                }
+			}
+			var datajson;
+			if (iftrue==true) {
+				if (currentIndex >= 0) {
+                    var balancetext = document.getElementById("balancetext");
+                    var balancetext_info = document.getElementById("balancetext_info");
+                    if(Number(balancetext.value)<Number(dataarr[idx].balance)){
+                        balancetext_info.innerHTML = "修改后的储值卡金额必须大于原来的金额";
+                        balancetext.style.border = "1px solid red";
+                        balancetext_info.style.color = "red";
+                        return false;
+                    }else {
+                        var url = "http://" + url1 + ":6078/backstageupdatecards";
+                        var obj = new Object();
+                        obj.id = parseInt(dataarr[idx].id);
+                        for (var i = 1; i < fields.length; i++) {
+                            if (fields[i].fieldname == "regtime" || fields[i].fieldname == "starttime" || fields[i].fieldname == "endtime") {
+                                var data = new Date(document.getElementById(fields[i].fieldname + 'text').value);
+                                obj[fields[i].fieldname] = data.getTime();
+                            } else {
+                                obj[fields[i].fieldname] = document.getElementById(fields[i].fieldname + 'text').value;
+                            }
+
+                        }
+                        obj.optid = 0;
+                        obj.mgrid = mgrid;
+                        datajson = JSON.stringify(obj);
+                        //console.log(datajson);
+                        save();
+                    }
+
+				} else {
+
+					var url = "http://" + url1 + ":6078/backstageaddcards";
+					var obj = new Object();
+					for (var i = 1; i < fields.length; i++) {
+						if(fields[i].fieldname=="regtime" ||fields[i].fieldname=="starttime" || fields[i].fieldname=="endtime"){
+							var data=new Date(document.getElementById(fields[i].fieldname + 'text').value);
+							obj[fields[i].fieldname] = data.getTime();
+						}else{
+							obj[fields[i].fieldname] = document.getElementById(fields[i].fieldname + 'text').value;
+						}
+					}
+                    obj.optid=0;
+                    obj.mgrid=mgrid;
+					datajson = JSON.stringify(obj);
+                    console.log(datajson);
+					save();
+
+				}
+				function save()	{
+					$.ajax({
+						type: "post",
+						contentType: "application/x-www-form-urlencoded",
+						data: datajson,
+						dataType: "json",
+						url: url,
+						success: function (data) {
+							//console.log(data);
+							//console.log(currentIndex);
+                            var userid=document.getElementById("username").getAttribute("data");
+                            //console.log(userid);
+							if (currentIndex >= 0) {
+								if(data.respVo.resultCode<0){
+                                    mizhu.alert('',data.respVo.resultDesc,'iconfont-close');
+									return;
+								}else{
+									datajson=JSON.parse(datajson);
+									datajson.vname=$("#vidtext option:selected").text();
+                                    datajson.enable=dataarr[idx].enable;
+                                    if(dataarr[idx].username){
+                                        datajson.username=dataarr[idx].username;
+                                        datajson.usernickname=dataarr[idx].usernickname;
+                                    }
+									if(cardState==2){
+                                        datajson.coachname=$("#coachtext option:selected").text().split("-")[0];
+                                        datajson.coachnickname=$("#coachtext option:selected").text().split("-")[1];
+                                        datajson.vtotal=dataarr[idx].vtotal;
+									}
+									if (window.sessionStorage) {
+										updateCard = JSON.parse(sessionStorage.getItem("updateCard")?sessionStorage.getItem("updateCard"):"[]");
+										if(updateCard.length>0) {
+											var len=0;
+											for (var j = 0; j < updateCard.length; j++) {
+												//console.log(updateCard[j].id+"b");
+												if (datajson.id == updateCard[j].id) {
+													len++;
+													updateCard[j]=datajson;
+												}
+											}
+											if(len==0){
+												updateCard.push(datajson);
+											}
+											sessionStorage.setItem("updateCard", JSON.stringify(updateCard));
+										}else{
+											updateCard.push(datajson);
+											sessionStorage.setItem("updateCard", JSON.stringify(updateCard));
+										}
+									} else {
+										updateCard = JSON.parse(Cookie.read("updateCard")?Cookie.read("updateCard"):"[]");
+										if(updateCard.length>0) {
+											var len=0;
+											for (var j = 0; j < updateCard.length; j++) {
+												if (datajson.id == updateCard[j].id) {
+													len++;
+													updateCard[j]=datajson;
+												}
+											}
+											if(len==0){
+												updateCard.push(datajson);
+											}
+											Cookie.write("updateCard", JSON.stringify(updateCard));
+										}else{
+											updateCard.push(datajson);
+											Cookie.write("updateCard", JSON.stringify(updateCard));
+										}
+									}
+									if(userid){
+                                        onSaveBinding(userid,dataarr[idx].id,"修改",JSON.stringify(datajson));
+									}else{
+                                        mizhu.alert('', '修改成功','iconfont-gou');
+                                        init();
+                                        cancel_shield();
+									}
+
+
+								}
+							}else {
+								if(data.respVo.resultCode<0){
+                                    mizhu.alert('',data.respVo.resultDesc,'iconfont-close');
+									return;
+								}else{
+                                    if(userid){
+                                        onSaveBinding(userid,data.respVo.resultDesc,"添加",JSON.stringify(datajson));
+									}else{
+                                        mizhu.alert('', '添加成功','iconfont-gou');
+                                        init();
+                                        cancel_shield();
+									}
+
+								}
+
+							}
+						},
+						error: function (err) {
+                            //mizhu.alert('','保存失败','iconfont-close');
+							cancel_shield();
+						}
+					});
+				}
+
+			}else{
+                mizhu.alert('', '请正确完善信息','iconfont-close');
+			}
+
+
+        }
+		//
+        function onSaveBinding(uid,cid,msg,json) {
+            var obj=new Object();
+            obj.uid=uid;
+            obj.cid=cid;
+            var datajson=JSON.stringify(obj);
+            //console.log(datajson);
+            $.ajax({
+                type: "post",
+                contentType:"application/x-www-form-urlencoded",
+                data:datajson,
+                dataType:"json",
+                url:"http://" + url1 + ":6078/addusercard",
+                success: function (res) {
+					//console.log(res);
+					if(res.respVo.resultCode==0){
+					    var datajson=JSON.parse(json);
+						datajson.username=$("#username").val().split("-")[0];
+						datajson.usernickname=$("#username").val().split("-")[1];
+                        if (window.sessionStorage) {
+                            updateCard = JSON.parse(sessionStorage.getItem("updateCard")?sessionStorage.getItem("updateCard"):"[]");
+                            if(updateCard.length>0) {
+                                var len=0;
+                                for (var j = 0; j < updateCard.length; j++) {
+                                    //console.log(updateCard[j].id+"b");
+                                    if (datajson.id == updateCard[j].id) {
+                                        len++;
+                                        updateCard[j]=datajson;
+                                    }
+                                }
+                                if(len==0){
+                                    updateCard.push(datajson);
+                                }
+                                sessionStorage.setItem("updateCard", JSON.stringify(updateCard));
+                            }else{
+                                updateCard.push(datajson);
+                                sessionStorage.setItem("updateCard", JSON.stringify(updateCard));
+                            }
+                        } else {
+                            updateCard = JSON.parse(Cookie.read("updateCard")?Cookie.read("updateCard"):"[]");
+                            if(updateCard.length>0) {
+                                var len=0;
+                                for (var j = 0; j < updateCard.length; j++) {
+                                    if (datajson.id == updateCard[j].id) {
+                                        len++;
+                                        updateCard[j]=datajson;
+                                    }
+                                }
+                                if(len==0){
+                                    updateCard.push(datajson);
+                                }
+                                Cookie.write("updateCard", JSON.stringify(updateCard));
+                            }else{
+                                updateCard.push(datajson);
+                                Cookie.write("updateCard", JSON.stringify(updateCard));
+                            }
+                        }
+                        mizhu.alert('',msg+ '并绑定成功！','iconfont-gou');
+                        init();
+                        cancel_shield();
+					}else{
+                        mizhu.alert('',res.respVo.resultDesc,'iconfont-close');
+                        return;
+					}
+                },
+                error: function (err) {
+                    //mizhu.alert('','err:'+ err,'iconfont-close');
+                }
+            });
+		}
+
+
+
+
+        //关闭弹出的div
+        function cancel_shield() {
+            var s = document.getElementById("test");
+            s.style.display = "none";
+            var e = document.getElementById("user_div");
+            e.style.display = "none";
+            var c = document.getElementById("card_div");
+            c.style.display = "none";
+            var m = document.getElementById("mytooltip");
+            m.style.display = "none";
+        }
+
+
+        //查询不同状态
+        function changeState(){
+            cardState=document.getElementById("selectState").value;
+            if (window.sessionStorage) {
+                sessionStorage.setItem("cardState", cardState);
+            }else{
+                Cookie.write("cardState", cardState);
+            }
+            init();
+        }
+
+        //查询不同排序
+		function changeSort(){
+            cardSort=document.getElementById("selectSort").value;
+            if (window.sessionStorage) {
+                sessionStorage.setItem("cardSort", cardSort);
+            }else{
+                Cookie.write("cardSort", cardSort);
+            }
+            init();
+		}
+
+
+
+        //分页
+        function first(){
+            if(document.getElementById("pagelab").value==1){
+                mizhu.alert('','当前已经为第一页!','iconfont-close');
+            }
+            else{
+                initTable(1,true);
+            }
+
+        }
+        function last(){
+
+            if(document.getElementById("pagelab").value==maxpage){
+                mizhu.alert('','当前已经为最后页!','iconfont-close');
+            }
+            else{
+                initTable(parseInt(maxpage),true);
+            }
+
+        }
+
+        function initTable(step, flag = false) {
+            initFields();
+            step = parseInt(step);
+            var p = parseInt(page) + parseInt(step);
+            if (flag) {
+                if (step < 1 || step > maxpage) {
+                    mizhu.alert('','页码超标','iconfont-close');
+                    return;
+                }
+                page = step;
+            } else {
+                page = p;
+                if (page < 1 || page > maxpage) {
+                    page -= step;
+                    return;
+                }
+            }
+            if (window.sessionStorage ) {
+                updateCard = JSON.parse(sessionStorage.getItem("updateCard")?sessionStorage.getItem("updateCard"):"[]");
+                cardState = sessionStorage.getItem("cardState")?sessionStorage.getItem("cardState"):1;
+            } else {
+                updateCard = JSON.parse(Cookie.read("updateCard")?sessionStorage.getItem("updateCard"):"[]");
+                cardState = Cookie.read("cardState")?sessionStorage.getItem("cardState"):1;
+            }
+            var num=document.getElementById("num").value;
+            var starttime=document.getElementById("start").value;
+            var endtime=document.getElementById("end").value;
+
+            var obj=new Object();
+            obj.vid=manager.vid;
+            obj.type=cardState;
+            obj.page=page;
+            obj.count=count;
+            var datajson=JSON.stringify(obj);
+            //console.log(datajson);
+            $.ajax({
+                type: "post",
+                contentType:"application/x-www-form-urlencoded",
+                data:datajson,
+                dataType:"json",
+                url:"http://" + url1 + ":6078/backstagegetcardsbynum",
+                success: function(data) {
+                    var table1 = document.getElementById('tbl');
+                    dataarr = [];
+                    while (table1.rows.length > 1) {
+                        table1.deleteRow(1);
+                    }
+                    //设置排序
+                    data.cardmap.sort(function sortId(a,b){
+                        return b[cardSort]-a[cardSort]
+                    });
+
+                    //console.log(data.cardmap);
+                    //console.log(allfield);
+                    for (var i = 0; i < data.cardmap.length; i++) {
+                        if(updateCard.length>0) {
+                            for (var j = 0; j < updateCard.length; j++) {
+                                if (data.cardmap[i].id == updateCard[j].id) {
+                                    data.cardmap[i] = updateCard[j];
+                                }
+                            }
+                        }
+                        dataarr.push(data.cardmap[i]);
+
+                        //console.log(data.cardmap[i]);
+
+                        if(data.cardmap[i].enable!==-1) {
+                            var row = table1.insertRow(table1.rows.length);
+                            for (var k = 0; k < allfield.length; k++) {
+                                var cell = row.insertCell(k);
+                                if (allfield[k].fieldname == "starttime" || allfield[k].fieldname == "endtime") {
+                                    cell.innerHTML = timestampToTime(dataarr[i][allfield[k].fieldname]);
+                                } else if (allfield[k].fieldname == "type") {
+                                    var isType = 0;
+                                    for (var l = 0; l < cardtype.length; l++) {
+                                        $.each(cardtype[l], function (index, value) {
+                                            if (parseInt(index) == parseInt(dataarr[i]["type"])) {
+                                                isType++;
+                                                cell.innerHTML = value
+                                            }
+                                        });
+                                    }
+                                    if (isType == 0) {
+                                        cell.innerHTML = "暂无";
+                                    }
+
+                                } else if (allfield[k].fieldname == "vid") {
+                                    cell.innerHTML = dataarr[i]["vname"] ? dataarr[i]["vname"] : "暂无"
+                                } else if (allfield[k].fieldname == "enable") {
+                                    var isenable = 0;
+                                    for (var m = 0; m < cardenable.length; m++) {
+                                        $.each(cardenable[m], function (index, value) {
+                                            if (parseInt(index) == parseInt(dataarr[i]["enable"])) {
+                                                isenable++;
+                                                cell.innerHTML = value
+                                            }
+                                        });
+                                    }
+                                    if (isenable == 0) {
+                                        cell.innerHTML = "暂无";
+                                    }
+
+                                }else if(allfield[k].fieldname=="coach"){
+                                    cell.innerHTML =dataarr[i]["coachname"]?dataarr[i]["coachname"]+"-"+dataarr[i]["coachnickname"]:"暂无"
+                                }else if(allfield[k].fieldname=="tcount"){
+                                    cell.innerHTML = dataarr[i][allfield[k].fieldname];
+                                } else if(allfield[k].fieldname=="username"){
+                                    //console.log(dataarr[i][allfield[k].fieldname]);
+                                    cell.innerHTML = dataarr[i][allfield[k].fieldname]?dataarr[i][allfield[k].fieldname]+"-"+dataarr[i].usernickname:"暂无";
+                                }else {
+                                    cell.innerHTML = dataarr[i][allfield[k].fieldname]?dataarr[i][allfield[k].fieldname]:"暂无";
+                                }
+                            }
+                            var optcell = row.insertCell(allfield.length);
+                            //console.log(cardState);
+                            if (dataarr[i].enable == 1 || dataarr[i].enable == 2) {
+                                optcell.innerHTML = "<input type='image' src='../assets/img/jiedong.png' id='jiedong" + i + "' value='' onclick='unfreeze(" + i + ")'>" +
+                                    "&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/chakan.png' id='bianji" + i + "' value='' onclick='edit(" + data.cardmap[i].id + "," + i + ")'>" +
+                                    "&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/czrz.png' id='xiangqing" + i + "' onclick='msg(" + i + ")'>" +
+                                    "&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/shanchu.png' id='shanchu" + i + "' value='' onclick='del(" + data.cardmap[i].id + "," + i + ")'>";
+                            } else {
+                                if(cardState==3){
+                                    optcell.innerHTML = "<input type='image' src='../assets/img/dongjie.png' id='dongjie" + i + "' value='' onclick='frozen(" + i + ")'>" +
+                                        "&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/bianji.png' id='bianji" + i + "' value='' onclick='bianji(" + data.cardmap[i].id + "," + i + ")'>" +
+                                        "&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/czrz.png' id='xiangqing" + i + "' onclick='msg(" + i + ")'>" +
+                                        "&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/shanchu.png' id='shanchu" + i + "' value='' onclick='del(" + data.cardmap[i].id + "," + i + ")'>";
+
+                                }else{
+                                    optcell.innerHTML = "<input type='image' src='../assets/img/dongjie.png' id='dongjie" + i + "' value='' onclick='frozen(" + i + ")'>" +
+                                        "&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/chakan.png' id='bianji" + i + "' value='' onclick='edit(" + data.cardmap[i].id + "," + i + ")'>" +
+                                        "&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/czrz.png' id='xiangqing" + i + "' onclick='msg(" + i + ")'>" +
+                                        "&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/shanchu.png' id='shanchu" + i + "' value='' onclick='del(" + data.cardmap[i].id + "," + i + ")'>";
+                                }
+
+                            }
+
+                        }
+                    }
+                    //console.log(dataarr);
+                    maxpage = Math.ceil(data.respVo.resultDesc / count);
+                    document.getElementById('pagelab').value = page;
+                },
+                error: function(err) {
+//						alert("err:" + err);
+                }
+            });
+        }
+
+        function pageKeyUpHandler(evt) {
+            if (evt.keyCode == 13) {
+                initTable(parseInt(document.getElementById("pagelab").value), true);
+            }
+        }
+
+
+        //权限增删改
+        function isdisadd(obj) {
+
+            var idstr = obj.id;
+
+            if (addable1 == 0 && idstr.indexOf("add")>=0){
+                document.getElementById(idstr).disabled = 'disabled';
+                document.getElementById(idstr).style.cursor = "not-allowed";
+            }
+
+            if (updateable1 == 0 && idstr.indexOf("bian")>=0){
+                document.getElementById(idstr).disabled = 'disabled';
+                document.getElementById(idstr).style.cursor = "not-allowed";
+            }
+
+            if (delable1 == 0 && idstr.indexOf("shan")>=0){
+                document.getElementById(idstr).disabled = 'disabled';
+                document.getElementById(idstr).style.cursor = "not-allowed";
+            }
+        }
+
+        function isdisout(obj) {
+            var idstr = obj.id;
+            document.getElementById(idstr).disabled = false;
+            document.getElementById(idstr).style.cursor = "pointer";
+        }
+
+	</script>
+</head>
+<body onload="init()">
+<div class="onclick">
+	<input type="text" style="width: 200px;height:25px;border-radius: 0px; margin-top: 19px;" name="num" id="num" class="abc input-default" placeholder="&nbsp;按卡号/名称/学号查询" value="" data-genuitec-lp-enabled="false"
+		   data-genuitec-file-id="wc1-67" data-genuitec-path="/fkds1.5.tools/WebRoot/tools/shop/index.html" >&nbsp;&nbsp;&nbsp;
+	<input type="text" style="width: 125px;height:25px;border-radius: 0px; margin-top: 19px;" placeholder="开始时间" class="shijian" id="start">&nbsp;&nbsp;&nbsp;<input type="text" style="width: 125px;height:25px;border-radius: 0px;margin-top: 19px;"  placeholder="结束时间" class="shijian" id="end">
+	<a onclick="inquiry()" id="chaxun"  class="search" >搜 索</a>&nbsp;&nbsp;&nbsp;
+	<a id="addnew1" onclick="add1()" class="add">新 增</a>
+	<select name="" id="selectState" style="height:35px; margin-top: 20px" onchange="changeState();">
+		<option value="1">时间卡</option>
+		<option value="2">私教卡</option>
+		<option value="3">储值卡</option>
+	</select>
+	<select name="" id="selectSort" style="height:35px; margin-top: 20px" onchange="changeSort();">
+		<option value="id">按id排序</option>
+		<option value="endtime">按结束时间排序排序</option>
+	</select>
+</div>
+<script>
+    lay('.shijian').each(function(){
+        laydate.render({
+            elem: this
+            ,trigger: 'click',
+            type: 'datetime',
+            format: 'yyyy-MM-dd HH:mm'
+        });
+    });
+</script>
+<!--<a  id="qingkong" onclick="qingkong()"><image style="margin-top: 10px" src="../assets/img/xinzeng.png"></image></a>-->
+<table class="table table-hover definewidth m10" id="tbl">
+	<thead id="thead">
+	<tr id="tabhead" class="theadColor">
+	</tr>
+	</thead>
+</table>
+
+<div class="inline pull-right page">
+	<div class="first" onclick="first()">第一页</div>
+	<div class="prev" onclick="initTable(-1)">上一页</div>
+	<div class="next" onclick="initTable(1)">下一页</div>
+	<div class="last" onclick="last()">最后一页</div>
+	<div class="clearfix"></div>
+	<input type="hidden" id="pagelab" style="width: 50px;height:22px;overflow:hidden;margin-right: 5px;text-align: center;border-radius: 0px" onkeyup="pageKeyUpHandler(event)">
+</div>
+
+
+
+
+
+<!--//弹出遮罩-->
+<div id="test"></div>
+
+<!--会员新增与编辑-->
+<div id="user_div">
+	<input type="image" src='../assets/img/guanbi.png' onclick="cancel_shield()" style="position: absolute;left: 745px;top: 10px;width: 27px;height: 27px">
+	<table class="table table-bordered " style="width: 600px;margin:0 auto;margin-top: 60px" id="user_table">
+	</table>
+</div>
+
+<div id="card_div">
+	<input type="image" src='../assets/img/guanbi.png' onclick="cancel_shield()" style="position: absolute;left: 745px;top: 10px;width: 27px;height: 27px">
+	<table class="table table-bordered " style="width: 600px;margin:0 auto;margin-top: 60px" id="card_table">
+	</table>
+</div>
+
+
+<div id="mytooltip"></div>
+
+<div id="test1"><span>数据同步中，请稍后......</span></div>
+
+</body>
+
+</html>

@@ -1,0 +1,1606 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<title></title>
+		<meta charset="UTF-8">
+		<link rel="stylesheet" type="text/css" href="../Css/bootstrap.css" />
+		<link rel="stylesheet" type="text/css" href="../Css/bootstrap-responsive.css" />
+		<link rel="stylesheet" type="text/css" href="../Css/style.css" />
+		<script type="text/javascript" src="../Js/jquery.js"></script>
+		<!--<script type="text/javascript" src="../Js/jquery.sorted.js"></script>-->
+		<script type="text/javascript" src="../Js/bootstrap.js"></script>
+		<script type="text/javascript" src="../Js/ckform.js"></script>
+		<script type="text/javascript" src="../Js/common.js"></script>
+		<!--<script type="text/javascript" src="../Js/jquery.min.js"></script>-->
+		<script type="text/javascript" src="../Js/jquery.nicescroll.js"></script>
+		<script type="text/javascript" src="../Js/js/laydate.js"></script>
+		<script type="text/javascript" src="../Js/ui.js"></script>
+		<script type="text/javascript" src="../Js/ursl.js"></script>
+		<style type="text/css">
+			* {
+				margin: 0;
+				padding: 0;
+				list-style-type: none;
+			}
+			
+			body {
+				padding-bottom: 40px;
+			}
+			
+			.sidebar-nav {
+				padding: 9px 0;
+			}
+			
+			@media (max-width: 980px) {
+				/* Enable use of floated navbar text */
+				.navbar-text.pull-right {
+					float: none;
+					padding-left: 5px;
+					padding-right: 5px;
+				}
+			}
+			
+			.lbs {
+				margin-top: 20px;
+				margin-left: 20px;
+			}
+			
+			#test {
+				width: 100%;
+				height: 100%;
+				background-color: #000;
+				position: absolute;
+				top: 0;
+				left: 0;
+				z-index: 2;
+				opacity: 0.3;
+				/*兼容IE8及以下版本浏览器*/
+				filter: alpha(opacity=30);
+				display: none;
+			}
+			
+			#log_window {
+				width: 800px;
+				height: 500px;
+				/*overflow: scroll;*/
+				background-color: white;
+				margin: auto;
+				position: absolute;
+				z-index: 3;
+				top: 0;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				display: none;
+				overflow: scroll;
+			}
+			
+			#log_window1 {
+				width: 500px;
+				/*height:200px;*/
+				height: auto;
+				min-height:100px;
+				background-color: #b1d6e8;
+				margin: auto;
+				position:absolute;
+				z-index: 4;
+				padding-bottom: 20px;
+				top: 25%;
+				/*bottom: 0;*/
+				/*left: 0;*/
+				left:50%;
+				transform:translateX(-250px);
+				display: none;
+			
+			}
+			
+			#checkbixDiv {
+				width: 500px;
+				height: 300px;
+				margin: 10px auto;
+				padding-right: 12px;
+				overflow: hidden;
+				position: absolute;
+    			bottom: 2px;
+			}
+			
+			.theadColor th {
+				background-color: #b1d6e8;
+				/*color: #1976b0;*/
+				font-weight: normal;
+			}
+			
+			.theadColor th span {
+				color: #1976b0;
+			}
+			
+			#chaxun {
+				margin-top: 10px;
+			}
+			
+			#addnew1 {
+				margin-top: 10px;
+			}
+			
+			#rolename {
+				margin-top: 19px;
+			}
+			
+			#span {
+				margin-left: 26px;
+			}
+			
+			.theadColor td,
+			.tableleft {
+				/*background-color: #b1d6e8;*/
+				/*color: #1976b0;*/
+				/*font-weight:normal;*/
+			}
+
+			.theadColor td,.tableleft  span {
+				color:#000;
+				font-weight: bold;
+			}
+			
+			#rolename {
+				padding-right: 26px;
+				background: url("../assets/img/fangdajing.png") no-repeat scroll right center transparent;
+			}
+			
+			#log_window2 {
+				width: 300px;
+				height: 200px;
+				min-height: 100px;
+				background-color: white;
+				border: 1px solid gainsboro;
+				margin: auto;
+				position: absolute;
+				z-index: 4;
+				padding-bottom: 20px;
+				top: 57%;
+				right: 38%;
+				display: none;
+			
+			}
+			
+			.error {
+				font-size: 12px;
+				color: red;
+				text-align: left;
+				padding-left: 30px;
+			}
+			
+			.ok {
+				font-size: 12px;
+				text-align: left;
+				padding-left: 30px;
+				
+			}
+		</style>
+
+		<script>
+			var page = 1;
+			var count = 10;
+			var maxpage = 0;
+			var dataarr = [];
+			var currentIndex = -1;
+			var localhost = " ";
+			var table, role, res;
+			var fields = [];
+			var addable1, updateable1, delable1, authority, pms;
+			var statetype;
+			var arrSid = [];
+			var cbcomps = [];
+			var dataarr1 = [];
+			var level;
+			var flag;
+			var mgrid;
+			var nowurl='';
+			var nowvaltext1;
+			var nowvaltext2;
+			var nowvaltext3;
+			var nowvaltext4;
+			var mailid;
+			var url1 =urls;
+//			var url1="192.168.1.248";
+			//加载列表
+			function init() {
+
+				localhost = window.sessionStorage ? sessionStorage.getItem("lh") : Cookie.read("lh");
+				table = 3;
+				var uname = window.sessionStorage ? sessionStorage.getItem("mgr") : Cookie.read("mgr");
+				manager = jQuery.parseJSON(uname);
+				mgrid = manager.id;
+				mid = manager.mid;
+				role = manager.type;
+				pms = window.sessionStorage ? sessionStorage.getItem("邮 件 管 理") : Cookie.read("邮 件 管 理");
+				authority = jQuery.parseJSON(pms);
+				addable1 = authority.addable;
+				updateable1 = authority.updateable;
+				delable1 = authority.delable;
+				if (null == uname || undefined == uname) {
+					parent.window.location = '../Public/login.html';
+					return;
+				}
+				var currentPage = window.sessionStorage ? sessionStorage.getItem("currentPagemail") : Cookie.read("currentPagemail");
+				if (null != currentPage && undefined != currentPage && currentPage.length > 0) {
+					window.location = currentPage;
+				}
+				if (window.sessionStorage) {
+					page = sessionStorage.getItem("mail_page");
+				} else {
+					page = Cookie.read("mail_page");
+				}
+				if (null == page)
+					page = 1;
+				document.getElementById('pagelab').value = page;
+				var Sys = {};
+				var ua = navigator.userAgent.toLowerCase();
+				var s;
+				(s = ua.match(/msie ([\d.]+)/)) ? Sys.ie = s[1]:
+					(s = ua.match(/firefox\/([\d.]+)/)) ? Sys.firefox = s[1] :
+					(s = ua.match(/chrome\/([\d.]+)/)) ? Sys.chrome = s[1] :
+					(s = ua.match(/opera.([\d.]+)/)) ? Sys.opera = s[1] :
+					(s = ua.match(/version\/([\d.]+).*safari/)) ? Sys.safari = s[1] : 0;
+				if (Sys.ie) { //Js判断为IE浏览器
+					alert('http://www.wangjinhai119.com' + Sys.ie);
+					if (Sys.ie == '9.0') { //Js判断为IE 9
+					} else if (Sys.ie == '8.0') { //Js判断为IE 8
+					} else {}
+				}
+				if (Sys.firefox) { //Js判断为火狐(firefox)浏览器
+					document.getElementById('pagelab').style.marginTop = '19px';
+				}
+				if (Sys.chrome) { //Js判断为谷歌chrome浏览器
+					document.getElementById('pagelab').style.marginTop = '18px';
+				}
+				if (Sys.opera) { //Js判断为opera浏览器
+					alert('http://www.wangjinhai119.com' + Sys.opera);
+				}
+				if (Sys.safari) { //Js判断为苹果safari浏览器
+					document.getElementById('pagelab').style.marginTop = '9px';
+				}
+				initFields();
+			
+			}
+
+			function initSidtxt() {
+				
+				var uname = window.sessionStorage ? sessionStorage.getItem("mgr") : Cookie.read("mgr");
+//				console.log(uname);
+				var un = JSON.parse(uname);
+				uuid = un.id;
+				mid=un.mid;
+//				mid = manager.mid;
+//				mgrid = manager.id;
+//				alert(uuid)
+//				alert(uuid)
+				var url = "http://"+localhost+":8080/fkds1.5.tools/activity/getActivityItem.action?mgrid=" + uuid + "&mid=" + mid;
+				$.ajax({
+					type: "get",
+					contentType: "application/xml",
+					url: url,
+					success: function(data) {
+						
+						var res = jQuery.parseJSON(data);
+						arrSid = [];
+						for (var i = 0; i < res.res.length; i++) {
+							arrSid.push(res.res[i]);
+						}
+						
+						
+					},
+					error: function(err) {
+						alert("err:" + err);
+					}
+				});
+			}
+
+			function initTableData(){
+				var uname = window.sessionStorage ? sessionStorage.getItem("mgr") : Cookie.read("mgr");
+				manager = jQuery.parseJSON(uname);
+				mgrid = manager.id;
+				mid = manager.mid;
+				var obj=new Object();
+//              obj.type=1;
+				obj.page=page;
+				obj.count=count;
+                var datajson=JSON.stringify(obj);
+				$.ajax({
+					type: "post",
+                    contentType:"application/x-www-form-urlencoded",
+                    data:datajson,
+                    dataType:"json",
+                    url:"http://" + url1 + ":6078/backstagegetmail",
+					success: function(data) {
+						//var res = jQuery.parseJSON(data);
+						var table1 = document.getElementById('tbl');
+						dataarr = [];
+						while (table1.rows.length > 1) {
+							table1.deleteRow(1);
+						}
+						var delid = -1;
+						var delurl = "";
+						if (window.sessionStorage) {
+							delid = sessionStorage.getItem("deleteId");
+							delurl = sessionStorage.getItem("delurl");
+						} else {
+							delid = Cookie.read("deleteId");
+							delurl = Cookie.read("delurl");
+						}
+						//console.log(data.mailmap);
+                        //设置排序
+                        data.mailmap.sort(function sortId(a,b){
+                            return b.id-a.id
+                        });
+
+						for (var i = 0; i < data.mailmap.length; i++) {
+							dataarr.push(data.mailmap[i]);
+							var row = table1.insertRow(table1.rows.length);
+							for (var k = 0; k < fields.length; k++) {
+								var cell = row.insertCell(k);
+								cell.innerHTML = data.mailmap[i][fields[k].fieldname];
+//								if (data.mailmap[i][fields[k].fieldname=="邮件接收人") {
+//									
+//										cell.innerHTML = data.mailmap[i].
+//									
+//								}
+							}
+							//操作
+							var optcell = row.insertCell(fields.length);
+						if (data.mailmap[i].issend == 1) {
+							optcell.innerHTML = 
+								"<button type='button'  id='bianji" + i + "' style='border-radius:10px;width:70px;heigth:50px;'disabled>已发送</button>" +
+//								"&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/fujian.png' onclick='attachment(" + data.mailmap[i].id + ")'>" +
+								"&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/shanchu.png' id='shanchu" + i + "' onmousemove='isdisadd(this)' onmouseout='isdisout(this)' onclick='del(" + data.mailmap[i].id + ")'>";
+
+						} else if (data.mailmap[i].issend == 0) {
+							optcell.innerHTML = 
+								"<button type='button'  id='bianji" + i + "' onclick='send(" + data.mailmap[i].id + ")' style='border-radius:10px;width:70px;heigth:50px;'>发送</button>" +
+//								"<input type='image' src='../assets/img/bianji.png' id='bianji" + i + "' onmousemove='isdisadd(this)' onmouseout='isdisout(this)' onclick='edit(" + i + ")'>" +
+//								"&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/fujian.png' onclick='attachment(" + data.mailmap[i].id + ")'>" +
+								"&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/shanchu.png' id='shanchu" + i + "' onmousemove='isdisadd(this)' onmouseout='isdisout(this)' onclick='del(" + data.mailmap[i].id + ")'>";
+						}
+							if (data.mailmap[i].id + "" == delid + "") {
+								optcell.innerHTML = '已删除同步中...';
+							}
+						}
+						
+						maxpage = Math.ceil(data.respVo.resultDesc/count);
+                        //设置分页
+                        var first=$(".page>div>div:nth-child(1)");
+                        var prev=$(".page>div>div:nth-child(2)");
+                        var next=$(".page>div>div:nth-child(3)");
+                        var last=$(".page>div>div:nth-child(4)");
+                        if(page>1){
+                            first.attr("class","blue")
+                        }else{
+                            first.attr("class","gray")
+                        }
+                        if(page>1){
+                            prev.attr("class","blue")
+                        }else{
+                            prev.attr("class","gray")
+                        }
+                        if(page<maxpage){
+                            next.attr("class","blue")
+                        }else{
+                            next.attr("class","gray")
+                        }
+                        if(page<maxpage){
+                            last.attr("class","blue")
+                        }else{
+                            last.attr("class","gray")
+                        }
+//						initSidtxt();
+						gettouser();
+					},
+					error: function(err) {
+						alert("err:" + err);
+					}
+				});
+			}
+			//动态表头
+			function initFields() {
+//				var url = "http://" + localhost + ":8080/fkds1.5.tools/permission/getPermissionFieldByRidSmid.action?rid=" + role + "&smid=" + table;
+				var Field=new Object();
+				Field.rid=role;
+				Field.smid=table;
+				var FieldJson=JSON.stringify(Field);
+				$.ajax({
+					type: "post",
+					contentType:"application/x-www-form-urlencoded",
+					data:FieldJson,
+					dataType:"json",
+					url:"http://" + url1 + ":6078/backstagegetpermissionfieldbyridsmid",
+					success: function(data) {
+						fields = [];
+						for (var i = 0; i < data.permissionfieldmap.length; i++) {
+							fields.push(data.permissionfieldmap[i]);
+						}
+						var th = document.getElementById("tabhead");
+						while (th.cells.length > 0) {
+							th.deleteCell(0);
+						}
+						for (var i = 0; i < fields.length; i++) {
+							var headcell = th.insertCell(i);
+							headcell.innerHTML = "<th><span>" + fields[i].name + "</span></th>";
+							if ("状 态" == fields[i].name) {
+								statetype = i;
+							}
+						}
+						var headoptcell = th.insertCell(fields.length);
+						headoptcell.innerHTML = "<th><span>" + "操 作" + "</span></th>";
+						initTableData();
+					},
+					error: function(err) {
+						alert("err:" + err);
+					}
+				});
+			}
+			//删除
+			function del(idx){
+				if (delable1 == 0) {
+					return;
+				}
+				if (confirm("确定要删除吗？")) {
+						var obj=new Object();
+						obj.index=idx,
+		                datajson=JSON.stringify(obj);
+					$.ajax({
+						type: "post",
+	                    contentType:"application/x-www-form-urlencoded",
+	                    data:datajson,
+	                    dataType:"json",
+	                    url:"http://" + url1 + ":6078/backstagedelmail",
+						success: function(data) {
+							if (window.sessionStorage) {
+								sessionStorage.setItem("deleteId", idx);
+//								sessionStorage.setItem("delurl", url);
+							} else {
+								Cookie.write("deleteId", idx);
+//								Cookie.write("delurl", url);
+							}
+							init();
+						},
+						error: function(err) {
+							alert("err:" + err);
+						}
+					});
+				}
+			}
+			
+			
+		function first(){
+            if(document.getElementById("pagelab").value==1){
+                mizhu.alert('','当前已经为第一页!','iconfont-close');
+            }
+            else{
+                initTable(1,true);
+            }
+
+        }
+        function last(){
+
+            if(document.getElementById("pagelab").value==maxpage){
+                mizhu.alert('','当前已经为最后页!','iconfont-close');
+            }
+            else{
+                initTable(parseInt(maxpage),true);
+            }
+
+        }
+			
+			
+			//分页
+			function initTable(step, flag = false) {
+				step = parseInt(step);
+				var p = parseInt(page) + parseInt(step);
+				if (flag) {
+					if (step < 1 || step > maxpage) {
+						mizhu.alert('','页码超标','iconfont-close');
+						return;
+					}
+					page = step;
+				} else {
+					page = p;
+					if (page < 1 || page > maxpage) {
+						page -= step;
+						return;
+					}
+				}
+				var obj=new Object();
+//              obj.type=1;
+				obj.page=page;
+				obj.count=count;
+                datajson=JSON.stringify(obj);
+				$.ajax({
+					type: "post",
+                    contentType:"application/x-www-form-urlencoded",
+                    data:datajson,
+                    dataType:"json",
+                    url:"http://" + url1 + ":6078/backstagegetmail",
+					success: function(data) {
+//						var res = jQuery.parseJSON(data);
+						var table1 = document.getElementById('tbl');
+						dataarr = [];
+						while (table1.rows.length > 1) {
+							table1.deleteRow(1);
+						}
+						var delid = -1;
+						var delurl = "";
+						if (window.sessionStorage) {
+							delid = sessionStorage.getItem("deleteId");
+							delurl = sessionStorage.getItem("delurl");
+						} else {
+							delid = Cookie.read("deleteId");
+							delurl = Cookie.read("delurl");
+						}
+                        //设置排序
+                        data.mailmap.sort(function sortId(a,b){
+                            return b.id-a.id
+                        });
+						for (var i = 0; i < data.mailmap.length; i++) {
+							dataarr.push(data.mailmap[i]);
+							var row = table1.insertRow(table1.rows.length);
+							for (var k = 0; k < fields.length; k++) {
+								var cell = row.insertCell(k);
+								cell.innerHTML = data.mailmap[i][fields[k].fieldname];
+								
+							}
+							//操作
+							var optcell = row.insertCell(fields.length);
+						if (data.mailmap[i].issend == 1) {
+							optcell.innerHTML = 
+								"<button type='button'  id='bianji" + i + "' style='border-radius:10px;width:70px;heigth:50px;'disabled>已发送</button>" +
+//								"&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/fujian.png' onclick='attachment(" + data.mailmap[i].id + ")'>" +
+								"&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/shanchu.png' id='shanchu" + i + "' onmousemove='isdisadd(this)' onmouseout='isdisout(this)' onclick='del(" + data.mailmap[i].id + ")'>";
+
+						} else if (data.mailmap[i].issend == 0) {
+							optcell.innerHTML = 
+								"<button type='button'  id='bianji" + i + "' onclick='send(" + data.mailmap[i].id + ")' style='border-radius:10px;width:70px;heigth:50px;'>发送</button>" +
+//								"<input type='image' src='../assets/img/bianji.png' id='bianji" + i + "' onmousemove='isdisadd(this)' onmouseout='isdisout(this)' onclick='edit(" + i + ")'>" +
+//								"&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/fujian.png' onclick='attachment(" + data.mailmap[i].id + ")'>" +
+								"&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/shanchu.png' id='shanchu" + i + "' onmousemove='isdisadd(this)' onmouseout='isdisout(this)' onclick='del(" + data.mailmap[i].id + ")'>";
+						}
+							if (data.mailmap[i].id + "" == delid + "") {
+								optcell.innerHTML = '已删除同步中...';
+							}
+						}
+						maxpage = Math.ceil(data.respVo.resultDesc / count);
+						document.getElementById('pagelab').value = page;
+                        //设置分页
+                        var first=$(".page>div>div:nth-child(1)");
+                        var prev=$(".page>div>div:nth-child(2)");
+                        var next=$(".page>div>div:nth-child(3)");
+                        var last=$(".page>div>div:nth-child(4)");
+                        if(page>1){
+                            first.attr("class","blue")
+                        }else{
+                            first.attr("class","gray")
+                        }
+                        if(page>1){
+                            prev.attr("class","blue")
+                        }else{
+                            prev.attr("class","gray")
+                        }
+                        if(page<maxpage){
+                            next.attr("class","blue")
+                        }else{
+                            next.attr("class","gray")
+                        }
+                        if(page<maxpage){
+                            last.attr("class","blue")
+                        }else{
+                            last.attr("class","gray")
+                        }
+						if (window.sessionStorage) {
+							sessionStorage.setItem("mail_page", page);
+						} else {
+							Cookie.write("mail_page", page);
+						}
+					},
+					error: function(err) {
+						alert("err:" + err);
+					}
+				});
+			}
+			//编辑
+			function edit(idx) {
+		
+				getmanager();
+				if (updateable1 == 0) {
+					return;
+				}
+				var s = document.getElementById("test");
+				s.style.display = "block";
+				var l = document.getElementById("log_window");
+				l.style.display = "block";
+				currentIndex = idx;
+				
+				var page1=1;
+				var url = "http://" + localhost + ":8080/fkds1.5.tools/mail/getMailAttachmentByMid.action?page=" + page1 + "&count=" + count + "&mid=" + dataarr[idx].id;
+				$.ajax({
+					type: "get",
+					contentType: "application/xml",
+					url:url ,
+					success: function(data) {
+						var res = jQuery.parseJSON(data);
+						var table1 = document.getElementById('tbl');
+						 dataarr1 = [];
+//						 alert(url)
+
+						for (var i = 0; i < res.res.length; i++) {
+			
+							console.log(res.res[i])
+							dataarr1.push(res.res[i]);	
+
+					for(var i=0;i<dataarr1.length;i++){
+		
+							document.getElementById('artnumtxt').value = dataarr1[i].artnum;
+							document.getElementById('cointxt').value = dataarr1[i].coin;
+							document.getElementById('diamondtxt').value = dataarr1[i].diamond;
+					
+							
+//							console.log(dataarr1[i].artnum);
+							var select = document.getElementById("sidtxt");
+							var cbidx = dataarr1[i].sid;
+						}
+					}
+							
+							
+							
+									
+					if(level != 1){
+					document.getElementById('cointxt').disabled = "disabled";
+					document.getElementById('diamondtxt').disabled = "disabled";
+					}else{
+						document.getElementById('cointxt').disabled = "";
+						document.getElementById('diamondtxt').disabled = "";
+					}
+							
+							
+							
+							while (select.options.length > 0) {
+								select.remove(0);
+							}
+					
+							for (var j = 0; j < arrSid.length; j++) {							
+
+								select.options.add(new Option(arrSid[j].shopid + "、" + arrSid[j].shop_name));
+								if (cbidx+'' == arrSid[j].shopid+'') {
+									select.options[j].selected = true;
+								}
+							}
+//							if(select.options.length==0){
+//								document.getElementById('load').style.display="block";
+//								}
+						
+				    }
+				});
+				
+				getObj('idtxt').value = dataarr[idx].id;
+				getObj('touserstxt').value = dataarr[idx].tousers;
+				getObj('touserstxt').disabled = 'disabled';
+				getObj('contexttxt').value = dataarr[idx].context;
+				getObj('timestamptxt').value = dataarr[idx].timestamp;
+				getObj('mtitletxt').value = dataarr[idx].mtitle;
+//				if (dataarr[idx].issend == 1) {
+//					getObj('issendtxt').value = "未发送";
+//				} else if (dataarr[idx].issend == 0) {
+//					getObj('issendtxt').value = "已发送";
+//				}
+//				getObj('issendtxt').disabled = 'disabled';
+			}
+
+			function getObj(objid) {
+				return document.getElementById(objid);
+			}
+			//关闭弹出的div
+			function cancel_shield() {
+				var s = document.getElementById("test");
+				s.style.display = "none";
+				var l = document.getElementById("log_window");
+				l.style.display = "none";
+				var l1 = document.getElementById("log_window1");
+				l1.style.display = "none";
+				var m1 = document.getElementById("log_window2");
+				m1.style.display = "none";
+				var m = document.getElementById("mytooltip");
+				m.style.display = "none";
+			}
+			//新增
+			function add1() {
+				
+				if (addable1 == 0) {
+					return;
+				}
+				currentIndex = -1;
+				var s = document.getElementById("test");
+				s.style.display = "block";
+				var l = document.getElementById("log_window");
+				l.style.display = "block";
+				
+//				var select = document.getElementById("sidtxt");
+//				while (select.options.length > 0) {
+//					select.remove(0);
+//				}
+//				for (var i = 0; i < arrSid.length; i++) {
+//					select.options.add(new Option(arrSid[i].shopid + "、" + arrSid[i].shop_name));
+//				}
+				
+
+				
+				document.getElementById('idtxt').value = '';
+				document.getElementById('touserstxt').value = '';
+				document.getElementById('touserstxt').disabled = '';
+				document.getElementById('contexttxt').value = '';
+//				document.getElementById('timestamptxt').value = '';
+				document.getElementById('mtitletxt').value = '';
+//				document.getElementById('issendtxt').value = '';
+			}
+				
+			function onSavebtnClickHandler() {
+				if(checkcontext()&&checktitle()){
+				var uname = window.sessionStorage ? sessionStorage.getItem("mgr") : Cookie.read("mgr");
+				manager = jQuery.parseJSON(uname);
+				mid = manager.mid;
+				var urls;
+//				alert(mgrid)
+				
+					
+				
+				if (currentIndex >= 0) {
+//					url = "http://" + localhost + ":8080/fkds1.5.tools/mail/updateMail.action?id=" + dataarr[currentIndex].id +
+//						"&tousers=" + document.getElementById('touserstxt').value +
+//						"&context=" + document.getElementById('contexttxt').value +
+//						"&timestamp=" + document.getElementById('timestamptxt').value +
+//						"&mtitle=" + document.getElementById('mtitletxt').value +
+//						"&sid="+document.getElementById('sidtxt').value.split("、")[0]+
+//						"&artnum="+document.getElementById('artnumtxt').value+
+//						"&coin="+document.getElementById('cointxt').value+
+//						"&diamond=" + document.getElementById('diamondtxt').value+
+//						"&issend=" + 1+
+//						"&mgrid=" + mgrid;
+//						alert(url+'edit')				
+				} else {
+					
+					var obj=new Object();
+						obj.touser=document.getElementById('touserstxt').value,
+						obj.context=document.getElementById('contexttxt').value,
+						obj.mtitle=document.getElementById('mtitletxt').value,
+						obj.mid="0",
+						obj.servid="0",
+						datajson=JSON.stringify(obj);
+						urls="http://" + url1 + ":6078/backstageaddmail";
+					
+					
+					
+					
+//					url = "http://" + localhost + ":8080/fkds1.5.tools/mail/addMail.action?" +
+//						"tousers=" + document.getElementById('touserstxt').value +
+//						"&context=" + document.getElementById('contexttxt').value +
+//						"&timestamp=" + document.getElementById('timestamptxt').value +
+//						"&mtitle=" + document.getElementById('mtitletxt').value +
+//						"&sid="+document.getElementById('sidtxt').value.split("、")[0]+
+//						"&artnum="+document.getElementById('artnumtxt').value+
+//						"&coin="+document.getElementById('cointxt').value+
+//						"&diamond=" + document.getElementById('diamondtxt').value+
+//						"&issend=" + 1+
+//						"&mgrid=" + mgrid+
+//						"&mid="+mid;
+//						alert(url+'add')
+				}
+				$.ajax({
+					type: "post",
+                    contentType:"application/x-www-form-urlencoded",
+                    data:datajson,
+                    dataType:"json",
+                    url:urls,
+					success: function(data) {
+						init();
+						mizhu.alert('', '保存成功','iconfont-gou');                                        
+                        cancel_shield();
+						
+					},
+					error: function(err) {
+						alert("err:" + err);
+					}
+				});
+				}else{
+					mizhu.alert('', '请正确完善信息','iconfont-close');
+				}
+			
+			}
+			//查询
+			function inquiry() {
+				page = 1;
+				document.getElementById('pagelab').value = page;
+				if (window.sessionStorage) {
+					sessionStorage.setItem("mail_page", page);
+				} else {
+					Cookie.write("mail_page", page);
+				}
+				$.ajax({
+					type: "get",
+					contextType: "application/xml",
+					url: "http://" + localhost + ":8080/fkds1.5.tools/mail/getMailByName.action?mtitle=" + document.getElementById('rolename').value + "&page=1&count=10",
+					success: function(data) {
+						res = jQuery.parseJSON(data);
+						var table1 = document.getElementById('tbl');
+						while (table1.rows.length > 1) {
+							table1.deleteRow(1);
+						}
+						var delid = -1;
+						var delurl = "";
+						if (window.sessionStorage) {
+							delid = sessionStorage.getItem("deleteId");
+							delurl = sessionStorage.getItem("delurl");
+						} else {
+							delid = Cookie.read("deleteId");
+							delurl = Cookie.read("delurl");
+						}
+						dataarr = [];
+						for (var i = 0; i < res.res.length; i++) {
+							dataarr.push(res.res[i]);
+							var row = table1.insertRow(table1.rows.length);
+							for (var k = 0; k < fields.length; k++) {
+								var cell = row.insertCell(k);
+								cell.innerHTML = res.res[i][fields[k].fieldname];
+								if (k == statetype) {
+									if (1 == res.res[i][fields[k].fieldname]) {
+										cell.innerHTML = "未发送";
+									} else if (0 == res.res[i][fields[k].fieldname]) {
+										cell.innerHTML = "已发送";
+									}
+								}
+							}
+							//操作
+
+							var optcell = row.insertCell(fields.length);
+
+							if (data.mailmap[i].issend == 1) {
+							optcell.innerHTML = 
+								"<button type='button'  id='bianji" + i + "' style='border-radius:10px;width:70px;heigth:50px;'disabled>已发送</button>" +
+//								"&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/fujian.png' onclick='attachment(" + data.mailmap[i].id + ")'>" +
+								"&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/shanchu.png' id='shanchu" + i + "' onmousemove='isdisadd(this)' onmouseout='isdisout(this)' onclick='del(" + data.mailmap[i].id + ")'>";
+
+						} else if (data.mailmap[i].issend == 0) {
+							optcell.innerHTML = 
+								"<button type='button'  id='bianji" + i + "' onclick='send(" + data.mailmap[i].id + ")' style='border-radius:10px;width:70px;heigth:50px;'>发送</button>" +
+//								"<input type='image' src='../assets/img/bianji.png' id='bianji" + i + "' onmousemove='isdisadd(this)' onmouseout='isdisout(this)' onclick='edit(" + i + ")'>" +
+//								"&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/fujian.png' onclick='attachment(" + data.mailmap[i].id + ")'>" +
+								"&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/shanchu.png' id='shanchu" + i + "' onmousemove='isdisadd(this)' onmouseout='isdisout(this)' onclick='del(" + data.mailmap[i].id + ")'>";
+						}
+							if (data.mailmap[i].id + "" == delid + "") {
+								optcell.innerHTML = '已删除同步中...';
+							}
+						}
+					},
+					error: function(err) {
+						alert("err:" + err);
+					}
+				});
+			}
+			
+			
+			function send(id){
+				$("#myModal").modal("show");
+				mailid=id;
+//				alert(id);
+//				var obj=new Object();
+//				obj.mailid=id;
+//              var datajson=JSON.stringify(obj);
+//				$.ajax({
+//					type: "post",
+//                  contentType:"application/x-www-form-urlencoded",
+//                  data:datajson,
+//                  dataType:"json",
+//                  url:"http://" + url1 + ":6078/backstagesendmail",
+//                  success:function(data){
+//                  	if(data.resultCode==0){
+//                  		alert("发送成功!");
+//                  		location.reload();
+//                  	}
+//                  },
+//                  error:function(){
+//                  	
+//                  }
+//                })
+			}
+			
+			
+			  //  消息类型
+		  function ceshi() {
+//		  	alert($('#shabi option:selected').index());
+		  	if($('#shabi option:selected').index()==-1){
+				alert("请选消息类型!");
+				return;
+			}
+		    var obj=new Object();
+				obj.mailid=mailid;
+				obj.servid=$('#shabi option:selected').val();
+            	var datajson=JSON.stringify(obj);		      		    
+		    $.ajax({
+		      type: "post",
+		      url: "http://" + url1 + ":6078/backstagesendmail",
+		      contentType: "application/x-www-form-urlencoded",
+		      data:datajson,
+		      dataType: "json",
+		      success: function (data) {
+		        if (data.resultCode==0) {
+		        	
+		         	mizhu.alert('', '发送成功','iconfont-gou');  
+		         	init();
+		        }
+		        else {
+		          alert(data.resultDesc);
+		        }
+		      },
+		      error: function (err) {
+		        alert("err:" + err);
+		      }
+		    });
+		  }
+
+			function attachment(id) {
+				if (window.localStorage) {
+					localStorage.setItem("mid", id);
+				} else {
+					Cookie.write("mid", id);
+				}
+				window.location = "attachment.html";
+			}
+
+			function clickTouser() {
+				var l = document.getElementById("log_window1");
+				l.style.display = "block";
+			}
+			//关闭弹出的div
+			function cancel_shield1() {
+				var l = document.getElementById("log_window1");
+				l.style.display = "none";
+				var m1 = document.getElementById("log_window2");
+				m1.style.display = "none";
+				document.getElementById("touserstxt").value = document.getElementById("txt").value;
+			}
+			//内容判断	
+			function checkcontext() {
+				var reg = /^(([\u4e00-\u9fa5])|[a-zA-Z0-9-_]|[, . ; : '' "" 、 ! () # $ % & *^@*|\\\\<>/?\ \s*]){1,70}$/;
+				if (!reg.test(document.getElementById("contexttxt").value)) {
+					document.getElementById("contexttxtinfo").style.display = "block";
+					document.getElementById("contexttxt").style.border = "1px solid red";
+					document.getElementById("contexttxtinfo").className = "error";
+					return false;
+				} else {
+					document.getElementById("contexttxt").style.border = "";
+					document.getElementById("contexttxtinfo").className = "ok";
+					document.getElementById("contexttxtinfo").style.display = "none";
+					return true;
+				}
+			}
+
+			function checktitle() {
+				var reg = /^(([\u4e00-\u9fa5])|[a-zA-Z0-9-_]|[, . ; : '' "" 、 ! () # $ % & *^@*|\\\\<>/?\ \s*]){1,20}$/;
+				if (!reg.test(document.getElementById("mtitletxt").value)) {
+					document.getElementById("mtitletxtinfo").style.display = "block";
+					document.getElementById("mtitletxt").style.border = "1px solid red";
+					document.getElementById("mtitletxtinfo").className = "error";
+					return false;
+				} else {
+					document.getElementById("mtitletxt").style.border = "";
+					document.getElementById("mtitletxtinfo").className = "ok";
+					document.getElementById("mtitletxtinfo").style.display = "none";
+					return true;
+				}
+			}
+
+			//验证内容
+			function checknum() {
+				var reg = /^\d+$/;
+				if (!reg.test(document.getElementById("artnumtxt").value)) {
+					document.getElementById("artnumtxtinfo").style.display = "block";
+					document.getElementById("artnumtxt").style.border = "1px solid red";
+					document.getElementById("artnumtxtinfo").className = "error";
+					return false;
+				} else {
+					document.getElementById("artnumtxt").style.border = "";
+					document.getElementById("artnumtxtinfo").className = "ok";
+					document.getElementById("artnumtxtinfo").style.display = "none";
+					return true;
+				}
+			}
+
+			function checkcoin() {
+				var reg = /^\d+$/;
+				if (!reg.test(document.getElementById("cointxt").value)) {
+					document.getElementById("cointxtinfo").style.display = "block";
+					document.getElementById("cointxt").style.border = "1px solid red";
+					document.getElementById("cointxtinfo").className = "error";
+					return false;
+				} else {
+					document.getElementById("cointxt").style.border = "";
+					document.getElementById("cointxtinfo").className = "ok";
+					document.getElementById("cointxtinfo").style.display = "none";
+					return true;
+				}
+			}
+
+			function checkdiamond() {
+				var reg = /^\d+$/;
+				if (!reg.test(document.getElementById("diamondtxt").value)) {
+					document.getElementById("diamondtxtinfo").style.display = "block";
+					document.getElementById("diamondtxt").style.border = "1px solid red";
+					document.getElementById("diamondtxtinfo").className = "error";
+					return false;
+				} else {
+					//					alert(document.getElementById("auditortxt").value.length)
+					document.getElementById("diamondtxt").style.border = "";
+					document.getElementById("diamondtxtinfo").className = "ok";
+					document.getElementById("diamondtxtinfo").style.display = "none";
+					return true;
+				}
+			}
+
+
+
+
+
+
+
+
+
+			function isdisabled() {
+				if (checkcontext() && checktitle()) {
+					document.getElementById("saveallinfo").disabled = false;
+					document.getElementById("saveallinfo").style.cursor = "pointer";
+				} else {
+					document.getElementById("saveallinfo").disabled = true;
+					document.getElementById("saveallinfo").style.cursor = "not-allowed";
+				}
+			}
+			//查询按钮添加回车事件			
+			document.onkeydown = function(e) {
+				switch (e.keyCode) {
+					case 13:
+						if (document.getElementById("rolename") == document.activeElement) {
+							document.getElementById("searchinfo").click();
+						} else {
+							initTable(parseInt(document.getElementById("pagelab").value), true);
+						}
+						break;
+				}
+			}
+			//权限增删改
+			function isdisadd(obj) {
+				var idstr = obj.id;
+				if (addable1 == 0 && idstr.indexOf("add") >= 0) {
+					document.getElementById(idstr).disabled = 'disabled';
+					document.getElementById(idstr).style.cursor = "not-allowed";
+				}
+				if (updateable1 == 0 && idstr.indexOf("bian") >= 0) {
+					document.getElementById(idstr).disabled = 'disabled';
+					document.getElementById(idstr).style.cursor = "not-allowed";
+				}
+				if (delable1 == 0 && idstr.indexOf("shan") >= 0) {
+					document.getElementById(idstr).disabled = 'disabled';
+					document.getElementById(idstr).style.cursor = "not-allowed";
+				}
+			}
+
+			function isdisout(obj) {
+				var idstr = obj.id;
+				document.getElementById(idstr).disabled = false;
+				document.getElementById(idstr).style.cursor = "pointer";
+			}
+			//审核人
+			function check() {
+				var l = document.getElementById("log_window2");
+				l.style.display = "block";
+				var url = "http://" + localhost + ":8080/fkds1.5.tools/systemManager/getManagerByMid.action?page=1&count=9999&mid=" + mid;
+				$.ajax({
+					type: "get",
+					contextType: "application/xml",
+					url: url,
+					success: function(data) {
+						var res = jQuery.parseJSON(data);
+						var chb = document.getElementById('pp');
+						//清空数组
+						arrCheckbox = [];
+						for (var i = 0; i < res.res.length; i++) {
+							arrCheckbox.push(res.res[i]);
+						}
+						//循环之前删除主键
+						while (chb.hasChildNodes()) {
+							chb.removeChild(chb.firstChild);
+						}
+						for (var i = 0; i <= arrCheckbox.length; i++) {
+							checkbox = document.createElement('input');
+							var br = document.createElement('br');
+							checkbox.setAttribute("type", "checkbox");
+							checkbox.setAttribute("index", i);
+							cbcomps.push(checkbox);
+							var myText = document.createTextNode(arrCheckbox[i].id);
+							chb.appendChild(checkbox);
+							chb.appendChild(myText);
+							if (i % 5 == 0) {
+								chb.appendChild(br);
+							}
+						}
+					},
+					error: function(err) {
+						alert("err:" + err);
+					}
+				});
+			}
+			//关闭弹出的div
+			function cancel_shield2() {
+				var l = document.getElementById("log_window2");
+				l.style.display = "none";
+			}
+			$(function() {
+				console.log($("pp").scrollLeft());
+			});
+
+			function confimbtn() {
+				idsarr = [];
+				namesarr = [];
+				for (var i = 0; i < cbcomps.length; i++) {
+					var cb = cbcomps[i];
+					index = parseInt(cb.getAttribute("index"));
+					if (cb.checked) {
+						idsarr.push(arrCheckbox[index].id);
+						namesarr.push(arrCheckbox[index].name);
+					}
+				}
+				sendto = idsarr.toString();
+				document.getElementById('auditortxt').value = namesarr.toString();
+				var l = document.getElementById("log_window2");
+				l.style.display = "none";
+//				checkauditor();
+//				isdisabled();
+			}
+
+			function quxiaobtn() {
+				var l = document.getElementById("log_window2");
+				l.style.display = "none";
+			}
+					
+			function deltr(index){
+
+			       $("tr[id='"+index+"']").remove();
+//			       isdisabled();			       
+			}
+			
+			//管理员权限
+			
+			function getmanager() {
+				$.ajax({
+					type: "get",
+					url: "http://" + localhost + ":8080/fkds1.5.tools/systemManager/managerList.action?page=1&count=10",
+					contentType: "application/xml",
+					success: function(data) {
+						var res = jQuery.parseJSON(data);
+						info = [];
+						for (var i = 0; i < res.res.length; i++) {
+							info.push(res.res[i]);
+						}
+						var uname = window.sessionStorage ? sessionStorage.getItem("mgr") : Cookie.read("mgr");
+//						alert(uname)
+						var un = JSON.parse(uname);
+						
+						for(var i = 0;i<info.length;i++){
+							if(un.name == info[i].name){
+								level = info[i].level;
+								uuid = info[i].id;
+//								alert(uuid)
+							}
+						}
+					}
+				});
+			}
+	
+			
+		</script>
+</head>
+
+	<body onload="init()">
+		<!--&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" style="width: 200px;height:25px;border-radius: 0px" name="rolename" id="rolename" class="abc input-default" placeholder="&nbsp;按标题查询" value="" data-genuitec-lp-enabled="false" data-genuitec-file-id="wc2-95" data-genuitec-path="/fkds1.5.tools/WebRoot/tools/mail/index.html">&nbsp;&nbsp;&nbsp;
+		<a href='#' onclick="inquiry()" id="searchinfo">
+			<image style="margin-top: 10px" src="../assets/img/chaxun.png"></image>
+		</a>&nbsp;&nbsp;&nbsp;-->
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<a id="addnew1" onmouseover="isdisadd(this)" onclick="add1()" class="add2">新  增</a>
+
+		<table class="table table-hover definewidth m10" id="tbl">
+			<thead>
+				<tr id="tabhead" class="theadColor">
+					<!--<th><span>id</span></th>
+			        <th><span>收 件 人</span></th>
+			        <th><span>内 容</span></th>
+			        <th><span>时 间 戳</span></th>
+			        <th><span>标 题</span></th>
+			        <th><span>状 态</span></th>
+			        <th style="width: 230px"><span>操 作</span></th>-->
+				</tr>
+			</thead>
+		</table>
+
+		<div class="inline pull-right page">
+			<div class="first" onclick="first()">第一页</div>
+			<div class="prev" onclick="initTable(-1)">上一页</div>
+			<div class="next" onclick="initTable(1)">下一页</div>
+			<div class="last" onclick="last()">最后一页</div>
+			<div class="clearfix"></div>
+			<input type="hidden" id="pagelab" style="width: 50px;height:22px;overflow:hidden;margin-right: 5px;text-align: center;border-radius: 0px" onkeyup="pageKeyUpHandler(event)">
+		</div>
+
+		<!--//弹出遮罩-->
+		<div id="test"></div>
+		<div id="log_window">
+			<input type="image" src='../assets/img/guanbi.png' onclick="cancel_shield()" style="position: absolute;left: 745px;top: 10px;">
+			<table class="table table-bordered " style="width: 600px;margin:0 auto;margin-top: 30px">
+				<!--<tr>-->
+				<!--<td width="10%" class="tableleft"><span class="tanKuang">id</span></td>-->
+				<!--<td style="padding-top: 18px"><input type="text" id="idtxt" name="title" value="" style="border-radius: 0px;width: 95%"/></td>-->
+				<!--</tr>-->
+				<tr>
+					<td width="20%" class="tableleft"><span class="tanKuang">收 件 人</span></td>
+					<td style="padding-top: 18px">
+						<input type="text" id="touserstxt" name="title" value="" style="border-radius: 0px;width: 95%" onclick="clickTouser()" placeholder="请选择收件人" /><br />
+						<!--<span id="touserstxtinfo" style="display: none;">你需要选择一个收件人</span>-->
+					</td>
+				</tr>
+				<tr>
+					<td class="tableleft"><span class="tanKuang">内 容</span></td>
+					<td style="padding-top: 18px">
+						<input type="text" id="contexttxt" name="title" value="" style="border-radius: 0px;width: 95%" oninput="checkcontext()" onblur="checkcontext();" placeholder="内容最多70个字符，包含字母、数字、汉字和英文符号" /><br />
+						<span id="contexttxtinfo" style="display: none;">内容最多70个字符，包含字母、数字、汉字和英文符号</span>
+					</td>
+				</tr>
+				<!--<tr>
+					<td class="tableleft"><span class="tanKuang">发 送 时 间</span></td>
+					<td style="padding-top: 18px"><input type="text" id="timestamptxt" name="title" value="" style="border-radius: 0px;width: 95%" placeholder="请选择一个时间戳"  /></td>
+				</tr>
+				<script>
+                    laydate.render({
+                        elem: '#timestamptxt',
+                        trigger: 'click',
+                        type: 'datetime'
+                    });
+				</script>-->
+				<tr>
+					<td class="tableleft"><span class="tanKuang">标 题</span></td>
+					<td style="padding-top: 18px">
+						<input type="text" id="mtitletxt" name="title" value="" style="border-radius: 0px;width: 95%" oninput="checktitle()" onblur="checktitle();" placeholder="标题最多20个字符，包含字母、数字、汉字和英文符号" /><br />
+						<span id="mtitletxtinfo" style="display: none;">标题最多20个字符，包含字母、数字、汉字和英文符号</span>
+					</td>
+				</tr>
+				<!--<tr>
+					<td class="tableleft"><span class="tanKuang">审 核 人</span></td>
+					<td style="padding-top: 18px">
+						<input type="text" placeholder="请勾选审核人" id="auditortxt" style="border-radius: 0px;width: 95%" onclick="check()" ><br /><span id="auditortxtinfo" style="display: none;">(你必须选择一个审核人)</span>
+					</td>
+				</tr>
+	           
+	            	<tr>
+					<td width="20%" class="tableleft"><span class="tanKuang">物 品</span></td>
+					<td style="padding-top: 18px"><select name="" id="sidtxt" style="border-radius: 0px;width: 95%" onblur="onBlurHandler(this.id)"><option></option></select></td>
+				</tr>
+				<tr>
+					<td width="20%" class="tableleft"><span class="tanKuang">数 量</span></td>
+					<td style="padding-top: 18px"><input type="text" id="artnumtxt" name="moduletitle" style="border-radius: 0px;width: 95%" oninput="checknum()" onblur="checknum();" placeholder="请输入数量" /><br />
+						<span id="artnumtxtinfo" style="display: none;">该字段只能为数字</span></td>
+				</tr>
+				<tr>
+					<td width="20%" class="tableleft"><span class="tanKuang">金 币</span></td>
+					<td style="padding-top: 18px"><input type="text" id="cointxt" name="moduletitle" style="border-radius: 0px;width: 95%" oninput="checkcoin()" onblur="checkcoin();" placeholder="请输入金币" /><br />
+						<span id="cointxtinfo" style="display: none;">该字段只能为数字</span></td>
+				</tr>
+				<tr>
+					<td width="20%" class="tableleft"><span class="tanKuang">钻 石</span></td>
+					<td style="padding-top: 18px"><input type="text" id="diamondtxt" name="moduletitle" style="border-radius: 0px;width: 95%" oninput="checkdiamond()" onblur="checkdiamond();" placeholder="请输入钻石" /><br />
+						<span id="diamondtxtinfo" style="display: none;">该字段只能为数字</span></td>
+				</tr>-->
+				<tr>
+					<td class="tableleft"><span class="tanKuang"></span></td>
+					<td>
+						<a  id="saveallinfo" onclick="onSavebtnClickHandler()" class="save">保存</a>
+					</td>
+				</tr>
+			</table>
+			<input type="hidden" id="idtxt" name="title" value="" style="border-radius: 0px;width: 95%" />
+			<!--<div id="load" style="display: none;position: absolute;top: 50%;left: 50%;">
+	    		<img src="../Images/5.gif" alt=""  />
+	   		</div>-->
+		</div>
+		<div id="mytooltip"></div>
+
+		<!--遮罩-->
+		<div id="log_window1">
+			<a href="javascript:cancel_shield1()" style="float: right;">关闭</a>
+			<div style="width:420px;margin:10px auto;height:400px;" id="divv">
+
+				<input id="txt" type="text" style="display:none;">
+				<input type="button" value="查询学员" onclick="chaxun()">
+				<input type="button" value="查询工作人员" onclick="chaxun1()">
+				<input type="button" value="查询所有" onclick="chaxun2()">
+				<input type="button" value="全选" onclick="selectall()">
+				<input type="button" value="反选" onclick="selectothers()">
+				<input type="button" value="提交" onclick="smtinfo()">
+				<!--<hr>-->
+				<div id="checkbixDiv" style="height:80%;width:80%;overflow:scroll;-ms-scroll-rails:railed;background:white;">
+					<!--<p id="pp" style="height: 100%;width: 100%;"></p>-->
+				</div>
+			</div>
+		</div>
+
+		<!--审核人弹框-->
+		<div id="log_window2">
+			<a href="javascript:cancel_shield2()" style="position: absolute;left: 260px;margin-top: -5px;">关闭</a>
+			<div style="width: 200px;margin:0 auto;height: 150px;overflow: scroll;" id="divv">
+				<p id="pp" style="height: 100%;width: 100%;"></p>
+			</div>
+			<div style="margin-top: 20px">
+				<button style="margin-left: 70px" onclick="confimbtn()">确定</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<button onclick="quxiaobtn()">取消</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			</div>
+		</div>
+		<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+		  <div class="modal-dialog" role="document">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+		          aria-hidden="true">&times;</span></button>
+		        <h4 class="modal-title" id="myModalLabel">请选择发送消息类型</h4>
+		      </div>
+		      <div class="modal-body" id="myModalContext">
+		        <select style="width:100%;" id="shabi">
+		          <option value="0">系统消息</option>
+		          <option value="1">短信</option>
+		          <option value="2">都发</option>
+		        </select>
+		        <div id="xinxixianshi">
+		
+		        </div>
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+		        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="ceshi()">确定</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+ <!--模态框end--> 
+	</body>
+
+</html>
+<script>
+	var arrCheckbox = [];
+	var touser = [];
+	//获取所有的收件人
+	function gettouser() {
+		var obj=new Object();
+		obj.vid=manager.vid;
+		obj.name="0";
+        var datajson=JSON.stringify(obj);
+		$.ajax({
+			type: "post",
+            contentType:"application/x-www-form-urlencoded",
+            data:datajson,
+            dataType:"json",
+            url:"http://" + url1 + ":6078/getuserbynameandvid",
+			success: function(data) {
+//				var res = jQuery.parseJSON(data);
+				touser = [];
+				for (var i = 0; i < data.UserMap.length; i++) {
+					touser.push(data.UserMap[i]);
+				}
+				var count = 1;
+//				console.log(touser)
+				var cbd = document.getElementById("checkbixDiv");
+				cbd.innerHTML = "";
+				for (var i = 0; i < touser.length; i++) {
+					var s = document.createElement("span");
+					s.innerHTML = "<input type='checkbox' name='player' />"+ touser[i].name+"--" + touser[i].nickname;
+					if (count % 1 == 0) {
+						s.innerHTML = "<input type='checkbox' name='player' />"+ touser[i].name+"--" + touser[i].nickname + "<br/>";
+					}
+					count++;
+					cbd.appendChild(s);
+				}
+			}
+		});
+	}
+	//子窗体查询
+	function chaxun() {
+		flag = true;
+//		var url = "http://" + localhost + ":8080/fkds1.5.tools/user/getUserByName.action?count=9999&page=1";
+//		var txt = document.getElementById('txt');
+//		if (txt.value.length > 0) {
+//			url += "&nickname=" + txt.value;
+//		}
+		var obj=new Object();
+		obj.vid=manager.vid;
+		obj.name="2";
+        var datajson=JSON.stringify(obj);
+		$.ajax({
+			type: "post",
+            contentType:"application/x-www-form-urlencoded",
+            data:datajson,
+            dataType:"json",
+            url:"http://" + url1 + ":6078/getuserbynameandvid",
+			success: function(data) {
+//				alert(data)
+//				var res = jQuery.parseJSON(data);
+				arrCheckbox = [];
+				touser=[];
+				for (var i = 0; i < data.UserMap.length; i++) {
+					touser.push(data.UserMap[i]);
+					arrCheckbox.push(data.UserMap[i]);
+				}
+				var count = 1;
+				var cbd = document.getElementById("checkbixDiv");
+				cbd.innerHTML = "";
+				for (var i = 0; i < arrCheckbox.length; i++) {
+					var s = document.createElement("span");
+					s.innerHTML = "<input type='checkbox' name='player' value='" + i + "'/>"+ arrCheckbox[i].name+"--"+ + arrCheckbox[i].nickname;
+					if (count % 1 == 0) {
+						s.innerHTML = "<input type='checkbox' name='player' value='" + i + "'/>"+ arrCheckbox[i].name+"--" + arrCheckbox[i].nickname + "<br/>";
+					}
+					count++;
+					cbd.appendChild(s);
+				}
+			},
+			error: function(err) {
+				alert("err:" + err);
+			}
+		});
+	}
+	
+		//子窗体查询工作人员
+	function chaxun1() {
+		flag = true;
+//		var url = "http://" + localhost + ":8080/fkds1.5.tools/user/getUserByName.action?count=9999&page=1";
+//		var txt = document.getElementById('txt');
+//		if (txt.value.length > 0) {
+//			url += "&nickname=" + txt.value;
+//		}
+		var obj=new Object();
+		obj.vid=manager.vid;
+		obj.name="1";
+        var datajson=JSON.stringify(obj);
+		$.ajax({
+			type: "post",
+            contentType:"application/x-www-form-urlencoded",
+            data:datajson,
+            dataType:"json",
+            url:"http://" + url1 + ":6078/getuserbynameandvid",
+			success: function(data) {
+//				alert(data)
+//				var res = jQuery.parseJSON(data);
+				arrCheckbox = [];
+				touser=[];
+				for (var i = 0; i < data.UserMap.length; i++) {
+					touser.push(data.UserMap[i]);
+					arrCheckbox.push(data.UserMap[i]);
+				}
+				var count = 1;
+				var cbd = document.getElementById("checkbixDiv");
+				cbd.innerHTML = "";
+				for (var i = 0; i < arrCheckbox.length; i++) {
+					var s = document.createElement("span");
+					s.innerHTML = "<input type='checkbox' name='player' value='" + i + "'/>"+ arrCheckbox[i].name+"--" + arrCheckbox[i].nickname;
+					if (count % 1 == 0) {
+						s.innerHTML = "<input type='checkbox' name='player' value='" + i + "'/>"+ arrCheckbox[i].name+"--" + arrCheckbox[i].nickname + "<br/>";
+					}
+					count++;
+					cbd.appendChild(s);
+				}
+			},
+			error: function(err) {
+				alert("err:" + err);
+			}
+		});
+	}
+		//子窗体查询所有人员
+	function chaxun2() {
+		flag = true;
+//		var url = "http://" + localhost + ":8080/fkds1.5.tools/user/getUserByName.action?count=9999&page=1";
+//		var txt = document.getElementById('txt');
+//		if (txt.value.length > 0) {
+//			url += "&nickname=" + txt.value;
+//		}
+		var obj=new Object();
+		obj.vid=manager.vid;
+		obj.name="0";
+        var datajson=JSON.stringify(obj);
+		$.ajax({
+			type: "post",
+            contentType:"application/x-www-form-urlencoded",
+            data:datajson,
+            dataType:"json",
+            url:"http://" + url1 + ":6078/getuserbynameandvid",
+			success: function(data) {
+//				alert(data)
+//				var res = jQuery.parseJSON(data);
+				arrCheckbox = [];
+				touser=[];
+				for (var i = 0; i < data.UserMap.length; i++) {
+					touser.push(data.UserMap[i]);
+					arrCheckbox.push(data.UserMap[i]);
+				}
+				var count = 1;
+				var cbd = document.getElementById("checkbixDiv");
+				cbd.innerHTML = "";
+				for (var i = 0; i < arrCheckbox.length; i++) {
+					var s = document.createElement("span");
+					s.innerHTML = "<input type='checkbox' name='player' value='" + i + "'/>"+ arrCheckbox[i].name+"--" + arrCheckbox[i].nickname;
+					if (count % 1 == 0) {
+						s.innerHTML = "<input type='checkbox' name='player' value='" + i + "'/>"+ arrCheckbox[i].name+"--" + arrCheckbox[i].nickname + "<br/>";
+					}
+					count++;
+					cbd.appendChild(s);
+				}
+			},
+			error: function(err) {
+				alert("err:" + err);
+			}
+		});
+	}
+	//子窗体提交
+	function smtinfo() {
+		var players1 = document.getElementsByName("player");
+		document.getElementById("txt").value = "";
+		for (var i = 0; i < players1.length; i++) {
+			if (players1[i].checked) {
+				if(flag){
+						if (document.getElementById("txt").value == "") {
+						document.getElementById("txt").value = arrCheckbox[i].id;
+	//					document.getElementById("txt").value = players1[i].value;
+						} else {
+						document.getElementById("txt").value = document.getElementById("txt").value + "," + touser[i].id;				
+//						document.getElementById("txt").value = document.getElementById("txt").value + "," + players1[i].nickname;
+						}
+				}else{
+					if (document.getElementById("txt").value == "") {
+					document.getElementById("txt").value = touser[i].id;
+//					document.getElementById("txt").value = players1[i].value;
+					} else {
+						document.getElementById("txt").value = document.getElementById("txt").value + "," + touser[i].id;
+//						console.log(touser[i].nickname);
+					}
+				}
+				
+			};
+		}
+	}
+	//子窗体全选
+	function selectall() {
+		var players2 = document.getElementsByName("player");
+		for (var i = 0; i < players2.length; i++) {
+			players2[i].checked = true;
+		}
+	}
+	//子窗体反选
+	function selectothers() {
+		var players3 = document.getElementsByName("player");
+		for (var i = 0; i < players3.length; i++) {
+			if (players3[i].checked) {
+				players3[i].checked = false;
+			} else {
+				players3[i].checked = true;
+			}
+		}
+	}
+</script>
+
+<script>
+	$(function() {
+		console.log($("log_window").scrollLeft());
+	});
+//	! function() {
+//		laydate.skin('molv'); //切换皮肤，请查看skins下面皮肤库
+//	}();
+</script>

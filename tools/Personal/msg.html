@@ -1,0 +1,335 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no" />
+	<meta charset="utf-8">
+	<meta name="format-detection" content="telephone=no,email=no,adress=no">
+
+	<!--公共样式-->
+	<link rel="stylesheet" type="text/css" href="../Css/bootstrap.css" />
+	<link rel="stylesheet" type="text/css" href="../Css/bootstrap-responsive.css" />
+	<link rel="stylesheet" type="text/css" href="../Css/style.css" />
+
+	<!--日历样式-->
+	<link rel="stylesheet" href="../assets/css/reset.css" />
+	<link rel="stylesheet" type="text/css" href="../assets/css/simple-calendar.css">
+	<link rel="stylesheet" href="../assets/css/calendar.css" />
+
+	<title>课表列表</title>
+	<style>
+		#test {
+			width: 100%;
+			height: 100%;
+			background-color: #000;
+			position: absolute;
+			top: 0;
+			left: 0;
+			z-index: 2;
+			opacity: 0.3;
+			/*兼容IE8及以下版本浏览器*/
+			filter: alpha(opacity=30);
+			display: none;
+		}
+
+		#detail_div{
+			width: 800px;
+			height: 550px;
+			padding-bottom: 50px;
+			background-color: white;
+			margin: auto;
+			position: absolute;
+			z-index: 3;
+			top: 0;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			display: none;
+			overflow-y: scroll;
+			/*border: 2px solid #b1d6e8;*/
+		}
+		#test1 {
+			width: 100%;
+			height: 100%;
+			background-color: #000;
+			position: absolute;
+			top: 0;
+			left: 0;
+			z-index: 2;
+			opacity: 0.3;
+			/*兼容IE8及以下版本浏览器*/
+			filter: alpha(opacity=30);
+			display: none;
+		}
+		.theadColor td,
+		.tableleft {
+			background-color: #b1d6e8;
+			/*color: #1976b0;*/
+			/*font-weight:normal;*/
+		}
+
+	</style>
+	<script type="text/javascript" src="../Js/jquery.js"></script>
+	<script type="text/javascript" src="../Js/simple-calendar2.js"></script>
+	<script type="text/javascript" src="../Js/hammer-2.0.8-min.js"></script>
+	<script type="text/javascript" src="../Js/js/laydate.js"></script>
+	<script type="text/javascript" src="../Js/ursl.js"></script>
+	<script type="text/javascript">
+        var url1=urls;
+        var n=0;
+        var coach=parseInt(window.sessionStorage? sessionStorage.getItem("coach"): Cookie.read("coach"));
+        var private=JSON.parse(window.sessionStorage? sessionStorage.getItem("private"): Cookie.read("private"));
+        var starttime=private.starttime;
+        var endtime=private.endtime;
+        var detailjson={};
+		var ptime=[];
+		var privatejson={};
+		var success=0;
+
+		//console.log(coach);
+		//私教时间
+		function initptime() {
+            var days=Math.floor((endtime-starttime)/(24*3600000))+1;
+            for(var i=0;i<days;i++){
+                var timer=new Date(starttime+i*24*3600000);
+                timer=timer.getFullYear()+'/'+(timer.getMonth()+1)+'/'+timer.getDate();
+                ptime.push(timer);
+               // console.log(ptime);
+            }
+        }
+
+        //审核私教
+        function initprivate(){
+            var obj=new Object();
+            obj.coachid=coach;
+            var datajson=JSON.stringify(obj);
+            $.ajax({
+                type: "post",
+                contentType:"application/x-www-form-urlencoded",
+                data:datajson,
+                dataType:"json",
+                url:"http://" + url1 + ":6078/backstagegetpttbycoachandstate",
+                success: function(data) {
+                    if(data.respVo.resultCode=="0"){
+                        for(var i=0;i<data.PersonalTraininersTimeMap.length;i++){
+							var timer=new Date(data.PersonalTraininersTimeMap[i].starttime);
+							timer=timer.getFullYear()+'/'+(timer.getMonth()+1)+'/'+timer.getDate();
+                            if (privatejson.hasOwnProperty(timer)) {
+                                privatejson[timer].push(data.PersonalTraininersTimeMap[i]);
+                            }else{
+                                privatejson[timer] = [];
+                                privatejson[timer].push(data.PersonalTraininersTimeMap[i]);
+                            }
+
+                        }
+                        success++;
+						if(success==2){
+                            riqi();
+						}
+
+                    }else{
+                        riqi();
+					}
+
+
+                },
+                error: function(err) {
+//						alert("err:" + err);
+                }
+            });
+        }
+
+        //公开课详情
+        function initcoursemap(){
+            var obj=new Object();
+            obj.coach=coach;
+            var datajson=JSON.stringify(obj);
+            $.ajax({
+                type: "post",
+                contentType:"application/x-www-form-urlencoded",
+                data:datajson,
+                dataType:"json",
+                url:"http://" + url1 + ":6078/backstagegetcoursebycoach",
+                success: function(data) {
+                    if(data.respVo.resultCode=="0"){
+                        data.coursemap.sort(function(a,b){
+                            return a.id-b.id;
+                        });
+                        //console.log(data.coursemap);
+                        for(var i=0;i<data.coursemap.length;i++){
+                            var days=Math.floor((data.coursemap[i].endtime-data.coursemap[i].starttime)/(24*3600000))+1;
+                            //console.log(data.coursemap[i]);
+                            for(var k=0;k<days;k++){
+                                var timer=new Date(data.coursemap[i].starttime+k*24*3600000);
+                                timer=timer.getFullYear()+'/'+(timer.getMonth()+1)+'/'+timer.getDate();
+                                if (detailjson[timer]) {
+                                    detailjson[timer].push(data.coursemap[i]);
+                                }else{
+
+                                    detailjson[timer] = [];
+                                    detailjson[timer].push(data.coursemap[i]);
+								}
+
+							}
+                           // console.log(detailjson);
+                        }
+                      // console.log(detailjson);
+                        success++;
+                        if(success==2){
+                            riqi();
+                        }
+
+                    }else{
+                        riqi();
+                    }
+
+
+                },
+                error: function(err) {
+//						alert("err:" + err);
+                }
+            });
+        }
+
+
+
+        //初始化调用
+        function init(){
+            initcoursemap();
+            initptime();
+            initprivate();
+        }
+
+
+
+        //日期
+        function riqi(){
+            var myCalendar = new SimpleCalendar('#calendar');
+            $(function(){
+                var monthCH = $('.sc-select-month').text();
+                $(".sc-mleft").click(function(){
+                    myCalendar.subMonth();
+                    var year = $('.sc-select-year').text();
+                    var monthCH = $('.sc-select-month').text();
+                    var month = SimpleCalendar.prototype.languageData.months_CH.indexOf(monthCH)+1;
+                })
+                $(".sc-mright").click(function(){
+                    myCalendar.addMonth();
+                    var year = $('.sc-select-year').text();
+                    var monthCH = $('.sc-select-month').text();
+                    var month = SimpleCalendar.prototype.languageData.months_CH.indexOf(monthCH)+1;
+                })
+            });
+
+            //滑动切换
+            var myElement = document.getElementById('calendar');
+            var hammer = new Hammer(myElement);
+            hammer.on("swipeleft", function (ev) {
+                myCalendar.addMonth();
+            });
+            hammer.on("swiperight", function (ev) {
+                myCalendar.subMonth();
+            });
+			//console.log(privatejson);
+            //console.log(detailjson);
+            //添加标记
+            var mark = detailjson;
+            myCalendar._defaultOptions.mark=mark;
+            myCalendar._defaultOptions.ptime=ptime;
+            myCalendar._defaultOptions.privatejson=privatejson;
+            myCalendar.update();
+            //console.log(detailjson);
+            //有标记的日期点击事件
+            $('#calendar').on("click", '.sc-selected', function() {
+                // var announcement=document.getElementsByClassName("announcement")[0];
+                // announcement.style.display="block";
+                announceList($(this));
+            });
+
+            //显示选择日期当天的活动
+            function announceList(v){
+                var year = $('.sc-select-year').text();
+                var monthCH = $('.sc-select-month').text();
+                var day = v.children()[1].innerText;
+                var month = SimpleCalendar.prototype.languageData.months_CH.indexOf(monthCH)+1;
+                var date = year + '/' + month + '/' + day;
+				//console.log(date);
+                //console.log(detailjson);
+                //console.log(JSON.stringify(private));
+                window.location="detail.html";
+                //console.log(date);
+				//console.log(detailjson);
+                if (window.sessionStorage) {
+                    sessionStorage.setItem("date", date);
+                    sessionStorage.setItem("public", JSON.stringify(detailjson[date]?detailjson[date]:[{}]));
+                    sessionStorage.setItem("private", JSON.stringify(private));
+                    sessionStorage.setItem("audited", JSON.stringify(privatejson[date]?privatejson[date]:[{}]));
+                } else {
+                    Cookie.write("date", date);
+                    Cookie.write("public", JSON.stringify(detailjson[date]));
+                    Cookie.write("private", JSON.stringify(private));
+                    Cookie.write("audited", JSON.stringify(privatejson[date]));
+                }
+            }
+        }
+
+		function back(){
+            window.location ="index.html";
+        }
+
+        //转换时间戳
+        function timestampToDate(timestamp) {
+            var date = new Date(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+            Y = date.getFullYear() + '-';
+            M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+            D = date.getDate()<10 ? '0'+date.getDate()+ ' ':date.getDate() + ' ';
+            h = date.getHours()<10 ? '0'+date.getHours()+ ':':date.getHours() + ':';
+            m = date.getMinutes()<10 ? '0'+date.getMinutes():date.getMinutes();
+            s = date.getSeconds();
+            return Y+M+D;
+        }
+	</script>
+</head>
+
+<body onload="init()">
+<div class="m10">
+	<a  onclick="back()"  class="back">返 回</a>
+</div>
+
+<div class="inner m10">
+	<div id='calendar' class="sc-calendar">
+		<div class="sc-header">
+			<div class="sc-title">
+				<div class="year"><span class="sc-select-year" name=""></span>年</div>
+				<div class="month">
+					<div class="arrow sc-mleft"></div>
+					<div class="monthdiv">
+						<span class="sc-select-month" name=""></span>
+					</div>
+					<div class="arrow sc-mright"></div>
+				</div>
+			</div>
+			<div class="sc-week"></div>
+		</div>
+		<div class="sc-body">
+			<div class="sc-days"></div>
+		</div>
+	</div>
+</div>
+<!--//弹出遮罩-->
+<div id="test"></div>
+
+<!--公开课详细编辑-->
+<div id="detail_div">
+	<input type="image" src='../assets/img/guanbi.png' onclick="cancel_shield()" style="position: absolute;left: 745px;top: 10px;width: 27px;height: 27px">
+	<table class="table table-bordered " style="width: 600px;margin:0 auto;margin-top: 60px" id="detail_table">
+	</table>
+</div>
+
+<div id="mytooltip"></div>
+
+<div id="test1"><span>数据同步中，请稍后......</span></div>
+
+</body>
+
+</html>

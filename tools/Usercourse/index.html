@@ -1,0 +1,793 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+	<title></title>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" type="text/css" href="../Css/bootstrap.css" />
+	<link rel="stylesheet" type="text/css" href="../Css/bootstrap-responsive.css" />
+	<link rel="stylesheet" type="text/css" href="../Css/style.css" />
+	<script type="text/javascript" src="../Js/jquery.js"></script>
+	<script type="text/javascript" src="../Js/jquery-ui.js"></script>
+	<script type="text/javascript" src="../Js/bootstrap.js"></script>
+	<script type="text/javascript" src="../Js/ckform.js"></script>
+	<script type="text/javascript" src="../Js/common.js"></script>
+	<script type="text/javascript" src="../Js/js/laydate.js"></script>
+	<script type="text/javascript" src="../Js/ui.js"></script>
+	<script type="text/javascript" src="../Js/ursl.js"></script>
+	<style type="text/css">
+		body {
+			padding-bottom: 40px;
+		}
+
+		@media (max-width: 980px) {
+			/* 启用浮动导航栏文字 */
+			.navbar-text.pull-right {
+				float: none;
+				padding-left: 5px;
+				padding-right: 5px;
+			}
+		}
+
+		#addnew1{
+			margin-left: 6px;
+		}
+
+		#test {
+			width: 100%;
+			height: 100%;
+			background-color: #000;
+			position: absolute;
+			top: 0;
+			left: 0;
+			z-index: 2;
+			opacity: 0.3;
+			/*兼容IE8及以下版本浏览器*/
+			filter: alpha(opacity=30);
+			display: none;
+		}
+
+		#user_div{
+			width: 800px;
+			height: 500px;
+			padding-bottom: 50px;
+			background-color: white;
+			margin: auto;
+			position: absolute;
+			z-index: 3;
+			top: 0;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			display: none;
+			overflow-y: scroll;
+			/*border: 2px solid #b1d6e8;*/
+		}
+		#user_photo {
+			width: 800px;
+			height: 420px;
+			background-color: white;
+			margin: auto;
+			position: absolute;
+			z-index: 3;
+			top: 0;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			display: none;
+			overflow-y: scroll;
+			/*border: 2px solid #b1d6e8;*/
+		}
+		.theadColor th {
+			background-color: #b1d6e8;
+			/*color: #1976b0;*/
+			font-weight: normal;
+			text-align: center;
+			height: 20px;
+			line-height: 22px;
+
+		}
+
+		.theadColor th span {
+			color: #1976b0;
+		}
+
+		#chaxun {
+			margin-top: 10px;
+		}
+
+		#addnew1 {
+			margin-top: 10px;
+		}
+
+		#rolename {
+			position: relative;
+			margin-top: 19px;
+		}
+
+		.theadColor td,
+		.tableleft {
+			/*background-color: #b1d6e8;*/
+			/*color: #1976b0;*/
+			/*font-weight:normal;*/
+		}
+
+		.theadColor td,.tableleft  span {
+			color:#000;
+			font-weight: bold;
+		}
+
+
+		#rolename {
+			padding-right: 30px;
+			background: url("../assets/img/fangdajing.png") no-repeat scroll right center transparent;
+		}
+
+		#test1 {
+			width: 100%;
+			height: 100%;
+			background-color: #000;
+			position: absolute;
+			top: 0;
+			left: 0;
+			z-index: 2;
+			opacity: 0.3;
+			/*兼容IE8及以下版本浏览器*/
+			filter: alpha(opacity=30);
+			display: none;
+		}
+
+
+	</style>
+	<script type="text/javascript">
+
+        var page = 1;
+        var count = 10;
+        var maxpage = 0;
+        var dataarr = [];
+        var currentIndex = -1;
+        var localhost = " ";
+        var table, role, res;
+        var fields = [];
+        //			所有教练
+        var allcoach=[];
+        //          关联公开课教练
+        var coursecoach=[];
+        //			所有拳馆
+        var freevenue=[];
+        var usercoursetype=[{"1":"正常"},{"2":"企业"}];
+
+        var addable1,updateable1,delable1,authority,pms,enables;
+        localhost = window.sessionStorage ? sessionStorage.getItem("lh") : Cookie.read("lh");
+
+        var url1=urls;
+        $(function() {
+            $(document).tooltip();
+        });
+
+        //加载列表
+        function init() {
+
+            //localhost = window.sessionStorage ? sessionStorage.getItem("lh") : Cookie.read("lh");
+            table = 1;
+            var uname = window.sessionStorage ? sessionStorage.getItem("mgr") : Cookie.read("mgr");
+            manager = jQuery.parseJSON(uname);
+            mid = manager.mid;
+            mgrid = manager.id;
+            role = manager.type;
+
+            pms = window.sessionStorage? sessionStorage.getItem("管 理 员"): Cookie.read("管 理 员");
+
+            authority = jQuery.parseJSON(pms);
+            addable1 = authority.addable;
+            updateable1 = authority.updateable;
+            delable1 = authority.delable;
+            enables = authority.enable;
+//                alert(authority)
+
+
+            if (null == uname || undefined == uname) {
+                parent.window.location = '../Public/login.html';
+                return;
+            }
+            if (window.sessionStorage) {
+                page = sessionStorage.getItem("Node_page");
+            } else {
+                page = Cookie.read("Node_page");
+            }
+            if (null == page)
+                page = 1;
+            document.getElementById('pagelab').value = page;
+
+            //判断各浏览器的兼容性
+            var Sys = {};
+            var ua = navigator.userAgent.toLowerCase();
+            var s;
+            (s = ua.match(/msie ([\d.]+)/)) ? Sys.ie = s[1]:
+                (s = ua.match(/firefox\/([\d.]+)/)) ? Sys.firefox = s[1] :
+                    (s = ua.match(/chrome\/([\d.]+)/)) ? Sys.chrome = s[1] :
+                        (s = ua.match(/opera.([\d.]+)/)) ? Sys.opera = s[1] :
+                            (s = ua.match(/version\/([\d.]+).*safari/)) ? Sys.safari = s[1] : 0;
+            if (Sys.ie) { //Js判断为IE浏览器
+                alert('http://www.wangjinhai119.com' + Sys.ie);
+                if (Sys.ie == '9.0') { //Js判断为IE 9
+                } else if (Sys.ie == '8.0') { //Js判断为IE 8
+                } else {}
+            }
+            if (Sys.firefox) { //Js判断为火狐(firefox)浏览器
+                document.getElementById('pagelab').style.marginTop = '19px';
+            }
+            if (Sys.chrome) { //Js判断为谷歌chrome浏览器
+                document.getElementById('pagelab').style.marginTop = '18px';
+            }
+            if (Sys.opera) { //Js判断为opera浏览器
+                alert('http://www.wangjinhai119.com' + Sys.opera);
+            }
+            if (Sys.safari) { //Js判断为苹果safari浏览器
+                document.getElementById('pagelab').style.marginTop = '9px';
+            }
+            initFields();
+        }
+        //动态表头
+        function initFields() {
+            //alert(3333)
+            //alert(url1)
+            var users=new Object();
+            users.rid=role;
+            users.smid=7;
+            var datajson=JSON.stringify(users);
+            $.ajax({
+                type: "post",
+                contentType: "application/x-www-form-urlencoded",
+                url: "http://" + url1 + ":6078/backstagegetpermissionfieldbyridsmid",
+                data:datajson,
+                dataType:"json",
+                success: function(data) {
+                    data.permissionfieldmap.sort(function(a,b){
+                        return a.smdid-b.smdid;
+                    })
+                    fields = [];
+                    for (var i = 0; i < data.permissionfieldmap.length; i++) {
+                        if(data.permissionfieldmap[i].fieldname!=="state" && data.permissionfieldmap[i].fieldname!=="classhour" ){
+                            fields.push(data.permissionfieldmap[i]);
+                        }
+                        //console.log(data.permissionfieldmap[i]);
+                    }
+                    var th = document.getElementById("tabhead");
+                    while (th.cells.length > 0) {
+                        th.deleteCell(0);
+                    }
+                    for (var i = 0; i < fields.length; i++) {
+                        var headcell = th.insertCell(i);
+                        headcell.innerHTML = "<th><span>" + fields[i].name + "</span></th>";
+                    }
+                    var headoptcell = th.insertCell(fields.length);
+                    headoptcell.innerHTML = "<th><span>" + "操 作" + "</span></th>";
+                    initTableData();
+                    initallvenue();
+                    initallcoach();
+                    initcoursecoach();
+                },
+                error: function(err) {
+//						alert("err:" + err);
+                }
+            });
+        }
+        //获取所有拳馆
+        function initallvenue(){
+            var obj=new Object();
+            obj.vid=manager.vid;
+            obj.page=page;
+            obj.count=999999;
+            var datajson=JSON.stringify(obj);
+            $.ajax({
+                type: "post",
+                contentType:"application/x-www-form-urlencoded",
+                data:datajson,
+                dataType:"json",
+                url:"http://" + url1 + ":6078/backstagegetvenue",
+                success: function(data) {
+                    data.VenueMap.sort(function(a,b){
+                        return a.id-b.id;
+                    })
+                    freevenue=[];
+                    if(data.respVo.resultCode=="0"){
+                        //console.log(data);
+                        for(var i=0;i<data.VenueMap.length;i++){
+                                freevenue.push(data.VenueMap[i]);
+                        }
+                    }else{
+                        freevenue.length=0;
+                    }
+
+                },
+                error: function(err) {
+//						alert("err:" + err);
+                }
+            });
+        }
+        //获取所有教练
+        function initallcoach(){
+            var obj=new Object();
+            obj.vid=manager.vid;
+            var datajson=JSON.stringify(obj);
+            $.ajax({
+                type: "post",
+                contentType:"application/x-www-form-urlencoded",
+                data:datajson,
+                dataType:"json",
+                url:"http://" + url1 + ":6078/backstagegetallcoach",
+                success: function(data) {
+                    allcoach=[];
+                    if(data.respVo.resultCode=="0"){
+                        //console.log(data);
+                        for(var i=0;i<data.UserMap.length;i++){
+                            allcoach.push(data.UserMap[i]);
+                        }
+                    }else{
+                        allcoach.length=0;
+                    }
+
+
+                },
+                error: function(err) {
+//						alert("err:" + err);
+                }
+            });
+        }
+        //获取关联公开课教练
+        function initcoursecoach(){
+            var obj=new Object();
+            var datajson=JSON.stringify(obj);
+            $.ajax({
+                type: "post",
+                contentType:"application/x-www-form-urlencoded",
+                data:datajson,
+                dataType:"json",
+                url:"http://" + url1 + ":6078/backstagegetcoursecoach",
+                success: function(data) {
+                    //console.log(data);
+                    coursecoach=[];
+                    if(data.respVo.resultCode=="0"){
+                        //console.log(data);
+                        for(var i=0;i<data.usercoursecoachmap.length;i++){
+                            coursecoach.push(data.usercoursecoachmap[i]);
+                        }
+                    }else{
+                        coursecoach.length=0;
+                    }
+
+
+                },
+                error: function(err) {
+//						alert("err:" + err);
+                }
+            });
+        }
+
+
+        //公开课列表初始化
+        function initTableData() {
+            var obj=new Object();
+            obj.vid=manager.vid;
+            obj.page=page;
+            obj.count=count;
+            var datajson=JSON.stringify(obj);
+            //console.log(datajson);
+            $.ajax({
+                type: "post",
+                contentType:"application/x-www-form-urlencoded",
+                data:datajson,
+                dataType:"json",
+                url:"http://" + url1 + ":6078/backstagegetcourse",
+                success: function(data) {
+                    //console.log(data);
+                    var table1 = document.getElementById('tbl');
+                    dataarr = [];
+                    while (table1.rows.length > 1) {
+                        table1.deleteRow(1);
+                    }
+                    if(data.respVo.resultCode==0) {
+                        //设置排序
+                        data.coursemap.sort(function sortId(a,b){
+                            return b.id-a.id
+                        });
+                        //console.log(data.coursemap);
+                        if (window.sessionStorage ) {
+                            updateCourse = JSON.parse(sessionStorage.getItem("updateCourse")?sessionStorage.getItem("updateCourse"):"[]");
+                        } else {
+                            updateCourse = JSON.parse(Cookie.read("updateCourse")?sessionStorage.getItem("updateCourse"):"[]");
+                        }
+                        //console.log(data.coursemap);
+                        //console.log(fields);
+                        for (var i = 0; i < data.coursemap.length; i++) {
+                            if(updateCourse.length>0) {
+                                for (var j = 0; j < updateCourse.length; j++) {
+                                    if (data.coursemap[i].id == updateCourse[j].id) {
+                                        data.coursemap[i] = updateCourse[j];
+                                    }
+                                }
+                            }
+
+                            dataarr.push(data.coursemap[i]);
+                            if(data.coursemap[i].state!==-1) {
+                                var row = table1.insertRow(table1.rows.length);
+                                for (var k = 0; k < fields.length; k++) {
+                                    var cell = row.insertCell(k);
+                                    if (fields[k].fieldname == "endtime" || fields[k].fieldname == "starttime") {
+                                        cell.innerHTML = timestampToDate(dataarr[i][fields[k].fieldname]);
+                                    } else if (fields[k].fieldname == "vid") {
+                                        cell.innerHTML = dataarr[i]["vname"] ? dataarr[i]["vname"] : "暂无"
+                                    } else if (fields[k].fieldname == "coach") {
+                                        cell.innerHTML = dataarr[i]["coachname"] ? dataarr[i]["coachname"]+"-"+dataarr[i]["coachnickname"] : "暂无"
+                                    } else if (fields[k].fieldname == "subcoach") {
+                                        cell.innerHTML = dataarr[i]["subcoachname"] ? dataarr[i]["subcoachname"]+"-"+dataarr[i]["subcoachnickname"] : "暂无"
+                                    } else if (fields[k].fieldname == "type") {
+                                        for (var u of usercoursetype) {
+                                            if (u[dataarr[i][fields[k].fieldname]]) {
+                                                cell.innerHTML = u[dataarr[i][fields[k].fieldname]];
+                                            }
+                                        }
+                                    } else if(fields[k].fieldname=="price"){
+                                        cell.innerHTML = `<a onclick="handleClick(${i})" style="cursor: pointer">点击查看</a>`;
+                                    }else if(fields[k].fieldname=="weburl"){
+                                        cell.innerHTML =`<a target="_blank" href="${dataarr[i][fields[k].fieldname]?dataarr[i][fields[k].fieldname]:""}" style="width: 160px; display: inline-block; word-break: break-all; overflow:hidden; ">${dataarr[i][fields[k].fieldname]?dataarr[i][fields[k].fieldname]:""}</a>`;
+                                    }else {
+                                        cell.innerHTML = dataarr[i][fields[k].fieldname];
+                                    }
+
+                                }
+                                var optcell = row.insertCell(fields.length);
+                                optcell.innerHTML = "<input type='image' src='../assets/img/xiangqing.png' id='xiangqing" + i + "' onclick='msg(" + i + ")'>";
+                            }
+
+                        }
+						//console.log(dataarr);
+						maxpage = Math.ceil(data.respVo.resultDesc / count);
+						//设置分页
+						var first=$(".page>div>div:nth-child(1)");
+						var prev=$(".page>div>div:nth-child(2)");
+						var next=$(".page>div>div:nth-child(3)");
+						var last=$(".page>div>div:nth-child(4)");
+						if(page>1){
+							first.attr("class","blue")
+						}else{
+							first.attr("class","gray")
+						}
+						if(page>1){
+							prev.attr("class","blue")
+						}else{
+							prev.attr("class","gray")
+						}
+						if(page<maxpage){
+							next.attr("class","blue")
+						}else{
+							next.attr("class","gray")
+						}
+						if(page<maxpage){
+							last.attr("class","blue")
+						}else{
+							last.attr("class","gray")
+						}
+                    }else{
+                        //alert(data.respVo.resultDesc);
+                    }
+                },
+                error: function(err) {
+//						alert("err:" + err);
+                }
+            });
+
+        }
+
+
+
+        //查看照片
+        function handleClick(idx){
+            //console.log(dataarr[idx].imgurl);
+            var s = document.getElementById("test");
+            s.style.display = "block";
+            var l = document.getElementById("user_photo");
+            l.style.display = "block";
+            var photo = document.getElementById("photo");
+            if(dataarr[idx].price){
+                photo.innerHTML=`<img src="/taiji.tools/upload/${dataarr[idx].price}"/>`;
+            }else{
+                photo.innerHTML=``;
+            }
+
+
+        }
+
+        //转换时间戳
+        function timestampToTime(timestamp) {
+            var date = new Date(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+            Y = date.getFullYear() + '-';
+            M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+            D = date.getDate()<10 ? '0'+date.getDate()+ ' ':date.getDate() + ' ';
+            h = date.getHours()<10 ? '0'+date.getHours()+ ':':date.getHours() + ':';
+            m = date.getMinutes()<10 ? '0'+date.getMinutes():date.getMinutes();
+            s = date.getSeconds();
+            return Y+M+D+h+m;
+        }
+
+        function timestampToDate(timestamp) {
+            var date = new Date(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+            Y = date.getFullYear() + '-';
+            M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+            D = date.getDate()<10 ? '0'+date.getDate():date.getDate();
+            return Y+M+D;
+        }
+
+
+
+
+
+        //关闭弹出的div
+        function cancel_shield() {
+            var s = document.getElementById("test");
+            s.style.display = "none";
+            var e = document.getElementById("user_div");
+            e.style.display = "none";
+            var p = document.getElementById("user_photo");
+            p.style.display = "none";
+            var m = document.getElementById("mytooltip");
+            m.style.display = "none";
+        }
+
+        //关闭弹出的div
+        function cancel_shield2() {
+            var l = document.getElementById("log_window");
+            l.style.display = "none";
+        }
+
+
+        //查询
+        function inquiry() {
+            page = 1;
+            document.getElementById('pagelab').value = page;
+            if (window.sessionStorage) {
+                sessionStorage.setItem("Node_page", page);
+            } else {
+                Cookie.write("Node_page", page);
+            }
+            $.ajax({
+                type: "get",
+                contentType: "application/xml",
+                url: "http://" + localhost + ":8080/fkds1.5.tools/systemManager/getManagerByName.action?name=" + document.getElementById('rolename').value + "&page=1&count=10",
+                success: function(data) {
+                    res = jQuery.parseJSON(data);
+                    var table1 = document.getElementById('tbl');
+                    while (table1.rows.length > 1) {
+                        table1.deleteRow(1);
+                    }
+                    dataarr = [];
+                    for (var i = 0; i < res.res.length; i++) {
+                        dataarr.push(res.res[i]);
+                        var row = table1.insertRow(table1.rows.length);
+                        for (var k = 0; k < fields.length; k++) {
+                            var cell = row.insertCell(k);
+                            cell.innerHTML = res.res[i][fields[k].fieldname];
+                        }
+                        var optcell = row.insertCell(fields.length);
+                        optcell.innerHTML = "<input type='image' src='../assets/img/bianji.png' id='bianji"+i+"' onmousemove='isdisadd(this)' onmouseout='isdisout(this)' value='' onclick='edit(" + i + ")'>" +
+                            "&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/shanchu.png' id='shanchu"+i+"' onmousemove='isdisadd(this)' onmouseout='isdisout(this)' value='' onclick='del(" + res.res[i].id + "," + table1.rows.length + ")'>";
+                        if (res.res[i].id + "" == delid + "") {
+                            optcell.innerHTML = '已删除同步中...';
+                        }
+                    }
+                },
+                error: function(err) {
+//						alert("err:" + err);
+                }
+            });
+        }
+
+        //分页
+        function first(){
+            if(document.getElementById("pagelab").value==1){
+                mizhu.alert('', '当前已经为第一页!','iconfont-gou');
+            }
+            else{
+                initTable(1,true);
+            }
+
+        }
+        function last(){
+
+            if(document.getElementById("pagelab").value==maxpage){
+                mizhu.alert('', '当前已经为最后页!','iconfont-gou');
+            }
+            else{
+                initTable(parseInt(maxpage),true);
+            }
+
+        }
+
+        function initTable(step, flag = false) {
+            initFields();
+            step = parseInt(step);
+            var p = parseInt(page) + parseInt(step);
+            if (flag) {
+                if (step < 1 || step > maxpage) {
+                    mizhu.alert('', '页码超标','iconfont-gou');
+                    return;
+                }
+                page = step;
+            } else {
+                page = p;
+                if (page < 1 || page > maxpage) {
+                    page -= step;
+                    return;
+                }
+            }
+
+            var obj=new Object();
+            obj.vid=manager.vid;
+            obj.page=page;
+            obj.count=count;
+            var datajson=JSON.stringify(obj);
+            $.ajax({
+                type: "post",
+                contentType:"application/x-www-form-urlencoded",
+                data:datajson,
+                dataType:"json",
+                url:"http://" + url1 + ":6078/backstagegetcourse",
+                success: function(data) {
+                    //console.log(data);
+                    var table1 = document.getElementById('tbl');
+                    dataarr = [];
+                    while (table1.rows.length > 1) {
+                        table1.deleteRow(1);
+                    }
+                    //设置排序
+                    data.coursemap.sort(function sortId(a,b){
+                        return b.id-a.id
+                    });
+                    //console.log(data.coursemap);
+                    if (window.sessionStorage ) {
+                        updateCourse = JSON.parse(sessionStorage.getItem("updateCourse")?sessionStorage.getItem("updateCourse"):"[]");
+                    } else {
+                        updateCourse = JSON.parse(Cookie.read("updateCourse")?sessionStorage.getItem("updateCourse"):"[]");
+                    }
+                    //console.log(data.coursemap);
+                    //console.log(fields);
+                    for (var i = 0; i < data.coursemap.length; i++) {
+                        if(updateCourse.length>0) {
+                            for (var j = 0; j < updateCourse.length; j++) {
+                                if (data.coursemap[i].id == updateCourse[j].id) {
+                                    data.coursemap[i] = updateCourse[j];
+                                }
+                            }
+                        }
+
+                        dataarr.push(data.coursemap[i]);
+                        if(data.coursemap[i].state!==-1) {
+                            var row = table1.insertRow(table1.rows.length);
+                            for (var k = 0; k < fields.length; k++) {
+                                var cell = row.insertCell(k);
+                                if (fields[k].fieldname == "endtime" || fields[k].fieldname == "starttime") {
+                                    cell.innerHTML = timestampToTime(dataarr[i][fields[k].fieldname]);
+                                } else if (fields[k].fieldname == "vid") {
+                                    cell.innerHTML = dataarr[i]["vname"] ? dataarr[i]["vname"] : "暂无"
+                                } else if (fields[k].fieldname == "coach") {
+                                    cell.innerHTML = dataarr[i]["coachname"] ? dataarr[i]["coachname"]+"-"+dataarr[i]["coachnickname"] : "暂无"
+                                } else if (fields[k].fieldname == "subcoach") {
+                                    cell.innerHTML = dataarr[i]["subcoachname"] ? dataarr[i]["subcoachname"]+"-"+dataarr[i]["subcoachnickname"] : "暂无"
+                                } else if (fields[k].fieldname == "type") {
+                                    for (var u of usercoursetype) {
+                                        if (u[dataarr[i][fields[k].fieldname]]) {
+                                            cell.innerHTML = u[dataarr[i][fields[k].fieldname]];
+                                        }
+                                    }
+                                } else if(fields[k].fieldname=="price"){
+                                    cell.innerHTML = `<a onclick="handleClick(${i})" style="cursor: pointer">点击查看</a>`;
+                                }else if(fields[k].fieldname=="weburl"){
+                                    cell.innerHTML =`<a target="_blank" href="${dataarr[i][fields[k].fieldname]?dataarr[i][fields[k].fieldname]:""}" style="width: 160px; display: inline-block; word-break: break-all; overflow:hidden; ">${dataarr[i][fields[k].fieldname]?dataarr[i][fields[k].fieldname]:""}</a>`;
+                                }else {
+                                    cell.innerHTML = dataarr[i][fields[k].fieldname];
+                                }
+
+                            }
+                            var optcell = row.insertCell(fields.length);
+                            optcell.innerHTML = "<input type='image' src='../assets/img/xiangqing.png' id='xiangqing" + i + "' onclick='msg(" + i + ")'>";
+                        }
+
+                    }
+                    //console.log(dataarr);
+                    maxpage = Math.ceil(data.respVo.resultDesc / count);
+                    document.getElementById('pagelab').value = page;
+                },
+                error: function(err) {
+//						alert("err:" + err);
+                }
+            });
+        }
+
+        function pageKeyUpHandler(evt) {
+            if (evt.keyCode == 13) {
+                initTable(parseInt(document.getElementById("pagelab").value), true);
+            }
+        }
+        function msg(idx){
+//            console.log(idx);
+//            console.log(dataarr);
+            window.location ="msg.html";
+            if (window.sessionStorage) {
+                sessionStorage.setItem("course", JSON.stringify(dataarr[idx]));
+
+            } else {
+                Cookie.write("course", dataarr[idx]);
+
+            }
+        }
+
+        //权限增删改
+        function isdisadd(obj) {
+
+            var idstr = obj.id;
+
+            if (addable1 == 0 && idstr.indexOf("add")>=0){
+                document.getElementById(idstr).disabled = 'disabled';
+                document.getElementById(idstr).style.cursor = "not-allowed";
+            }
+
+            if (updateable1 == 0 && idstr.indexOf("bian")>=0){
+                document.getElementById(idstr).disabled = 'disabled';
+                document.getElementById(idstr).style.cursor = "not-allowed";
+            }
+
+            if (delable1 == 0 && idstr.indexOf("shan")>=0){
+                document.getElementById(idstr).disabled = 'disabled';
+                document.getElementById(idstr).style.cursor = "not-allowed";
+            }
+        }
+
+        function isdisout(obj) {
+            var idstr = obj.id;
+            document.getElementById(idstr).disabled = false;
+            document.getElementById(idstr).style.cursor = "pointer";
+        }
+
+	</script>
+</head>
+<body onload="init()">
+<!--<a  id="qingkong" onclick="qingkong()"><image style="margin-top: 10px" src="../assets/img/xinzeng.png"></image></a>-->
+<table class="table table-hover definewidth m10" id="tbl">
+	<thead id="thead">
+	<tr id="tabhead" class="theadColor">
+	</tr>
+	</thead>
+</table>
+
+<div class="inline pull-right page">
+	<div class="first" onclick="first()">第一页</div>
+	<div class="prev" onclick="initTable(-1)">上一页</div>
+	<div class="next" onclick="initTable(1)">下一页</div>
+	<div class="last" onclick="last()">最后一页</div>
+	<div class="clearfix"></div>
+	<input type="hidden" id="pagelab" style="width: 50px;height:22px;overflow:hidden;margin-right: 5px;text-align: center;border-radius: 0px" onkeyup="pageKeyUpHandler(event)">
+</div>
+
+<!--//弹出遮罩-->
+<div id="test"></div>
+
+<!--会员新增与编辑-->
+<div id="user_div">
+	<input type="image" src='../assets/img/guanbi.png' onclick="cancel_shield()" style="position: absolute;left: 745px;top: 10px;width: 27px;height: 27px">
+	<table class="table table-bordered " style="width: 600px;margin:0 auto;margin-top: 60px" id="user_table">
+	</table>
+</div>
+
+<!--查看照片-->
+<div id="user_photo">
+	<input type="image" src='../assets/img/guanbi.png' onclick="cancel_shield()" style="position: absolute;left: 745px;top: 10px;width: 27px;height: 27px">
+	<div id="photo" style="text-align: center; margin-top: 60px;"></div>
+</div>
+
+<div id="mytooltip"></div>
+
+<div id="test1"><span>数据同步中，请稍后......</span></div>
+</body>
+
+</html>

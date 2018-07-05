@@ -1,0 +1,764 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta charset="UTF-8">
+    <!--<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />-->
+    <link rel="stylesheet" type="text/css" href="../Css/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="../Css/bootstrap-responsive.css" />
+    <link rel="stylesheet" type="text/css" href="../Css/style.css" />
+    <!--<link rel="stylesheet" type="text/css" href="../Css/prettify.css" />-->
+    <script type="text/javascript" src="../Js/jquery.js"></script>
+    <script type="text/javascript" src="../Js/bootstrap.js"></script>
+    <script type="text/javascript" src="../Js/ckform.js"></script>
+    <script type="text/javascript" src="../Js/common.js"></script>
+    <script type="text/javascript" src="../Js/js/laydate.js"></script>
+    <script type="text/javascript" src="../Js/js1/jquery-1.4.3.js"></script>
+    <script type="text/javascript" src="../Js/ursl.js"></script>
+    <!--<script type="text/javascript" src="../Js/js1/lab2.js"></script>-->
+
+    <style type="text/css">
+        .s1{
+            width:120px;
+        }
+        #d1{
+            width:620px;
+            height:420px;
+            background-color:#b1d6e8;
+            margin:0 auto;
+            margin-top: 60px;
+            margin-left: 6%;
+        }
+        #d3{
+            padding-left:30px;
+        }
+        #log_window {
+				width: 800px;
+				height: 400px;
+				overflow: scroll;
+				background-color: white;
+				margin: auto;
+				position: absolute;
+				z-index: 3;
+				top: 0;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				display: none;
+			}
+			#test {
+				width: 100%;
+				height: 100%;
+				background-color: #000;
+				position: absolute;
+				top: 0;
+				left: 0;
+				z-index: 2;
+				opacity: 0.3;
+				/*兼容IE8及以下版本浏览器*/
+				filter: alpha(opacity=30);
+				display: none;
+			
+			}
+			
+			.theadColor th {
+				background-color: #b1d6e8;
+				/*color: #1976b0;*/
+				font-weight: normal;
+			}
+			
+			.theadColor th span {
+				color: #1976b0;
+			}
+			
+			#chaxun {
+				margin-top: 10px;
+			}
+			
+			#addnew1 {
+				margin-top: 10px;
+			}
+			
+			#rolename {
+				margin-top: 19px;
+			}
+			
+			.theadColor td,
+			.tableleft {
+				background-color: #b1d6e8;
+				/*color: #1976b0;*/
+				font-weight: normal;
+			}
+			
+			.tanKuang {
+				color: #1976b0;
+			}
+			#log_window2 {
+				width: 300px;
+				height: 200px;
+				min-height: 100px;
+				background-color: white;
+				border: 1px solid gainsboro;
+				margin: auto;
+				position: absolute;
+				z-index: 4;
+				padding-bottom: 20px;
+				top: 57%;
+				right: 38%;
+				display: none;
+			}
+			
+			.error {
+				font-size: 12px;
+				color: red;
+				text-align: left;
+				padding-left: 30px;
+			}
+			
+			.ok {
+				font-size: 12px;
+				text-align: left;
+				padding-left: 30px;
+			}	
+			
+    </style>
+
+    <script>
+
+        var localhost = " ";
+        var roleArr = [];
+        var roleId = [];
+        var mokuanName = [];
+        var mokuanId = [];
+        var res,res1;
+        var smarr = [];
+        var leftarr = [];
+        var recarr = [];
+        var addarr = [];
+        var delarr = [];
+        var updarr = [];
+        var selected;
+        var arrCheckbox = [];
+        var cbcomps=[];
+        var sendto;
+        var manager;
+        var url1 =urls;
+//      console.log(url1)
+//      var url1="192.168.1.248";
+
+        function init() {
+
+            localhost = window.sessionStorage ? sessionStorage.getItem("lh") : Cookie.read("lh");
+            var uname = window.sessionStorage ? sessionStorage.getItem("mgr") : Cookie.read("mgr");
+            manager = jQuery.parseJSON(uname);
+            mid = manager.mid;
+            mgrid = manager.id;
+            //console.log(mid);
+            //console.log(mgrid);
+            var student = new Object();
+            student.rid=1;
+            var datajson=JSON.stringify(student);
+            $.ajax({
+                type: "post",
+                contentType:"application/x-www-form-urlencoded",
+                data:datajson,
+                dataType:"json",
+                url:"http://" + url1 + ":6078/backstagegetrole",
+                success: function (res) {
+//                    res = jQuery.parseJSON(res);
+                    roleArr = [];
+                    roleId = [];
+                    for (var i = 0; i < res.rolemap.length; i++) {
+                        roleArr.push(res.rolemap[i].name);
+                        roleId.push(res.rolemap[i].id);
+                    }
+
+                    var select = document.getElementById('roleSelect');
+                    while (select.options.length>0){
+                        select.remove(0);
+                    }
+
+                    for (var i = 0; i < roleArr.length; i++){
+                        var opt = new Option(roleArr[i]);
+                        opt.value = roleId[i];
+                        select.options.add(new Option(roleArr[i]));
+                    }
+                    sminit();
+
+                },
+                error: function (err) {
+                    alert("err:" + err);
+                }
+            });
+        }
+
+        function sminit() {
+            var student = new Object();
+            student.rid=1;
+            var datajson1=JSON.stringify(student);
+            $.ajax({
+                type: "post",
+                contentType:"application/x-www-form-urlencoded",
+                dataType:"json",
+                data:datajson1,
+                url:"http://" + url1 + ":6078/backstagegetsystemmodel",
+                success: function (data) {
+//                    res1 = jQuery.parseJSON(data);
+                    smarr = [];
+                   // console.log(data.SystemModelMap);
+                    for (var i = 0; i < data.SystemModelMap.length; i++) {
+                        smarr.push(data.SystemModelMap[i]);
+                    }
+
+                    roleSelectDom();
+                },
+                error: function (err) {
+                    alert("err:" + err);
+                }
+            });
+        }
+
+
+        function roleSelectDom() {
+            var roleSelect = document.getElementById('roleSelect');
+            var student = new Object();
+            student.rid= roleId[roleSelect.selectedIndex];
+            var json1 = JSON.stringify(student);
+            $.ajax({
+                type: "post",
+                contentType: "application/x-www-form-urlencoded",
+                url:"http://" + url1 + ":6078/backstagegetpermissiontable",
+                data:json1,
+                dataType:"json",
+                success: function (data) {
+                    mokuanName = [];
+                    mokuanId = [];
+                    for (var i = 0; i < data.permissiontablemap.length; i++) {
+
+                        mokuanName.push(data.permissiontablemap[i].name);
+                        mokuanId.push(data.permissiontablemap[i].smid);
+                        addarr.push(data.permissiontablemap[i].addable);
+                        delarr.push(data.permissiontablemap[i].delable);
+                        updarr.push(data.permissiontablemap[i].updateable);
+                        recarr.push(data.permissiontablemap[i].record);
+
+                    }
+
+                    var select = document.getElementById('s2');
+                    while (select.options.length>0){
+                        select.remove(0);
+                    }
+
+                    for (var i = 0; i < mokuanName.length; i++){
+                        var opt = new Option(mokuanId[i]);
+                        opt.value = mokuanId[i];
+                        select.options.add(new Option(mokuanName[i]));
+                    }
+                    initleft();
+                },
+                error: function (err) {
+                    alert("err:" + err);
+                }
+            });
+
+        }
+
+
+        function initleft() {
+
+            leftarr = [];
+            for(var i=0;i<smarr.length;i++){
+                if(mokuanName.indexOf(smarr[i].name) < 0){
+                    leftarr.push(smarr[i].name);
+                }
+            }
+
+            var select = document.getElementById('s1');
+            while (select.options.length>0){
+                select.remove(0);
+            }
+            console.log(leftarr);
+            for (var i = 0; i < leftarr.length; i++){
+                select.options.add(new Option(leftarr[i]));
+            }
+        }
+
+
+        //根据name取ID
+        function name2id(name) {
+            for(var i=0;i<smarr.length;i++){
+                if(name == smarr[i].name){
+                    return smarr[i].id;
+                }
+            }
+            return -1;
+        }
+
+
+        $(function(){
+
+            $('#b1').click(function(){
+                $obj = $('#s1 option:selected').clone(true);
+                if($obj.size() == 0){
+                    alert("请至少选择一条!");
+                    return;
+                }
+
+                var tmp = name2id($('#s1 option:selected').text());
+                mokuanId.push(tmp);
+
+                addarr.push(1);
+                updarr.push(1);
+                delarr.push(1);
+                recarr.push(11);
+
+                $('#s2').append($obj);
+                $('#s1 option:selected').remove();
+            });
+
+            $('#b2').click(function(){
+                var tmp;
+                while ($('#s1 option').length > 0){
+                    tmp = name2id($('#s1 option:last').text());
+
+                    if (mokuanId.indexOf(tmp)<0){
+                        mokuanId.push(tmp);
+
+                        addarr.push(1);
+                        updarr.push(1);
+                        delarr.push(1);
+                        recarr.push(11);
+
+                        $obj = $("#s1 option:last").clone(true);
+                        $('#s2').append($obj);
+                        $("#s1 option:last").remove();
+                    }
+                }
+            });
+
+
+
+            $('#b3').click(function(){
+                $obj = $('#s2 option:selected').clone(true);
+                if($obj.size() == 0){
+                    alert("请至少选择一条!");
+                    return;
+                }
+                var tmp = name2id($('#s2 option:selected').text());
+                mokuanId.splice(mokuanId.indexOf(tmp),1);
+                addarr.splice(mokuanId.indexOf(tmp),1);
+                updarr.splice(mokuanId.indexOf(tmp),1);
+                delarr.splice(mokuanId.indexOf(tmp),1);
+                recarr.splice(mokuanId.indexOf(tmp),1);
+
+                $('#s1').append($obj);
+                $('#s2 option:selected').remove();
+            });
+
+
+
+            $('#b4').click(function(){
+                $('#s1').append($('#s2 option'));
+
+                var tmp;
+                while ($('#s2 option').length > 0) {
+                    tmp = name2id($('#s2 option:last').text());
+
+                    mokuanId = [];
+                    addarr = [];
+                    updarr = [];
+                    delarr = [];
+                    recarr = [];
+                    if (mokuanId.indexOf(tmp) < 0) {
+                        $obj = $("#s2 option:last").clone(true);
+                        $('#s1').append($obj);
+                        $("#s2 option:last").remove();
+                    }
+                 }
+                });
+
+             });
+
+
+
+        function change() {
+            var xiangqiang = document.getElementById("xiangqiang");
+            var objS = document.getElementById("s2");
+            var grade = objS.options[objS.selectedIndex].value;
+            selected = objS.selectedIndex;
+            xiangqiang.style.display = 'block';
+            $('#reccount').val(recarr[selected])  ;
+//            $('#xinzeng').val(addarr[selected])  ;
+//            $('#bianji').val(updarr[selected])  ;
+//            $('#shanchu').val(delarr[selected])  ;
+            document.getElementById('xinzeng').selectedIndex = addarr[selected];
+            document.getElementById('bianji').selectedIndex = updarr[selected];
+            document.getElementById('shanchu').selectedIndex = delarr[selected];
+        }
+    </script>
+</head>
+<body onload="init()">
+
+<div  style="height: 50px;margin-left: 6%;" class="definewidth m20" data-genuitec-lp-enabled="false" data-genuitec-file-id="wc1-34" data-genuitec-lp-enabled="false" data-genuitec-file-id="wc2-75" data-genuitec-path="/fkds1.5.tools/WebRoot/tools/authority/index.html">
+   <lable sty>role:</lable> <select name="" id="roleSelect" onchange="roleSelectDom()"></select>
+   <!--<a id="addnew1"  onclick="addtext1()">
+			<image style="margin-top: -10px; margin-left: 10px;" src="../assets/img/xinzeng.png"></image>
+	</a>-->
+</div>
+
+<div id="d1" >
+    <div id="d3">
+        <table cellpadding="0" cellspacing="8">
+            <tr>
+                <td>可选权限</td>
+                <td>&nbsp;</td>
+                <td>已选权限</td>
+            </tr>
+            <tr>
+                <td>
+                    <select id="s1" name="s1" style="width:250px; height:320px;" multiple="multiple"></select>
+                </td>
+                <td>
+                    <p><input id="b1" type="button" class="s1" value="---&gt;" /></p>
+                    <!--<p><input type="button" id="b2" class="s1" value="&#45;&#45;&gt;&gt;" /></p>-->
+                    <p><input type="button" id="b3" class="s1" value="&lt;---" /></p>
+                    <!--<p><input type="button" id="b4" class="s1" value="&lt;&lt;&#45;&#45;" /></p>-->
+                </td>
+                <td><select id="s2" name="s2" style="width:250px;height:320px;" multiple="multiple" onchange="change()" ondblclick="secondaryHtml()"></select></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div id="xiangqiang" style="position:absolute; right:10%; top:220px;width:290px;height:auto;border: 1px solid #cccccc;padding-bottom:10px;text-align:center;display:none;background-color:#ffffff; " class="definewidth m20" data-genuitec-lp-enabled="false" data-genuitec-file-id="wc1-34">
+
+   <lable>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</lable><input type="text" placeholder="允许操作总条数" id="reccount"><br>
+   <lable> 新 增  </lable> <select name="" id="xinzeng">
+        <option value="">否</option>
+        <option value="">是</option>
+    </select><br>
+    <lable> 编 辑  </lable><select name="" id="bianji">
+        <option value="">否</option>
+        <option value="">是</option>
+    </select><br>
+    <lable> 删 除  </lable><select name="" id="shanchu">
+        <option value="">否</option>
+        <option value="">是</option>
+    </select><br>
+
+    <a class="save"  onclick="queding1()">确 定</a>
+</div>
+
+<div  style="height:50px;margin-left:6%;margin-top:2%" class="definewidth m20" data-genuitec-lp-enabled="false" data-genuitec-file-id="wc1-34">
+    <a class="save"  id="queding">确 定</a>
+</div>
+
+
+<!--//弹出遮罩-->
+<div id="test">1111</div>
+<div id="log_window">
+			<input type="image" src='../assets/img/guanbi.png' onclick="cancel_shield()" style="position: fixed;margin-left: 745px;margin-top: 10px;">
+			<table class="table table-bordered " style="width: 600px;height:260px;margin:0 auto;margin-top: 50px">
+				
+				<tr>
+					<td class="tableleft"><span class="tanKuang">管理员权限名称</span></td>
+					<td style="padding-top: 18px"><input type="text" id="shop_nametxt" name="moduletitle" style="border-radius: 0px;width: 95%" oninput="checktitle()" onblur="checktitle()"  placeholder="请输入管理员权限名称，最多10个汉字或字母，不可输入字符" />
+						<br /><span id="shop_nametxtinfo" class="missspan" style="display: none;">请输入管理员权限名称，最多10个汉字或字母，不可输入字符</span></td>
+				</tr>
+				<tr>
+					<td class="tableleft"><span class="tanKuang">管理员抬头</span></td>
+					<td style="padding-top: 18px"><input type="text" id="shop_texttxt" name="moduletitle" style="border-radius: 0px;width: 95%" oninput="checkgoodname()" onblur="checkgoodname()"  placeholder="(请输入管理员抬头，只可输入英文，最多2个英文字母，区分大小写)" />
+						<br /><span id="shop_texttxtinfo" class="missspan" style="display: none;">请输入管理员抬头，只可输入英文，最多2个英文字母，区分大小写</span></td>
+				</tr>
+				<!--
+				<tr>
+					<td class="tableleft"><span class="tanKuang">审 核 人</span></td>
+					<td style="padding-top: 18px">
+						<input type="text" placeholder="请勾选审核人" id="auditortxt" style="border-radius: 0px;width: 95%" oninput="checkauditor()"  onclick="check()">
+						<br /><span id="auditortxtinfo" class="missspan" style="display: none;">你必须选择一个审核人</span>
+						//<input type="text" id="auditortxt" style="border-radius: 0px;width: 95%" onclick="check()" required="required"></span>
+					</td>
+				</tr>
+				-->
+				<tr>
+					<td class="tableleft"></td>
+					<td>
+						<input id="saveallinfo" onMouseOver="mouseover()" type="image" src='../assets/img/save.png'   onclick="onSavebtnClickHandler()" />
+					</td>
+				</tr>
+			</table>
+			 <!--<div id="showdiv" style="width: 100%; height: 100%; position: absolute; top:0;left:0; background: none; ">
+            	<div style="width: 64px; position: fixed; height:64px; left:50%; top:50%;margin-top:-32px;margin-left: -32px;"><image src="../Images/5.gif" style="width: 64px;height: 64px"/></div>
+            </div>-->
+			<input type="hidden" id="shopidtxt" name="grouptitle" style="border-radius: 0px;width: 95%" />
+		</div>
+	<div id="mytooltip"></div>
+	<!--审核人-->
+		<div id="log_window2" style="display: none;">
+			<a href="javascript:cancel_shield2()" style="position: absolute;left: 260px;margin-top: -5px;">关闭</a>
+			<div style="width: 200px;margin:0 auto;height: 150px;overflow: scroll;" id="divv">
+				<p id="pp" style="height: 100%;width: 100%;"></p>
+			</div>
+			<div style="margin-top:20px">
+				<button style="margin-left:70px" onclick="confimbtn()">确定</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<button onclick="quxiaobtn()">取消</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			</div>
+		</div>
+</body>
+</html>
+
+
+<script>
+
+//    $('#queding').click(function () {
+//        var url = "http://" + localhost + ":8080/fkds1.5.tools/permission/updatePmByRid.action?rid=" + roleId[roleSelect.selectedIndex] + "&smids=" +mokuanId.toString();
+//        alert(url)
+//        $.ajax({
+//            type: "get",
+//            contentType: "application/xml",
+//            url: url,
+//            success: function (data) {
+//                    alert(data)
+//            },
+//            error: function (err) {
+//                alert("err:" + err);
+//            }
+//        });
+//    })
+
+function sortNumber(a,b)
+{
+    return a - b;
+}
+
+
+$('#queding').click(function () {
+    if (mokuanId.length <= 0){
+        return;
+    }
+    mokuanId.sort(sortNumber);
+//    alert(mokuanId)
+//    var url = "http://" + localhost + ":8080/fkds1.5.tools/permission/updatePmByRid.action?rid=" + roleId[roleSelect.selectedIndex] +
+//        "&smids=" +mokuanId.toString() +
+//        "&recs=" + recarr.toString() +
+//        "&addids=" + addarr.toString() +
+//        "&updateids=" + updarr.toString() +
+//        "&delids=" + delarr.toString();
+    var student=new Object();
+    student.rid=roleId[roleSelect.selectedIndex];
+    student.smids=mokuanId.toString();
+    student.recs=recarr.toString();
+    student.addids=addarr.toString();
+    student.updateids=updarr.toString();
+    student.delids=delarr.toString();
+    var datajson=JSON.stringify(student);
+    $.ajax({
+        type:"post",
+        contentType:"application/x-www-form-urlencoded",
+        url:"http://" + url1 + ":6078/backstageupdatepermissiontable",
+        data:datajson,
+        dataType:"json",
+        success: function (data) {
+           // alert(data)
+        },
+        error: function (err) {
+            alert("err:" + err);
+        }
+    });
+})
+
+
+//////////////////////////////////////////////////////
+
+    function queding1() {
+
+        recarr[selected] = $('#reccount').val()  ;
+        addarr[selected] =  document.getElementById('xinzeng').selectedIndex ;
+        updarr[selected] =  document.getElementById('bianji').selectedIndex  ;
+        delarr[selected] =  document.getElementById('shanchu').selectedIndex ;
+
+    }
+
+
+    function secondaryHtml() {
+
+        var options=$("#s2 option:selected");  //获取选中的项
+        var idx = name2id(options.text());//根据name取id
+       	var roleSelect = document.getElementById('roleSelect');
+        var roid = roleId[roleSelect.selectedIndex];
+
+
+        if (window.sessionStorage) {
+            sessionStorage.setItem("val", options.val());
+            sessionStorage.setItem("id",idx);
+            sessionStorage.setItem("roid",roid);
+        } else {
+            Cookie.write("val", options.val());
+            Cookie.write("id",idx);
+            Cookie.write("roid",roid);
+        }
+        window.location = 'secondary.html';
+    }
+    //弹出新增弹出DIV
+	function addtext1(){
+		document.getElementById("test").style.display="block"
+		document.getElementById("log_window").style.display="block"
+	}
+	function cancel_shield(){
+		document.getElementById("test").style.display="none"
+		document.getElementById("log_window").style.display="none"
+		
+	}
+	
+	function checktitle() {
+				var  reg = /^[a-zA-Z\u4e00-\u9fa5]{1,10}$/;
+				if (!reg.test(document.getElementById("shop_nametxt").value)) {
+					document.getElementById("shop_nametxtinfo").style.display = "block";
+					document.getElementById("shop_nametxt").style.border = "1px solid red";
+					document.getElementById("shop_nametxtinfo").className = "error";
+					return false;
+				} else {
+					document.getElementById("shop_nametxt").style.border = "";
+					document.getElementById("shop_nametxtinfo").className = "ok";
+					document.getElementById("shop_nametxtinfo").style.display = "none";
+					return true;
+				}
+			}
+	
+	function checkgoodname() {
+				var  reg = /^[a-z]{1,2}$/;
+				if (!reg.test(document.getElementById("shop_texttxt").value)) {
+					document.getElementById("shop_texttxtinfo").style.display = "block";
+					document.getElementById("shop_texttxt").style.border = "1px solid red";
+					document.getElementById("shop_texttxtinfo").className = "error";
+					return false;
+				} else {
+					document.getElementById("shop_texttxt").style.border = "";
+					document.getElementById("shop_texttxtinfo").className = "ok";
+					document.getElementById("shop_texttxtinfo").style.display = "none";
+					return true;
+				}
+			}
+	
+	function check() {
+				var l = document.getElementById("log_window2");
+				l.style.display = "block";
+				var url = "http://" + localhost + ":8080/fkds1.5.tools/systemManager/getManagerByMid.action?page=1&count=9999&mid=" + mid;
+				$.ajax({
+					type: "get",
+					contextType: "application/xml",
+					url: url,
+					success: function(data) {
+						var res = jQuery.parseJSON(data);
+						var chb = document.getElementById('pp');
+						//清空数组
+						arrCheckbox = [];
+						for (var i = 0; i < res.res.length; i++) {
+							arrCheckbox.push(res.res[i]);
+						}
+						//循环之前删除主键
+						while (chb.hasChildNodes()) {
+							chb.removeChild(chb.firstChild);
+						}
+						for (var i = 0; i < arrCheckbox.length; i++) {
+							checkbox = document.createElement('input');
+							var br = document.createElement('br');
+							checkbox.setAttribute("type", "checkbox");
+							checkbox.setAttribute("index", i);
+							cbcomps.push(checkbox);
+							var myText = document.createTextNode(arrCheckbox[i].id);
+							chb.appendChild(checkbox);
+							chb.appendChild(myText);
+							if (i % 5 == 0) {
+								chb.appendChild(br);
+							}
+						}
+					},
+					error: function(err) {
+						//						alert("err:" + err);
+					}
+				});
+			}
+	
+	function cancel_shield2() {
+		var l = document.getElementById("log_window2");
+		l.style.display = "none";
+		idsarr = [];
+		namesarr = [];
+		srr1 = [];
+
+
+	}
+	
+	
+	function confimbtn() {
+				idsarr = [];
+				namesarr = [];
+				for (var i = 0; i < cbcomps.length; i++) {
+					var cb = cbcomps[i];
+					index = parseInt(cb.getAttribute("index"));
+					if (cb.checked) {
+						idsarr.push(arrCheckbox[index].id);
+						namesarr.push(arrCheckbox[index].name);
+					}
+				}
+				sendto = idsarr.toString();
+				document.getElementById('auditortxt').value = namesarr.toString();
+				var l = document.getElementById("log_window2");
+				l.style.display = "none";
+//				checkauditor();
+//				isdisabled();
+			}
+	
+	function quxiaobtn() {
+				var l = document.getElementById("log_window2");
+				l.style.display = "none";
+			}
+	function mouseover(){
+//		if(checktitle() &&checkgoodname()){
+//			alert("111")
+//			document.getElementById("saveallinfo").disabled=false
+//			
+//		}
+//		else{
+//			alert("22")
+//		document.getElementById("saveallinfo").disabled=true
+//				
+//		}
+	}
+	
+	
+	function onSavebtnClickHandler() {
+		//alert(sendto)
+		var nowurl;
+		var name=document.getElementById("shop_nametxt").value;
+		var taitou=document.getElementById("shop_texttxt").value;
+	if(checktitle()&&checkgoodname()){
+		nowurl="http://" + url1 + ":6078/backstageupdatepermissionfield";
+		}
+	else{
+		alert("&&&&&&&")
+
+	}
+			var student=new Object();
+        	student.name=name;
+			student.taitou=taitou
+			student.sendto=sendto;
+			var datajson=JSON.stringify(student);
+            $.ajax({
+                type: "post",
+                contentType:"application/x-www-form-urlencoded",
+                data:datajson,
+                dataType:"json",
+                url:nowurl,
+					success: function(data) {
+						 	init();
+							alert("保存成功"); 
+					},
+					error: function(err) {
+						//						alert("err:" + err);
+					}
+				});
+	}
+
+</script>

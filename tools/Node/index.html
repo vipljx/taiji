@@ -1,0 +1,1141 @@
+﻿<!DOCTYPE html>
+<html>
+
+	<head>
+		<title></title>
+		<meta charset="UTF-8">
+		<link rel="stylesheet" type="text/css" href="../Css/bootstrap.css" />
+		<link rel="stylesheet" type="text/css" href="../Css/bootstrap-responsive.css" />
+		<link rel="stylesheet" type="text/css" href="../Css/style.css" />
+		<script type="text/javascript" src="../Js/jquery.js"></script>
+		<script type="text/javascript" src="../Js/jquery-ui.js"></script>
+		<script type="text/javascript" src="../Js/bootstrap.js"></script>
+		<script type="text/javascript" src="../Js/ckform.js"></script>
+		<script type="text/javascript" src="../Js/common.js"></script>
+		<script type="text/javascript" src="../Js/js/laydate.js"></script>
+		<script type="text/javascript" src="../Js/ui.js"></script>
+		<script type="text/javascript" src="../Js/ursl.js"></script>
+		<style type="text/css">
+			body {
+				padding-bottom: 40px;
+
+			}
+
+
+			@media (max-width: 980px) {
+				/* 启用浮动导航栏文字 */
+				.navbar-text.pull-right {
+					float: none;
+					padding-left: 5px;
+					padding-right: 5px;
+				}
+			}
+
+
+			#test {
+				width: 100%;
+				height: 100%;
+				background-color: #000;
+				position: absolute;
+				top: 0;
+				left: 0;
+				z-index: 2;
+				opacity: 0.3;
+				/*兼容IE8及以下版本浏览器*/
+				filter: alpha(opacity=30);
+				display: none;
+			}
+			#addnew1 {
+				margin-top: 10px;
+			}
+			#log_window {
+				width: 800px;
+				height: 550px;
+				background-color: white;
+				margin: auto;
+				position: absolute;
+				z-index: 3;
+				top: 0;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				display: none;
+				/*border: 2px solid #b1d6e8;*/
+			}
+
+			#user_info {
+				width: 800px;
+				height: 550px;
+				background-color: white;
+				margin: auto;
+				position: absolute;
+				z-index: 3;
+				top: 0;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				display: none;
+				/*border: 2px solid #b1d6e8;*/
+			}
+
+			.theadColor th {
+				background-color: #b1d6e8;
+				/*color: #1976b0;*/
+				font-weight: normal;
+				text-align: center;
+				height: 20px;
+				line-height: 22px;
+			}
+
+
+
+			#rolename {
+				position: relative;
+				margin-top: 19px;
+			}
+
+			.theadColor td,
+			.tableleft {
+				/*background-color: #b1d6e8;*/
+				/*color: #1976b0;*/
+				/*font-weight:normal;*/
+			}
+
+			.theadColor td,.tableleft  span {
+				color:#000;
+				font-weight: bold;
+			}
+
+
+
+			#rolename {
+				padding-right: 30px;
+				background: url("../assets/img/fangdajing.png") no-repeat scroll right center transparent;
+			}
+
+			#test1 {
+				width: 100%;
+				height: 100%;
+				background-color: #000;
+				position: absolute;
+				top: 0;
+				left: 0;
+				z-index: 2;
+				opacity: 0.3;
+				/*兼容IE8及以下版本浏览器*/
+				filter: alpha(opacity=30);
+				display: none;
+			}
+			.search{
+				margin:0 0 0 35px;
+				height: 30px;
+			}
+			.onclick{
+				margin-left: 35px;
+			}
+			.onclick a{
+				margin: 0;
+
+			}
+		</style>
+		<script type="text/javascript">
+			var page = 1;
+			var count = 10;
+			var maxpage = 0;
+			var dataarr = [];
+			var currentIndex = -1;
+			var localhost = " ";
+			var arrMarkid = [];
+            var defaultArr = [];
+			var table, role, res;
+			var fields = [];
+			var searchtype=["=",">",">=","<","<=","!=","LIKE","LIKE %...%","NOT LIKE","IN (...)","NOT IN (...)","BETWEEN","NOT BETWEEN","IS NULL","IS NOT NULL"];
+            var typeArr = [];
+			var addable1,updateable1,delable1,authority,pms,enables;
+			var managertt;
+				localhost = window.sessionStorage ? sessionStorage.getItem("lh") : Cookie.read("lh");
+			var url1 =urls;
+//			var url1="192.168.1.248";
+			$(function() {
+				$(document).tooltip();
+
+			});
+		
+			//加载列表
+			function init() {
+			//localhost = window.sessionStorage ? sessionStorage.getItem("lh") : Cookie.read("lh");
+				table = 1;
+				var uname = window.sessionStorage ? sessionStorage.getItem("mgr") : Cookie.read("mgr");
+				manager = jQuery.parseJSON(uname);
+				mid = manager.mid;
+				mgrid = manager.id;
+				role = manager.type;
+
+				pms = window.sessionStorage? sessionStorage.getItem("管 理 员"): Cookie.read("管 理 员");
+
+	            authority = jQuery.parseJSON(pms);
+	            addable1 = authority.addable;
+	            updateable1 = authority.updateable;
+	            delable1 = authority.delable;
+                enables = authority.enable;
+//                alert(authority)
+
+
+				if (null == uname || undefined == uname) {
+					parent.window.location = '../Public/login.html';
+					return;
+				}
+				if (window.sessionStorage) {
+					page = sessionStorage.getItem("Node_page");
+				} else {
+					page = Cookie.read("Node_page");
+				}
+				if (null == page)
+					page = 1;
+				document.getElementById('pagelab').value = page;
+				//判断各浏览器的兼容性
+				var Sys = {};
+				var ua = navigator.userAgent.toLowerCase();
+				var s;
+				(s = ua.match(/msie ([\d.]+)/)) ? Sys.ie = s[1]:
+					(s = ua.match(/firefox\/([\d.]+)/)) ? Sys.firefox = s[1] :
+					(s = ua.match(/chrome\/([\d.]+)/)) ? Sys.chrome = s[1] :
+					(s = ua.match(/opera.([\d.]+)/)) ? Sys.opera = s[1] :
+					(s = ua.match(/version\/([\d.]+).*safari/)) ? Sys.safari = s[1] : 0;
+				if (Sys.ie) { //Js判断为IE浏览器
+					alert('http://www.wangjinhai119.com' + Sys.ie);
+					if (Sys.ie == '9.0') { //Js判断为IE 9
+					} else if (Sys.ie == '8.0') { //Js判断为IE 8
+					} else {}
+				}
+				if (Sys.firefox) { //Js判断为火狐(firefox)浏览器
+					document.getElementById('pagelab').style.marginTop = '19px';
+				}
+				if (Sys.chrome) { //Js判断为谷歌chrome浏览器
+					document.getElementById('pagelab').style.marginTop = '18px';
+				}
+				if (Sys.opera) { //Js判断为opera浏览器
+					alert('http://www.wangjinhai119.com' + Sys.opera);
+				}
+				if (Sys.safari) { //Js判断为苹果safari浏览器
+					document.getElementById('pagelab').style.marginTop = '9px';
+				}
+				initFields();
+
+			}
+
+			function initTableData() {
+				var obj=new Object();
+                obj.type=1;
+                obj.vid=manager.vid;
+				obj.page=page;
+				obj.count=count;
+                var datajson=JSON.stringify(obj);
+                //console.log(datajson);
+				$.ajax({
+                    type: "post",
+                    contentType:"application/x-www-form-urlencoded",
+                    data:datajson,
+                    dataType:"json",
+                    url:"http://" + url1 + ":6078/backstagegetmanager",
+					success: function(data) {
+						//console.log(data);
+                        data.managermap.sort(function(a,b){
+                            return b.id-a.id;
+                        });
+//						var res = jQuery.parseJSON(data);
+						var table1 = document.getElementById('tbl');
+						dataarr = [];
+						while (table1.rows.length > 1) {
+							table1.deleteRow(1);
+						}
+						var delid = -1;
+						var delurl = "";
+						if (window.sessionStorage) {
+							delid = sessionStorage.getItem("deleteId");
+//							delurl = sessionStorage.getItem("delurl");
+						} else {
+							delid = Cookie.read("deleteId");
+//							delurl = Cookie.read("delurl");
+						}
+						for (var i = 0; i < data.managermap.length; i++) {
+							dataarr.push(data.managermap[i]);
+							var row = table1.insertRow(table1.rows.length);
+							for (var k = 0; k < fields.length; k++) {
+								var cell = row.insertCell(k);
+								cell.innerHTML = data.managermap[i][fields[k].fieldname];
+							}
+							var optcell = row.insertCell(fields.length);
+							optcell.innerHTML = 
+//								"<input type='image' src='../assets/img/bianji.png' id='bianji"+i+"' onmousemove='isdisadd(this)' onmouseout='isdisout(this)' value='' onclick='edit(" + i + ")'>" +
+//                              "&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/xiangqing.png' id='xiangqing"+i+"' onclick='detail(" + i + ")'>" +
+								"&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/shanchu.png' id='shanchu"+i+"' onmousemove='isdisadd(this)' onmouseout='isdisout(this)' value='' onclick='del(" + data.managermap[i].id + ")'>";
+							if (data.managermap[i].id + "" == delid + "") {
+								optcell.innerHTML = '已删除同步中...';
+							}
+						}
+//						maxpage = Math.ceil(res.total / count);
+//						initMakeidSelect();
+						typeSelect();
+					},
+					error: function(err) {
+//						alert("err:" + err);
+					}
+				});
+                search();
+			}
+
+
+			//动态表头
+			function initFields() {
+				var users=new Object();
+                users.rid=role;
+                users.smid=table;
+                var datajson=JSON.stringify(users);
+				$.ajax({
+					type: "post",
+					contentType:"application/x-www-form-urlencoded",
+					data:datajson,
+                    dataType:"json",
+					url:"http://" + url1 + ":6078/backstagegetpermissionfieldbyridsmid",
+					success: function(data) {
+						   data.permissionfieldmap.sort(function(a,b){
+                            return a.smdid-b.smdid;
+                        });
+                        fields = [];
+//                      nowfields = [];
+                        for (var i = 0; i < data.permissionfieldmap.length; i++) {
+                            var fieldname=data.permissionfieldmap[i].fieldname;
+                            
+                                fields.push(data.permissionfieldmap[i]);
+                            
+                      
+                            
+                        }
+                        var th = document.getElementById("tabhead");
+                        while (th.cells.length > 0) {
+                            th.deleteCell(0);
+                        }
+                        for (var i = 0; i < fields.length; i++) {
+                            var headcell = th.insertCell(i);
+                            headcell.innerHTML = "<th><span>" + fields[i].name + "</span></th>";
+                        }
+                        var headoptcell = th.insertCell(fields.length);
+                        headoptcell.innerHTML = "<th><span>" + "操 作" + "</span></th>";
+                       
+						initTableData();
+					},
+					error: function(err) {
+						//						alert("err:" + err);
+					}
+				});
+			}
+
+
+			//删除
+			function del(idx) {
+				if(delable1 == 0){
+					return;
+				}
+				if (confirm("确定要删除吗？")) {
+					var users=new Object();
+	                users.id=idx;
+	                
+	                var datajson=JSON.stringify(users);
+					$.ajax({
+						type: "post",
+						contentType:"application/x-www-form-urlencoded",
+						data:datajson,
+	                    dataType:"json",
+						url:"http://" + url1 + ":6078/delmanager",
+						success: function(data) {
+							if (window.sessionStorage) {
+								sessionStorage.setItem("deleteId", idx);
+//								sessionStorage.setItem("delurl", url);
+							} else {
+								Cookie.write("deleteId", idx);
+//								Cookie.write("delurl", url);
+							}
+							init();
+						},
+						error: function(err) {
+							alert("err:" + err);
+						}
+					});
+				}
+			}
+//			验证
+
+ 		function checknametxt(){
+ 				var nametxt = document.getElementById("nametxt");
+				var nametxt_info = document.getElementById("nametxt_info");
+
+				nametxt_info.innerHTML = "";
+				nametxt.style.border = "";
+ 		}
+
+ 		function checknametxt1(){
+ 			var nametxt = document.getElementById("nametxt");
+			var nametxt_info = document.getElementById("nametxt_info");
+			if (nametxt.value == "") {
+				nametxt_info.innerHTML = "该字段不能为空";
+				nametxt.style.border = "1px solid red";
+				nametxt_info.style.color = "red";
+				return false;
+			}
+			 else {
+				nametxt_info.innerHTML = "";
+				nametxt.style.border = "";
+				return true;
+			}
+ 		}
+
+		function checkpsdtxt(){
+				var psdtxt = document.getElementById("psdtxt");
+				var psdtxt_info = document.getElementById("psdtxt_info");
+
+				psdtxt_info.innerHTML = "";
+				psdtxt.style.border = "";
+
+		}
+
+		function checkpsdtxt1(){
+			var psdtxt = document.getElementById("psdtxt");
+			var psdtxt_info = document.getElementById("psdtxt_info");
+			if (psdtxt.value == "") {
+				psdtxt_info.innerHTML = "该字段不能为空";
+				psdtxt.style.border = "1px solid red";
+				psdtxt_info.style.color = "red";
+				return false;
+			}
+			 else {
+				psdtxt_info.innerHTML = "";
+				psdtxt.style.border = "";
+				return true;
+			}
+		}
+
+		function checkmanagertxt(){
+				var managertxt = document.getElementById("managertxt");
+				var managertxt_info = document.getElementById("managertxt_info");
+
+				managertxt_info.innerHTML = "";
+				managertxt.style.border = "";
+		}
+
+		function checkmanagertxt1(){
+			var managertxt = document.getElementById("managertxt");
+			var managertxt_info = document.getElementById("managertxt_info");
+			if (managertxt.value == "") {
+				managertxt_info.innerHTML = "该字段不能为空";
+				managertxt.style.border = "1px solid red";
+				managertxt_info.style.color = "red";
+				return false;
+			}
+			 else {
+				managertxt_info.innerHTML = "";
+				managertxt.style.border = "";
+				return true;
+			}
+		}
+
+		//获取管理员抬头
+		function gettext(){
+			var managertt=document.getElementById("span_text")
+			managertt.innerHTML="";
+			var nowlength=document.getElementById("typeSelect").options.length
+			var type = document.getElementById('typeSelect').value.split("、")[0];
+				if(type==1){
+				managertt.innerHTML="cg";
+				}
+				else if(type==2){
+				managertt.innerHTML="yy";
+				}
+				else if(type==3){
+				managertt.innerHTML="yj";
+				}
+				else if(type==4){
+				managertt.innerHTML="ej";
+				}
+				else if(type==5){
+				managertt.innerHTML="sj";
+				}
+				else{
+				var gettext=document.getElementById('typeSelect').value.split("-")[0];
+				alert(gettext+"****")
+				var substr= gettext.match(/、(\S*)_/)
+				alert(substr[1])
+					managertt.innerHTML=substr[1];
+				}
+		}
+
+
+			function onSavebtnClickHandler() {
+				
+				if(checkmanagertxt1()&&checkpsdtxt1()&&checknametxt1()){
+				var mid = document.getElementById('midSelect').value.split("、")[0];
+//              var defaul = document.getElementById('defaultSelect').value.split("、")[0];
+                var type = document.getElementById('typeSelect').value.split("、")[0];
+
+				var urls;
+				
+				if (currentIndex >= 0) {
+					urls = "http://" + localhost + ":8080/fkds1.5.tools/systemManager/updateManager.action?id=" + dataarr[currentIndex].id +
+						"&name=" +document.getElementById("span_text").innerHTML+"_"+ document.getElementById('nametxt').value +
+						"&password=" + document.getElementById('psdtxt').value +
+						"&nickname=" + document.getElementById('managertxt').value +
+						"&type=" + type +
+						"&defaultt=" + defaul +
+						"&mid=" + mid ;
+//                            "&enable=" + document.getElementById('leveltxt').value +
+//							"&level=" + document.getElementById('enabletxt').value;
+				} else {
+					var obj=new Object();
+						obj.name=document.getElementById('nametxt').value;
+						obj.password=document.getElementById('psdtxt').value;
+						obj.nickname=document.getElementById('managertxt').value;
+						obj.mid=mid;
+						obj.servid=0;
+						obj.type=type;
+						obj.enable=0;
+						obj.level=0;
+						obj.defaultt=0;
+						obj.uid=0;
+						datajson=JSON.stringify(obj);
+						urls="http://" + url1 + ":6078/backstageaddmanager";
+					
+					
+//					
+//					urls = "http://" + localhost + ":8080/fkds1.5.tools/systemManager/addManager.action?" +
+//						"&name=" +document.getElementById("span_text").innerHTML+"_"+ document.getElementById('nametxt').value +
+//						"&password=" + document.getElementById('psdtxt').value +
+//						"&nickname=" + document.getElementById('managertxt').value +
+//						"&type=" + type +
+//						"&defaultt=" + defaul +
+//						"&mid=" + mid ;
+				}
+
+
+				//alert(url)
+				$.ajax({
+					type: "post",
+	                contentType:"application/x-www-form-urlencoded",
+	                data:datajson,
+	                dataType:"json",
+					url: urls,
+					success: function(data) {
+//					   var res= jQuery.parseJSON(data);
+						if(data.resultCode == -2){
+							mizhu.alert('', '保存失败,管理员已存在','iconfont-close');
+							init();
+
+						}
+						else{
+							mizhu.alert('', '保存成功','iconfont-gou');    
+                            cancel_shield();
+							init();
+
+						}
+					},
+					error: function(err) {
+						mizhu.alert('', '保存失败','iconfont-close');
+                        cancel_shield();
+					}
+				});
+			}else{
+				mizhu.alert('', '请正确完善信息','iconfont-close');
+			}
+
+		}
+			function defaultSelect() {
+
+                var url = "http://" + localhost + ":8080/fkds1.5.tools/systemManager/managerList.action?page=1&count=9999";
+                $.ajax({
+                    type: "get",
+                    contentType: "application/xml",
+                    url: url,
+                    success: function(data) {
+                        var res = jQuery.parseJSON(data);
+                        defaultArr = [];
+                        for (var i = 0; i < res.res.length; i++) {
+                            defaultArr.push(res.res[i]);
+                        }
+                        
+                    },
+                    error: function(err) {
+						alert("err:" + err);
+                    }
+                });
+
+            }
+
+            function typeSelect() {
+
+                var student = new Object();
+//	            student.rid=1;
+	            var datajson=JSON.stringify(student);
+	            $.ajax({
+	                type: "post",
+	                contentType:"application/x-www-form-urlencoded",
+	                data:datajson,
+	                dataType:"json",
+	                url:"http://" + url1 + ":6078/backstagegetrole",
+                    success: function(data) {
+//                      var res = jQuery.parseJSON(data);
+                        typeArr = [];
+                        for (var i = 0; i < data.rolemap.length; i++) {
+                            typeArr.push(data.rolemap[i]);
+                        }
+                        initMakeidSelect();
+                    },
+                    error: function(err) {
+                        alert("err:" + err);
+                    }
+                });
+
+            }
+
+			function initMakeidSelect(){
+				var student = new Object();
+	            var datajson=JSON.stringify(student);
+	            $.ajax({
+	                type: "post",
+	                contentType:"application/x-www-form-urlencoded",
+	                data:datajson,
+	                dataType:"json",
+	                url:"http://" + url1 + ":6078/backstagegetallvenue",
+                    success: function(data) {
+//                      var res = jQuery.parseJSON(data);
+                        arrMarkid = [];
+                        for (var i = 0; i < data.VenueMap.length; i++) {
+                            arrMarkid.push(data.VenueMap[i]);
+                        }
+                        
+                    },
+                    error: function(err) {
+                        alert("err:" + err);
+                    }
+                });
+			}
+
+
+            //编辑
+			function edit(idx) {
+				if(updateable1 == 0){
+					return;
+				}
+				var s = document.getElementById("test");
+				s.style.display = "block";
+				var l = document.getElementById("log_window");
+				l.style.display = "block";
+
+
+				var select2 = document.getElementById("midSelect");
+				var cbidx = dataarr[idx].mid;
+//				alert(cbidx)
+				while (select2.options.length > 0) {
+					select2.remove(0);
+				}
+				for (var i = 0; i < arrMarkid.length; i++) {
+					select2.options.add(new Option(arrMarkid[i].id + "、" + arrMarkid[i].name));
+					if (cbidx == arrMarkid[i].id) {
+						select2.selectedIndex = i;
+					}
+				}
+
+//              var select3 = document.getElementById("defaultSelect");
+//              var cbidx1 = dataarr[idx].defaultt;
+//              while (select3.options.length > 0) {
+//                  select3.remove(0);
+//              }
+//              for (var i = 0; i < defaultArr.length; i++) {
+//                  select3.options.add(new Option(defaultArr[i].id + "、" + defaultArr[i].name));
+//                  if (cbidx1 == defaultArr[i].id) {
+//                      select3.selectedIndex = i;
+//                  }
+//              }
+
+                var select4 = document.getElementById("typeSelect");
+                var cbidx2 = dataarr[idx].type;
+                while (select4.options.length > 0) {
+                    select4.remove(0);
+                }
+                for (var i = 0; i < typeArr.length; i++) {
+                    select4.options.add(new Option(typeArr[i].id + "、" + typeArr[i].name));
+                    if (cbidx2 == typeArr[i].id) {
+                        select4.selectedIndex = i;
+                    }
+                }
+//              if(select2.options.length==0||select3.options.length==0||select4.options.length==0){
+//					document.getElementById('load').style.display="block";
+//				}
+				currentIndex = idx;
+				getObj('idtxt').value = dataarr[idx].id;
+				getObj('nametxt').value = dataarr[idx].name;
+				getObj('psdtxt').value = dataarr[idx].password;
+                getObj('managertxt').value = dataarr[idx].nickname;
+//				getObj('typetxt').value = dataarr[idx].type;
+				getObj('leveltxt').value = dataarr[idx].level;
+			}
+            //会员详情
+            function detail(idx) {
+                if(updateable1 == 0){
+                    return;
+                }
+                var s = document.getElementById("test");
+                s.style.display = "block";
+                var l = document.getElementById("user_info");
+                l.style.display = "block";
+
+
+                var select2 = document.getElementById("midSelect");
+                var cbidx = dataarr[idx].mid;
+//				alert(cbidx)
+                while (select2.options.length > 0) {
+                    select2.remove(0);
+                }
+                for (var i = 0; i < arrMarkid.length; i++) {
+                    select2.options.add(new Option(arrMarkid[i].id + "、" + arrMarkid[i].name));
+                    if (cbidx == arrMarkid[i].id) {
+                        select2.selectedIndex = i;
+                    }
+                }
+
+//              var select3 = document.getElementById("defaultSelect");
+//              var cbidx1 = dataarr[idx].defaultt;
+//              while (select3.options.length > 0) {
+//                  select3.remove(0);
+//              }
+//              for (var i = 0; i < defaultArr.length; i++) {
+//                  select3.options.add(new Option(defaultArr[i].id + "、" + defaultArr[i].name));
+//                  if (cbidx1 == defaultArr[i].id) {
+//                      select3.selectedIndex = i;
+//                  }
+//              }
+
+                var select4 = document.getElementById("typeSelect");
+                var cbidx2 = dataarr[idx].type;
+                while (select4.options.length > 0) {
+                    select4.remove(0);
+                }
+                for (var i = 0; i < typeArr.length; i++) {
+                    select4.options.add(new Option(typeArr[i].id + "、" + typeArr[i].name));
+                    if (cbidx2 == typeArr[i].id) {
+                        select4.selectedIndex = i;
+                    }
+                }
+//              if(select2.options.length==0||select3.options.length==0||select4.options.length==0){
+//					document.getElementById('load').style.display="block";
+//				}
+                currentIndex = idx;
+                
+                getObj('psdtxt1').value = dataarr[idx].name;
+                getObj('psdtxt2').value = dataarr[idx].vid;
+                getObj('psdtxt3').value = dataarr[idx].password;
+                getObj('psdtxt4').value = dataarr[idx].password;
+                getObj('psdtxt5').value = dataarr[idx].password;
+                getObj('psdtxt6').value = dataarr[idx].password;
+                getObj('psdtxt7').value = dataarr[idx].password;
+               
+            }
+
+            function getObj(objid) {
+				return document.getElementById(objid);
+			}
+
+
+			//关闭弹出的div
+			function cancel_shield() {
+				var s = document.getElementById("test");
+				s.style.display = "none";
+				var l = document.getElementById("log_window");
+				l.style.display = "none";
+                var u = document.getElementById("user_info");
+                u.style.display = "none";
+				var m = document.getElementById("mytooltip");
+				m.style.display = "none";
+			}
+
+
+
+			//新增
+			function add1() {
+				if(addable1 == 0){
+					return;
+				}
+				currentIndex = -1;
+				var s = document.getElementById("test");
+				s.style.display = "block";
+				var l = document.getElementById("log_window");
+				l.style.display = "block";
+				var select2 = document.getElementById("midSelect");
+				while (select2.options.length > 0){
+					select2.remove(0);
+				}
+				for (var i = 0; i < arrMarkid.length; i++) {
+					select2.options.add(new Option(arrMarkid[i].id + "、" + arrMarkid[i].name));
+				}
+
+//              var select3 = document.getElementById("defaultSelect");
+//              while (select3.options.length > 0) {
+//                  select3.remove(0);
+//              }
+//              for (var i = 0; i < defaultArr.length; i++) {
+//                  select3.options.add(new Option(defaultArr[i].id + "、" + defaultArr[i].name));
+//              }
+
+                var select4 = document.getElementById("typeSelect");
+                while (select4.options.length > 0) {
+                    select4.remove(0);
+                }
+                for (var i = 0; i < typeArr.length; i++) {
+                	if(typeArr[i].id!=1){
+                		select4.options.add(new Option(typeArr[i].id + "、" + typeArr[i].name));
+                	}
+                    
+                }
+
+//              if(select2.options.length==0||select3.options.length==0||select4.options.length==0){
+//					document.getElementById('load').style.display="block";
+//				}
+				document.getElementById('idtxt').value = '';
+				document.getElementById('nametxt').value = '';
+				document.getElementById('psdtxt').value = '';
+                document.getElementById('managertxt').value = '';
+//				document.getElementById('midSelect').value = '';
+//				document.getElementById('typetxt').value = '';
+				document.getElementById('leveltxt').value = '';
+			}
+
+
+
+
+
+
+	function first(){
+            if(document.getElementById("pagelab").value==1){
+                mizhu.alert('','当前已经为第一页!','iconfont-close');
+            }
+            else{
+                initTable(1,true);
+            }
+
+        }
+        function last(){
+
+            if(document.getElementById("pagelab").value==maxpage){
+                mizhu.alert('','当前已经为最后页!','iconfont-close');
+            }
+            else{
+                initTable(parseInt(maxpage),true);
+            }
+
+        }
+
+
+			//分页
+			function initTable(step, flag = false) {
+				 initFields();
+				step = parseInt(step);
+				var p = parseInt(page) + parseInt(step);
+				if (flag) {
+					if (step < 1 || step > maxpage) {
+						mizhu.alert('','页码超标','iconfont-close');
+						return;
+					}
+					page = step;
+				} else {
+					page = p;
+					if (page < 1 || page > maxpage) {
+						page -= step;
+						return;
+					}
+				}
+			var obj=new Object();
+                obj.type=1;
+                obj.vid=manager.vid;
+				obj.page=page;
+				obj.count=count;
+                var datajson=JSON.stringify(obj);
+                //console.log(datajson);
+				$.ajax({
+                    type: "post",
+                    contentType:"application/x-www-form-urlencoded",
+                    data:datajson,
+                    dataType:"json",
+                    url:"http://" + url1 + ":6078/backstagegetmanager",
+					success: function(data) {
+//					    alert(data)
+//						var res = jQuery.parseJSON(data);
+						var table1 = document.getElementById('tbl');
+						dataarr = [];
+						while (table1.rows.length > 1) {
+							table1.deleteRow(1);
+						}
+						var delid = -1;
+						var delurl = "";
+						if (window.sessionStorage) {
+							delid = sessionStorage.getItem("deleteId");
+							delurl = sessionStorage.getItem("delurl");
+						} else {
+							delid = Cookie.read("deleteId");
+							delurl = Cookie.read("delurl");
+						}
+						for (var i = 0; i < data.managermap.length; i++) {
+							dataarr.push(data.managermap[i]);
+							var row = table1.insertRow(table1.rows.length);
+							for (var k = 0; k < fields.length; k++) {
+								var cell = row.insertCell(k);
+								cell.innerHTML = data.managermap[i][fields[k].fieldname];
+							}
+							var optcell = row.insertCell(fields.length);
+							optcell.innerHTML = 
+//								"<input type='image' src='../assets/img/bianji.png' id='bianji"+i+"' onmousemove='isdisadd(this)' onmouseout='isdisout(this)' value='' onclick='edit(" + i + ")'>" +
+//                              "&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/xiangqing.png' id='xiangqing"+i+"' onclick='detail(" + i + ")'>" +
+								"&nbsp;&nbsp;&nbsp;<input type='image' src='../assets/img/shanchu.png' id='shanchu"+i+"' onmousemove='isdisadd(this)' onmouseout='isdisout(this)' value='' onclick='del(" + data.managermap[i].id + ")'>";
+							if (data.managermap[i].id + "" == delid + "") {
+								optcell.innerHTML = '已删除同步中...';
+							}
+						}
+//						maxpage = Math.ceil(res.total / count);
+//						initMakeidSelect();
+						typeSelect();
+					},
+					error: function(err) {
+//						alert("err:" + err);
+					}
+				});
+			}
+
+			function pageKeyUpHandler(evt) {
+				if (evt.keyCode == 13) {
+					initTable(parseInt(document.getElementById("pagelab").value), true);
+				}
+			}
+
+
+			//权限增删改
+	        function isdisadd(obj) {
+
+	            var idstr = obj.id;
+
+	            if (addable1 == 0 && idstr.indexOf("add")>=0){
+	                document.getElementById(idstr).disabled = 'disabled';
+	                document.getElementById(idstr).style.cursor = "not-allowed";
+	            }
+
+	            if (updateable1 == 0 && idstr.indexOf("bian")>=0){
+	                document.getElementById(idstr).disabled = 'disabled';
+	                document.getElementById(idstr).style.cursor = "not-allowed";
+	            }
+
+	            if (delable1 == 0 && idstr.indexOf("shan")>=0){
+	                document.getElementById(idstr).disabled = 'disabled';
+	                document.getElementById(idstr).style.cursor = "not-allowed";
+	            }
+	        }
+
+	        function isdisout(obj) {
+	            var idstr = obj.id;
+	            document.getElementById(idstr).disabled = false;
+	            document.getElementById(idstr).style.cursor = "pointer";
+	        }
+
+            //查询
+            function inquiry() {
+                //console.log(1);
+                var $form=$("form");
+                var data=$form.serialize();
+                console.log(data);
+                page = 1;
+                document.getElementById('pagelab').value = page;
+                if (window.sessionStorage) {
+                    sessionStorage.setItem("Node_page", page);
+                } else {
+                    Cookie.write("Node_page", page);
+                }
+            }
+
+	        //通用搜索
+			function search(rowlength=""){
+	    		//console.log(rowlength);
+                var select1 = document.getElementById("search_filed"+rowlength);
+                while (select1.options.length > 0) {
+                    select1.remove(0);
+                }
+                select1.options.add(new Option("请选择" ));
+                for (var i = 0; i < fields.length; i++) {
+                    select1.options.add(new Option(fields[i].name ,fields[i].fieldname));
+                }
+                var select2 = document.getElementById("search_type"+rowlength);
+                while (select2.options.length > 0) {
+                    select2.remove(0);
+                }
+                select2.options.add(new Option("请选择" ));
+                for (var i = 0; i < searchtype.length; i++) {
+                    select2.options.add(new Option(searchtype[i] ,searchtype[i]));
+                }
+			}
+			//搜索条件增加
+			function increase(){
+                var table1 = document.getElementById('search');
+                var rowlength=table1.rows.length;
+				var row = table1.insertRow(rowlength);
+				row.innerHTML=`<td><select name="search_filed${rowlength}" id="search_filed${rowlength}" style="width: 100px;height:29px;border-radius: 0px;" ></select></td>
+							<td><select name="search_type${rowlength}" id="search_type${rowlength}" style="width: 100px;height:29px;border-radius: 0px;"></select></select></td>
+							<td><input type="text" style="width: 150px;height:25px;border-radius: 0px;" name="search_value${rowlength}" id="search_value${rowlength}"></td>`;
+				search(rowlength);
+
+			}
+		</script>
+</head>
+	<body onload="init()">
+	<form>
+		<table class="search" id="search" style="display: none">
+			<tr>
+				<td><select name="search_filed" id="search_filed" style="width: 100px;height:29px;border-radius: 0px;" ></select></td>
+				<td><select name="search_type" id="search_type" style="width: 100px;height:29px;border-radius: 0px;"></select></td>
+				<td><input name="search_value" type="text" style="width: 150px;height:25px;border-radius: 0px;" id="search_value" ></td>
+				<td valign="top"><input type="button" value="+"  style="height: 29px" onclick="increase()"></td>
+			</tr>
+		</table>
+		<div class="onclick">
+			<a href='#' onclick="inquiry()" id="chaxun" style="display: none"><image src="../assets/img/chaxun.png"/></a>
+			<a id="addnew1"  onclick="add1()" class="add2">新  增</a>
+		</div>
+	</form>
+
+		<!--<a  id="qingkong" onclick="qingkong()"><image style="margin-top: 10px" src="../assets/img/xinzeng.png"></image></a>-->
+		<table class="table  table-hover definewidth m10" id="tbl">
+			<thead id="thead">
+				<tr id="tabhead" class="theadColor">
+				</tr>
+			</thead>
+		</table>
+
+	<div class="inline pull-right page">
+		<div class="first" onclick="first()">第一页</div>
+		<div class="prev" onclick="initTable(-1)">上一页</div>
+		<div class="next" onclick="initTable(1)">下一页</div>
+		<div class="last" onclick="last()">最后一页</div>
+		<div class="clearfix"></div>
+		<input type="hidden" id="pagelab" style="width: 50px;height:22px;overflow:hidden;margin-right: 5px;text-align: center;border-radius: 0px" onkeyup="pageKeyUpHandler(event)">
+	</div>
+
+		<!--//弹出遮罩-->
+		<div id="test"></div>
+		<div id="log_window">
+			<input type="image" src='../assets/img/guanbi.png' onclick="cancel_shield()" style="position: absolute;left: 745px;top: 10px;width: 27px;height: 27px">
+			<table class="table table-bordered " style="width: 600px;margin:0 auto;margin-top: 60px">
+				 <tr>
+                    <td class="tableleft"><span class="tanKuangSpan">管 理 员 权 限</span></td>
+					<td style="padding-top: 18px"><select id="typeSelect"  onchange="gettext()" style="border-radius: 0px;width: 95%"></select></td>
+                </tr>
+				<tr>
+					<td width="20%" class="tableleft"><span class="tanKuangSpan">账 号</span></td>
+					<td style="padding-top: 18px;">
+						<!--<span id="span_text" style="float: left;  width: 40px; margin-left: 11px; line-height: 22px; height: 22px; border: 1px solid #dddddd">cg</span>-->
+						<input type="text" id="nametxt" class="txt" name="moduletitle" style="border-radius: 0px; float: left; margin-left:10px;width: 170px" value=""   title="" placeholder="请输入账号" onfocus="checknametxt()" oninput="checknametxt1()"/>
+						<span style="float: left; width: 210px; margin-left: 5px; line-height: 25px; height: 25px;font-size: 10px; border: none">最终账号：登录账号请以最终账号登录</span>
+						<span id="nametxt_info"></span>
+					</td>
+				</tr>
+				<tr>
+					<td class="tableleft"><span class="tanKuangSpan">密 码</span></td>
+					<td style="padding-top: 18px">
+						<input type="text" id="psdtxt" class="txt" name="moduletitle" style="border-radius: 0px;width: 95%" value=""  placeholder="请输入密码" onfocus="checkpsdtxt()" oninput="checkpsdtxt1()"/><br />
+						<span id="psdtxt_info"></span>
+					</td>
+				</tr>
+                <tr>
+                    <td width="20%" class="tableleft"><span class="tanKuangSpan">管 理 员 名 称</span></td>
+                    <td style="padding-top: 18px">
+                        <input type="text" id="managertxt" class="txt" name="moduletitle" style="border-radius: 0px;width: 95%" value="" title="" placeholder="请输入管理员名称" onfocus="checkmanagertxt()" oninput="checkmanagertxt1()"/><br />
+                        <span id="managertxt_info"></span>
+                    </td>
+                </tr>
+                <!--<tr>
+                    <td class="tableleft"><span class="tanKuangSpan">选 择 审 核 人</span></td>
+					<td style="padding-top: 18px"><select id="defaultSelect" style="border-radius: 0px;width: 95%"></select></td>
+                </tr>-->
+				<tr>
+					<td class="tableleft"><span class="tanKuangSpan">所属拳馆</span></td>
+					<td style="padding-top: 18px"><select id="midSelect" style="border-radius: 0px;width: 95%"></select></td>
+				</tr>
+				<tr>
+					<td class="tableleft"></td>
+					<td>
+						<a  onclick="onSavebtnClickHandler()" class="save">保 存</a>
+					</td>
+				</tr>
+			</table>
+			<input type="hidden" id="idtxt" name="grouptitle" style="border-radius: 0px;width: 95%" title="mmm" />
+			<input type="hidden" id="leveltxt" name="moduletitle" style="border-radius: 0px;width: 95%" />
+			<input type="hidden" id="enabletxt" name="moduletitle" style="border-radius: 0px;width: 95%"/>
+		</div>
+		<!--详情-->
+		<div id="user_info">
+			<input type="image" src='../assets/img/guanbi.png' onclick="cancel_shield()" style="position: absolute;left: 745px;top: 10px;width: 27px;height: 27px">
+			<table class="table table-bordered " style="width: 600px;margin:0 auto;margin-top: 60px">
+				
+				<tr>
+					<td class="tableleft"><span class="tanKuangSpan">姓名</span></td>
+					<td style="padding-top: 18px">
+						<input type="text" id="psdtxt1" class="txt" name="moduletitle" style="border-radius: 0px;width: 95%" value=""  /><br />
+						
+					</td>
+				</tr>
+
+				<tr>
+					<td class="tableleft"><span class="tanKuangSpan">馆长编号</span></td>
+					<td style="padding-top: 18px">
+						<input type="text" id="psdtxt2" class="txt" name="moduletitle" style="border-radius: 0px;width: 95%" value=""  /><br />
+						
+					</td>
+				</tr>
+				<tr>
+					<td class="tableleft"><span class="tanKuangSpan">性别</span></td>
+					<td style="padding-top: 18px">
+						<input type="text" id="psdtxt3" class="txt" name="moduletitle" style="border-radius: 0px;width: 95%" value=""  /><br />
+						
+					</td>
+				</tr>
+				<tr>
+					<td class="tableleft"><span class="tanKuangSpan">年龄</span></td>
+					<td style="padding-top: 18px">
+						<input type="text" id="psdtxt4" class="txt" name="moduletitle" style="border-radius: 0px;width: 95%" value=""   /><br />
+						
+					</td>
+				</tr>
+				<tr>
+					<td class="tableleft"><span class="tanKuangSpan">地址</span></td>
+					<td style="padding-top: 18px">
+						<input type="text" id="psdtxt5" class="txt" name="moduletitle" style="border-radius: 0px;width: 95%" value=""  /><br />
+						
+					</td>
+				</tr>
+				<tr>
+					<td class="tableleft"><span class="tanKuangSpan">联系方式</span></td>
+					<td style="padding-top: 18px">
+						<input type="text" id="psdtxt6" class="txt" name="moduletitle" style="border-radius: 0px;width: 95%" value=""   /><br />
+						
+					</td>
+				</tr>
+				<tr>
+					<td class="tableleft"><span class="tanKuangSpan">所属馆</span></td>
+					<td style="padding-top: 18px">
+						<input type="text" id="psdtxt7" class="txt" name="moduletitle" style="border-radius: 0px;width: 95%" value=""  /><br />
+						
+					</td>
+				</tr>
+			</table>
+			<input type="hidden" id="idtxt" name="grouptitle" style="border-radius: 0px;width: 95%" title="mmm" />
+			<input type="hidden" id="leveltxt" name="moduletitle" style="border-radius: 0px;width: 95%" />
+			<input type="hidden" id="enabletxt" name="moduletitle" style="border-radius: 0px;width: 95%"/>
+		</div>
+		<div id="mytooltip"></div>
+
+		<div id="test1"><span>数据同步中，请稍后......</span></div>
+	</body>
+
+</html>
